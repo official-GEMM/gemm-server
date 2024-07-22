@@ -1,19 +1,16 @@
 package com.example.gemm_server.exception;
 
 import com.example.gemm_server.dto.CommonResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Controller
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler({CustomException.class})
   protected ResponseEntity<CommonResponse<?>> handleCustomException(CustomException ex) {
@@ -21,6 +18,13 @@ public class GlobalExceptionHandler {
         new CommonResponse<>(ex.getStatusCode(), null,
             ex.getMessage()),
         ex.getHttpStatus());
+  }
+
+  @ExceptionHandler({NoHandlerFoundException.class})
+  protected ResponseEntity<CommonResponse<?>> handleNoHandlerFoundException(
+      NoHandlerFoundException ex) {
+    return new ResponseEntity<>(new CommonResponse<>(HttpStatus.NOT_FOUND.value(), null,
+        ex.getMessage()), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler({Exception.class})
