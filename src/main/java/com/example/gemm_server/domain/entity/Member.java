@@ -2,8 +2,8 @@ package com.example.gemm_server.domain.entity;
 
 import static com.example.gemm_server.common.constant.Policy.JOIN_COMPENSATION;
 
-import com.example.gemm_server.common.Provider;
-import com.example.gemm_server.common.Role;
+import com.example.gemm_server.common.enums.Provider;
+import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.common.util.UUIDUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

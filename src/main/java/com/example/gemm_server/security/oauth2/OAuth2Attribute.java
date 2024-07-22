@@ -1,6 +1,6 @@
 package com.example.gemm_server.security.oauth2;
 
-import com.example.gemm_server.common.Provider;
+import com.example.gemm_server.common.enums.Provider;
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
 import java.time.LocalDate;
