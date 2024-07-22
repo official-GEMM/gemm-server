@@ -18,11 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
+  private final TokenProvider tokenProvider;
 
-  @GetMapping("/login/{userId}")
-  public ResponseEntity<CommonResponse> login(@Param("accessToken") String accessToken,
-      @Param("refreshToken") String refreshToken,
-      @PathVariable Long userId) {
+  @GetMapping("/login")
+  public ResponseEntity<CommonResponse> login(
+      @Param("accessToken") String accessToken,
+      @Param("refreshToken") String refreshToken
+  ) {
+    Long userId = tokenProvider.getUserIdFromToken(accessToken);
     Member member = authService.compensateMemberForDailyAttendance(userId);
     LoginResponse loginResponse = new LoginResponse(accessToken, refreshToken,
         member.isDataCompleted());

@@ -16,19 +16,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
   private final TokenProvider tokenProvider;
-  private static final String URI = "/auth/login/{userId}";
+  private static final String URI = "/auth/login";
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
     String accessToken = tokenProvider.generateAccessToken(authentication);
     String refreshToken = tokenProvider.generateRefreshToken(authentication);
-    String userId = authentication.getName();
-    
+
     String redirectUrl = UriComponentsBuilder.fromUriString(URI)
         .queryParam("accessToken", accessToken)
         .queryParam("refreshToken", refreshToken)
-        .buildAndExpand(userId, "userId").toUriString();
+        .toUriString();
 
     response.sendRedirect(redirectUrl);
   }
