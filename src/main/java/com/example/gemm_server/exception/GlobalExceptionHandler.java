@@ -16,17 +16,16 @@ public class GlobalExceptionHandler {
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler({CustomException.class})
-  protected ResponseEntity<CommonResponse> handleCustomException(CustomException ex) {
+  protected ResponseEntity<CommonResponse<?>> handleCustomException(CustomException ex) {
     return new ResponseEntity<>(
-        new CommonResponse(ex.getStatusCode(), null,
+        new CommonResponse<>(ex.getStatusCode(), null,
             ex.getMessage()),
         ex.getHttpStatus());
   }
 
   @ExceptionHandler({Exception.class})
-  protected ResponseEntity<CommonResponse> handleServerException(Exception ex) {
-    log.error(ex.getMessage(), ex);
-    return new ResponseEntity<>(new CommonResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), null,
+  protected ResponseEntity<CommonResponse<?>> handleServerException(Exception ex) {
+    return new ResponseEntity<>(new CommonResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null,
         ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

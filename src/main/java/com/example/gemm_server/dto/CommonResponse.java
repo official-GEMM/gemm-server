@@ -1,28 +1,40 @@
 package com.example.gemm_server.dto;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@RequiredArgsConstructor
-public class CommonResponse {
+public class CommonResponse<T> {
 
-  private final Integer code;
-  private Object data;
+  @Schema(description = "Http 응답 코드")
+  private int code;
+
+  @Schema(description = "응답 데이터")
+  private T data;
+
+  @Schema(description = "응답 메세지")
   private String message;
 
-  public static ResponseEntity<CommonResponse> okResponseEntity(Object data) {
-    return ResponseEntity.ok(new CommonResponse(HttpStatus.OK.value(), data, null));
+  public CommonResponse(T data) {
+    this.code = 200;
+    this.data = data;
   }
 
-  public static ResponseEntity<CommonResponse> okResponseEntity(Object data, String message) {
-    return ResponseEntity.ok(new CommonResponse(HttpStatus.OK.value(), data, message));
+  public CommonResponse(T data, String message) {
+    this.data = data;
+    this.message = message;
+  }
+
+  public CommonResponse(int status, T data, String message) {
+    this.code = status;
+    this.data = data;
+    this.message = message;
   }
 
   public static void setJsonResponse(
