@@ -25,8 +25,16 @@ public class CommonResponse {
     return ResponseEntity.ok(new CommonResponse(HttpStatus.OK.value(), data, message));
   }
 
-  public static ResponseEntity<CommonResponse> okResponseEntity(Integer code, Object data,
-      String message) {
-    return ResponseEntity.ok(new CommonResponse(code, data, message));
+  public static void setJsonResponse(
+      HttpServletResponse response,
+      int statusCode,
+      String message
+  ) throws IOException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    response.setStatus(statusCode);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding("UTF-8");
+    CommonResponse<?> errorResponse = new CommonResponse<>(statusCode, null, message);
+    response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
   }
 }
