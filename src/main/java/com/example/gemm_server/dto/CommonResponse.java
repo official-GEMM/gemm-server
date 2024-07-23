@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.MediaType;
@@ -24,15 +25,17 @@ public class CommonResponse<T> {
   public CommonResponse(T data) {
     this.code = 200;
     this.data = data;
+    this.message = "";
   }
 
   public CommonResponse(T data, String message) {
+    this.code = 200;
     this.data = data;
     this.message = message;
   }
 
-  public CommonResponse(int status, T data, String message) {
-    this.code = status;
+  public CommonResponse(int code, T data, String message) {
+    this.code = code;
     this.data = data;
     this.message = message;
   }
@@ -46,7 +49,8 @@ public class CommonResponse<T> {
     response.setStatus(statusCode);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding("UTF-8");
-    CommonResponse<?> errorResponse = new CommonResponse<>(statusCode, null, message);
+    CommonResponse<?> errorResponse = new CommonResponse<>(statusCode, Collections.emptyMap(),
+        message);
     response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
   }
 }
