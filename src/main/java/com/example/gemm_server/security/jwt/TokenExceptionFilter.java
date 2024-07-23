@@ -1,6 +1,6 @@
 package com.example.gemm_server.security.jwt;
 
-import com.example.gemm_server.common.util.ResponseUtil;
+import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.exception.TokenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,7 +18,7 @@ public class TokenExceptionFilter extends OncePerRequestFilter {
     try {
       filterChain.doFilter(request, response);
     } catch (TokenException error) {
-      ResponseUtil.setJsonResponse(response, error.getStatusCode(), error.getMessage());
+      CommonResponse.setJsonResponse(response, error.getStatusCode(), error.getMessage());
     }
   }
 }

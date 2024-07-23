@@ -83,6 +83,11 @@ public class TokenProvider {
     return new UsernamePasswordAuthenticationToken(principal, token, authorities);
   }
 
+  public Long getUserIdFromToken(String token) {
+    Claims claims = parseClaims(token);
+    return Long.parseLong(claims.getSubject());
+  }
+
   private List<SimpleGrantedAuthority> getAuthorities(Claims claims) {
     return Collections.singletonList(new SimpleGrantedAuthority(
         claims.get(AUTHORITIES_KEY).toString()));

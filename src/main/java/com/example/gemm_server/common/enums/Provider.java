@@ -1,4 +1,4 @@
-package com.example.gemm_server.common;
+package com.example.gemm_server.common.enums;
 
 import lombok.Getter;
 
