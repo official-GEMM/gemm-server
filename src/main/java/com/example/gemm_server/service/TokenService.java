@@ -11,12 +11,10 @@ public class TokenService {
 
   private final MemberRepository memberRepository;
 
-  // TODO:
   public String getRefreshToken(Long memberId) {
     return memberRepository.findOneById(memberId).getRefreshToken();
   }
 
-  // TODO:
   public void updateRefreshToken(Long memberId, String refreshToken) {
     Member member = memberRepository.findOneById(memberId);
     member.setRefreshToken(refreshToken);

@@ -24,7 +24,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     String accessToken = resolveToken(request);
-    // accessToken 검증
+
     if (tokenProvider.validateToken(accessToken)) {
       setAuthentication(accessToken);
     }
