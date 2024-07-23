@@ -1,7 +1,5 @@
 package com.example.gemm_server.domain.entity;
 
-import static com.example.gemm_server.common.constant.Policy.JOIN_COMPENSATION;
-
 import com.example.gemm_server.common.enums.Provider;
 import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.common.util.UUIDUtil;
@@ -90,8 +88,8 @@ public class Member extends Timestamped {
         .socialId(socialId)
         .provider(provider)
         .birth(birth)
-        .recommendationCode(UUIDUtil.createRecommendationCode())
-        .gem(JOIN_COMPENSATION)
+        .recommendationCode(UUIDUtil.createReferralCode())
+        .gem(0)
         .role(Role.USER)
         .build();
   }
