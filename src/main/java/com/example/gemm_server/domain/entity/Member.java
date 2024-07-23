@@ -75,7 +75,7 @@ public class Member extends Timestamped {
   @Column(name = "banned_at")
   private LocalDateTime bannedAt;
 
-  @Column(name = "last_login_at", nullable = false)
+  @Column(name = "last_login_at")
   private LocalDateTime lastLoginAt;
 
   @Column(name = "role", nullable = false)
@@ -93,7 +93,6 @@ public class Member extends Timestamped {
         .recommendationCode(UUIDUtil.createRecommendationCode())
         .gem(JOIN_COMPENSATION)
         .role(Role.USER)
-        .lastLoginAt(LocalDateTime.now())
         .build();
   }
 
