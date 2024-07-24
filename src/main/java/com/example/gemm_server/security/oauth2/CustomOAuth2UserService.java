@@ -2,9 +2,12 @@ package com.example.gemm_server.security.oauth2;
 
 import static com.example.gemm_server.common.code.MemberErrorCode.MEMBER_BANNED;
 import static com.example.gemm_server.common.code.MemberErrorCode.MEMBER_DELETED;
+import static com.example.gemm_server.common.constant.Policy.JOIN_COMPENSATION;
 
+import com.example.gemm_server.common.enums.GemUsage;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.MemberRepository;
+import com.example.gemm_server.service.GemService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -15,11 +18,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final MemberRepository memberRepository;
+  private final GemService gemService;
 
   @Transactional
   @Override
@@ -40,9 +45,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     Member member = memberRepository.findOneBySocialIdAndProviderIncludingDeleted(
             oAuth2Attribute.socialId(),
             oAuth2Attribute.provider().toString())
-        .orElseGet(oAuth2Attribute::toEntity);
+        .orElseGet(() -> joinMemberWithJoinCompensation(oAuth2Attribute.toEntity()));
     validateMember(member);
-    return memberRepository.save(member);
+    return member;
+  }
+
+  private Member joinMemberWithJoinCompensation(Member notYetJoinedMember) {
+    Member joinedMember = memberRepository.save(notYetJoinedMember);
+    gemService.saveChangesOfGemWithMember(joinedMember, JOIN_COMPENSATION, GemUsage.COMPENSATION);
+    return joinedMember;
   }
 
   private void validateMember(Member member) {

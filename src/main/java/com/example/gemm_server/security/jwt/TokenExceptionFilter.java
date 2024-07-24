@@ -2,6 +2,7 @@ package com.example.gemm_server.security.jwt;
 
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.exception.TokenException;
+import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class TokenExceptionFilter extends OncePerRequestFilter {
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+  protected void doFilterInternal(@NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
     try {

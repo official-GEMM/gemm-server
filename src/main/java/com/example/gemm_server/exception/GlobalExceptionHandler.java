@@ -1,6 +1,7 @@
 package com.example.gemm_server.exception;
 
 import com.example.gemm_server.dto.CommonResponse;
+import java.util.Collections;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,13 +24,15 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({NoHandlerFoundException.class})
   protected ResponseEntity<CommonResponse<?>> handleNoHandlerFoundException(
       NoHandlerFoundException ex) {
-    return new ResponseEntity<>(new CommonResponse<>(HttpStatus.NOT_FOUND.value(), null,
-        ex.getMessage()), HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>(
+        new CommonResponse<>(HttpStatus.NOT_FOUND.value(), Collections.emptyMap(),
+            ex.getMessage()), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler({Exception.class})
   protected ResponseEntity<CommonResponse<?>> handleServerException(Exception ex) {
-    return new ResponseEntity<>(new CommonResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null,
-        ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    return new ResponseEntity<>(
+        new CommonResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Collections.emptyMap(),
+            ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

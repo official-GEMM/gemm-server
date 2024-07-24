@@ -14,6 +14,9 @@ public class DateUtil {
   }
 
   public static boolean isToday(LocalDateTime localDatetime) {
+    if (localDatetime == null) {
+      return false;
+    }
     LocalDate today = LocalDate.now();
     return today.equals(localDatetime.toLocalDate());
   }

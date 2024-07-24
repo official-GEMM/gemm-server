@@ -1,7 +1,5 @@
 package com.example.gemm_server.domain.entity;
 
-import static com.example.gemm_server.common.constant.Policy.JOIN_COMPENSATION;
-
 import com.example.gemm_server.common.enums.Provider;
 import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.common.util.UUIDUtil;
@@ -75,7 +73,7 @@ public class Member extends Timestamped {
   @Column(name = "banned_at")
   private LocalDateTime bannedAt;
 
-  @Column(name = "last_login_at", nullable = false)
+  @Column(name = "last_login_at")
   private LocalDateTime lastLoginAt;
 
   @Column(name = "role", nullable = false)
@@ -90,10 +88,9 @@ public class Member extends Timestamped {
         .socialId(socialId)
         .provider(provider)
         .birth(birth)
-        .recommendationCode(UUIDUtil.createRecommendationCode())
-        .gem(JOIN_COMPENSATION)
+        .recommendationCode(UUIDUtil.createReferralCode())
+        .gem(0)
         .role(Role.USER)
-        .lastLoginAt(LocalDateTime.now())
         .build();
   }
 

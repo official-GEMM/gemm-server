@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class UUIDUtil {
 
-  public static String createRecommendationCode() {
+  public static String createReferralCode() {
     // TODO: 생성한 추천인 코드의 중복 검사
     String uuidString = UUID.randomUUID().toString();
     byte[] uuidStringBytes = uuidString.getBytes(StandardCharsets.UTF_8);
