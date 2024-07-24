@@ -1,6 +1,6 @@
 package com.example.gemm_server.security.jwt;
 
-import com.example.gemm_server.dto.CommonResponse;
+import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.exception.TokenException;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
@@ -20,7 +20,7 @@ public class TokenExceptionFilter extends OncePerRequestFilter {
     try {
       filterChain.doFilter(request, response);
     } catch (TokenException error) {
-      CommonResponse.setJsonResponse(response, error.getStatusCode(), error.getMessage());
+      EmptyDataResponse.setJsonResponse(response, error.getStatusCode(), error.getMessage());
     }
   }
 }
