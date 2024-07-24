@@ -26,7 +26,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -82,7 +81,7 @@ public class TokenProvider {
     List<SimpleGrantedAuthority> authorities = getAuthorities(claims);
 
     // 2. security의 User 객체 생성
-    User principal = new User(claims.getSubject(), "", authorities);
+    CustomUser principal = new CustomUser(claims.getSubject(), "", authorities);
     return new UsernamePasswordAuthenticationToken(principal, token, authorities);
   }
 
