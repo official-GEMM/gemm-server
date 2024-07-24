@@ -10,6 +10,7 @@ public enum TokenErrorCode implements ErrorCode {
   NO_TOKEN(HttpStatus.BAD_REQUEST, "토큰이 존재하지 않습니다."),
   INVALID_JWT_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 JWT 토큰입니다."),
   UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "지원되지 않는 JWT 토큰입니다."),
+  UNMATCHED_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "refresh 토큰이 일지하지 않습니다."),
 
   INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "잘못된 JWT 서명입니다."),
   EXPIRED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "만료된 JWT 토큰입니다."),

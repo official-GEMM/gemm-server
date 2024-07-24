@@ -12,6 +12,7 @@ public enum MemberErrorCode implements ErrorCode {
   OWN_REFERRAL_CODE(HttpStatus.BAD_REQUEST, "자신을 추천인으로 등록할 수 없습니다."),
 
   LOGIN_NECESSARY(HttpStatus.UNAUTHORIZED, "로그인이 필요한 기능입니다."),
+  REFRESH_TOKEN_NECESSARY(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 필요한 기능입니다."),
 
   MEMBER_BANNED(HttpStatus.FORBIDDEN, "관리자에 의해 사용이 금지된 사용자입니다."),
   LACK_OF_AUTHORITY(HttpStatus.FORBIDDEN, "관리자 권한이 필요한 기능입니다."),
