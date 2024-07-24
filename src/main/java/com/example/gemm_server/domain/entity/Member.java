@@ -45,8 +45,8 @@ public class Member extends Timestamped {
   @Enumerated(value = EnumType.STRING)
   private Provider provider;
 
-  @Column(name = "recommendation_code", length = 8, updatable = false, nullable = false, unique = true)
-  private String recommendationCode;
+  @Column(name = "referral_code", length = 8, updatable = false, nullable = false, unique = true)
+  private String referralCode;
 
   @Column(name = "name", length = 30, nullable = false)
   private String name;
