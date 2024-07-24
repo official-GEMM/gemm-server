@@ -1,16 +1,27 @@
 package com.example.gemm_server.controller;
 
+import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
+
+import com.example.gemm_server.common.annotation.Admin;
+import com.example.gemm_server.common.annotation.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.dto.CommonResponse;
+import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.auth.LoginResponse;
+import com.example.gemm_server.dto.member.NecessaryMemberDataPostRequest;
+import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,5 +46,26 @@ public class AuthController {
     LoginResponse loginResponse = new LoginResponse(accessToken, refreshToken,
         member.isDataCompleted());
     return ResponseEntity.ok(new CommonResponse<>(loginResponse));
+  }
+
+  @BearerAuth
+  @Operation(summary = "필수 정보 입력", description = "필수 정보를 입력하지 않은 사용자의 정보를 업데이트하는 API")
+  @PostMapping("/profile")
+  public ResponseEntity<EmptyDataResponse> updateNecessaryMemberInformation(
+      @Valid @RequestBody NecessaryMemberDataPostRequest memberNecessaryData,
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    String referralCode = memberNecessaryData.getReferralCode();
+    if (referralCode != null) {
+      authService.compensateMemberForReferral(user.getId(), referralCode);
+    }
+    authService.updateNecessaryMemberData(user.getId(), memberNecessaryData);
+    return ResponseEntity.ok(new EmptyDataResponse(MEMBER_UPDATED));
+  }
+
+  @Admin
+  @GetMapping("user")
+  public ResponseEntity<EmptyDataResponse> user() {
+    return ResponseEntity.ok(new EmptyDataResponse("success"));
   }
 }

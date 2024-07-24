@@ -14,4 +14,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
       @Param("provider") String provider);
 
   Member findOneById(Long id);
+
+  Optional<Member> findOneByReferralCode(String referralCode);
 }
