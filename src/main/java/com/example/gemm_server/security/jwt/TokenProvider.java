@@ -1,7 +1,9 @@
 package com.example.gemm_server.security.jwt;
 
-import static com.example.gemm_server.common.code.TokenErrorCode.INVALID_JWT_SIGNATURE;
-import static com.example.gemm_server.common.code.TokenErrorCode.INVALID_TOKEN;
+import static com.example.gemm_server.common.code.error.TokenErrorCode.EXPIRED_JWT_TOKEN;
+import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_JWT_SIGNATURE;
+import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_JWT_TOKEN;
+import static com.example.gemm_server.common.code.error.TokenErrorCode.UNSUPPORTED_JWT_TOKEN;
 
 import com.example.gemm_server.exception.TokenException;
 import com.example.gemm_server.service.TokenService;
@@ -10,6 +12,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.util.Collections;
@@ -117,12 +120,14 @@ public class TokenProvider {
   private Claims parseClaims(String token) {
     try {
       return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-    } catch (ExpiredJwtException e) {
-      return e.getClaims();
-    } catch (MalformedJwtException e) {
-      throw new TokenException(INVALID_TOKEN);
-    } catch (SecurityException e) {
+    } catch (SecurityException | MalformedJwtException e) {
       throw new TokenException(INVALID_JWT_SIGNATURE);
+    } catch (ExpiredJwtException e) {
+      throw new TokenException(EXPIRED_JWT_TOKEN);
+    } catch (UnsupportedJwtException e) {
+      throw new TokenException(UNSUPPORTED_JWT_TOKEN);
+    } catch (IllegalArgumentException e) {
+      throw new TokenException(INVALID_JWT_TOKEN);
     }
   }
 }
