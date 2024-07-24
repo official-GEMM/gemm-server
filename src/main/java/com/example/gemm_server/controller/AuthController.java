@@ -2,7 +2,6 @@ package com.example.gemm_server.controller;
 
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
 
-import com.example.gemm_server.common.annotation.Admin;
 import com.example.gemm_server.common.annotation.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.dto.CommonResponse;
@@ -61,11 +60,5 @@ public class AuthController {
     }
     authService.updateNecessaryMemberData(user.getId(), memberNecessaryData);
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_UPDATED));
-  }
-
-  @Admin
-  @GetMapping("user")
-  public ResponseEntity<EmptyDataResponse> user() {
-    return ResponseEntity.ok(new EmptyDataResponse("success"));
   }
 }
