@@ -1,6 +1,6 @@
 package com.example.gemm_server.controller;
 
-import static com.example.gemm_server.common.code.error.MemberErrorCode.REFRESH_TOKEN_NECESSARY;
+import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_LOGOUT;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
 
 import com.example.gemm_server.common.annotation.BearerAuth;
@@ -50,6 +50,16 @@ public class AuthController {
     LoginResponse loginResponse = new LoginResponse(accessToken, refreshToken,
         member.isDataCompleted());
     return ResponseEntity.ok(new CommonResponse<>(loginResponse));
+  }
+
+  @BearerAuth
+  @Operation(summary = "로그아웃", description = "로그아웃 API")
+  @PostMapping("/logout")
+  public ResponseEntity<EmptyDataResponse> logout(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    authService.logout(user.getId());
+    return ResponseEntity.ok(new EmptyDataResponse(MEMBER_LOGOUT));
   }
 
   @BearerAuth

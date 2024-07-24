@@ -25,6 +25,13 @@ public class AuthService {
   private final GemService gemService;
 
   @Transactional
+  public void logout(Long memberId) {
+    // TODO: access token을 redis에 blacklist로 등록
+    Member member = memberRepository.findOneById(memberId);
+    member.setRefreshToken(null);
+  }
+
+  @Transactional
   public Member compensateMemberForDailyAttendance(Long memberId) {
     Member member = memberRepository.findOneById(memberId);
     if (!DateUtil.isToday(member.getLastLoginAt())) {
