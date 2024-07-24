@@ -3,8 +3,10 @@ package com.example.gemm_server.security.jwt;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.EXPIRED_JWT_TOKEN;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_JWT_SIGNATURE;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_JWT_TOKEN;
+import static com.example.gemm_server.common.code.error.TokenErrorCode.UNMATCHED_REFRESH_TOKEN;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNSUPPORTED_JWT_TOKEN;
 
+import com.example.gemm_server.dto.auth.TokenResponse;
 import com.example.gemm_server.exception.TokenException;
 import com.example.gemm_server.service.TokenService;
 import io.jsonwebtoken.Claims;
@@ -80,7 +82,6 @@ public class TokenProvider {
     Claims claims = parseClaims(token);
     List<SimpleGrantedAuthority> authorities = getAuthorities(claims);
 
-    // 2. security의 User 객체 생성
     CustomUser principal = new CustomUser(claims.getSubject(), "", authorities);
     return new UsernamePasswordAuthenticationToken(principal, token, authorities);
   }
@@ -95,17 +96,18 @@ public class TokenProvider {
         claims.get(AUTHORITIES_KEY).toString()));
   }
 
-  // 3. accessToken 재발급
-  public String reissueAccessToken(String accessToken) {
-    if (StringUtils.hasText(accessToken)) {
-      Long memberId = Long.parseLong(getAuthentication(accessToken).getName());
-      String refreshToken = tokenService.getRefreshToken(memberId);
+  public TokenResponse reissueAccessToken(String token) {
+    if (StringUtils.hasText(token)) {
+      Long memberId = getUserIdFromToken(token);
+      String existRefreshToken = tokenService.getRefreshToken(memberId);
 
-      if (validateToken(refreshToken)) {
-        return generateAccessToken(getAuthentication(refreshToken));
+      if (validateToken(token) && token.equals(existRefreshToken)) {
+        String accessToken = generateAccessToken(getAuthentication(token));
+        String refreshToken = generateRefreshToken(getAuthentication(token));
+        return new TokenResponse(accessToken, refreshToken);
       }
     }
-    return null;
+    throw new TokenException(UNMATCHED_REFRESH_TOKEN);
   }
 
   public boolean validateToken(String token) {

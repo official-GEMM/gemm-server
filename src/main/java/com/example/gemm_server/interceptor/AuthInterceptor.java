@@ -1,7 +1,5 @@
 package com.example.gemm_server.interceptor;
 
-import static com.example.gemm_server.common.code.error.MemberErrorCode.LACK_OF_AUTHORITY;
-import static com.example.gemm_server.common.code.error.MemberErrorCode.LOGIN_NECESSARY;
 import static com.example.gemm_server.security.jwt.TokenAuthenticationFilter.AUTHORIZATION;
 
 import com.example.gemm_server.common.annotation.Admin;
@@ -51,7 +49,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     String bearerToken = request.getHeader(AUTHORIZATION);
     if (!StringUtils.hasText(bearerToken)) { // 헤더에 토큰이 있을 경우, 필터에서 유효하지 않은 토큰에 대해 예외처리를 해준다.
-      throw new MemberException(LOGIN_NECESSARY);
+      throw new MemberException(bearerAuth.errorCode());
     }
   }
 
@@ -65,7 +63,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     boolean isAdmin = authentication.getAuthorities()
         .contains(new SimpleGrantedAuthority(Role.ADMIN.getName()));
     if (!isAdmin) {
-      throw new MemberException(LACK_OF_AUTHORITY);
+      throw new MemberException(admin.errorCode());
     }
   }
 }

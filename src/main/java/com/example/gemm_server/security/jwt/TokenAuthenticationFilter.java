@@ -17,9 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
+  private final TokenProvider tokenProvider;
+
   public static final String AUTHORIZATION = "Authorization";
   public static final String TOKEN_PREFIX = "Bearer ";
-  private final TokenProvider tokenProvider;
 
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -33,16 +34,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  private void setAuthentication(String accessToken) {
-    Authentication authentication = tokenProvider.getAuthentication(accessToken);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-  }
-
   private String resolveToken(HttpServletRequest request) {
     String token = request.getHeader(AUTHORIZATION);
     if (ObjectUtils.isEmpty(token) || !token.startsWith(TOKEN_PREFIX)) {
       return null;
     }
     return token.substring(TOKEN_PREFIX.length());
+  }
+
+  private void setAuthentication(String accessToken) {
+    Authentication authentication = tokenProvider.getAuthentication(accessToken);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 }
