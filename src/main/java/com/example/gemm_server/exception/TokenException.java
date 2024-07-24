@@ -1,6 +1,6 @@
 package com.example.gemm_server.exception;
 
-import com.example.gemm_server.common.code.TokenErrorCode;
+import com.example.gemm_server.common.code.error.TokenErrorCode;
 
 public class TokenException extends CustomException {
 

@@ -7,6 +7,7 @@ import com.example.gemm_server.domain.repository.GemRepository;
 import com.example.gemm_server.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +16,12 @@ public class GemService {
   private final GemRepository gemRepository;
   private final MemberRepository memberRepository;
 
+  @Transactional
   public void saveChangesOfGemWithMember(Member member, int amount, GemUsage usageType) {
     // TODO: 필요시 gem 변경 대한 알림 생성
     member.setGem(member.getGem() + usageType.getSignedAmount(amount));
     memberRepository.save(member);
-    
+
     Gem gem = new Gem(amount, usageType, member.getId());
     gemRepository.save(gem);
   }

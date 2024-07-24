@@ -1,6 +1,6 @@
 package com.example.gemm_server.exception;
 
-import com.example.gemm_server.common.code.ErrorCode;
+import com.example.gemm_server.common.code.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public class CustomException extends RuntimeException {

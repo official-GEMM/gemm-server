@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -30,7 +31,8 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @SQLDelete(sql = "UPDATE member SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")
-@Table(name = "member")
+@Table(name = "member",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"social_id", "provider"}))
 public class Member extends Timestamped {
 
   @Id
@@ -45,8 +47,8 @@ public class Member extends Timestamped {
   @Enumerated(value = EnumType.STRING)
   private Provider provider;
 
-  @Column(name = "recommendation_code", length = 8, updatable = false, nullable = false, unique = true)
-  private String recommendationCode;
+  @Column(name = "referral_code", length = 8, updatable = false, nullable = false, unique = true)
+  private String referralCode;
 
   @Column(name = "name", length = 30, nullable = false)
   private String name;
@@ -88,7 +90,7 @@ public class Member extends Timestamped {
         .socialId(socialId)
         .provider(provider)
         .birth(birth)
-        .recommendationCode(UUIDUtil.createReferralCode())
+        .referralCode(UUIDUtil.createReferralCode())
         .gem(0)
         .role(Role.USER)
         .build();
