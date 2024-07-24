@@ -3,8 +3,10 @@ package com.example.gemm_server.security.jwt;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.EXPIRED_JWT_TOKEN;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_JWT_SIGNATURE;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_JWT_TOKEN;
+import static com.example.gemm_server.common.code.error.TokenErrorCode.UNMATCHED_REFRESH_TOKEN;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNSUPPORTED_JWT_TOKEN;
 
+import com.example.gemm_server.dto.auth.TokenResponse;
 import com.example.gemm_server.exception.TokenException;
 import com.example.gemm_server.service.TokenService;
 import io.jsonwebtoken.Claims;
@@ -15,6 +17,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
@@ -42,6 +46,8 @@ public class TokenProvider {
   private long refreshTokenExpireTime;
   private SecretKey secretKey;
   private static final String AUTHORITIES_KEY = "role";
+  public static final String AUTHORIZATION = "Authorization";
+  public static final String TOKEN_PREFIX = "Bearer ";
 
   @PostConstruct
   public void setSecretKey() {
@@ -80,7 +86,6 @@ public class TokenProvider {
     Claims claims = parseClaims(token);
     List<SimpleGrantedAuthority> authorities = getAuthorities(claims);
 
-    // 2. security의 User 객체 생성
     CustomUser principal = new CustomUser(claims.getSubject(), "", authorities);
     return new UsernamePasswordAuthenticationToken(principal, token, authorities);
   }
@@ -95,17 +100,26 @@ public class TokenProvider {
         claims.get(AUTHORITIES_KEY).toString()));
   }
 
-  // 3. accessToken 재발급
-  public String reissueAccessToken(String accessToken) {
-    if (StringUtils.hasText(accessToken)) {
-      Long memberId = Long.parseLong(getAuthentication(accessToken).getName());
-      String refreshToken = tokenService.getRefreshToken(memberId);
+  public String resolveToken(HttpServletRequest request) {
+    String token = request.getHeader(AUTHORIZATION);
+    if (ObjectUtils.isEmpty(token) || !token.startsWith(TOKEN_PREFIX)) {
+      return null;
+    }
+    return token.substring(TOKEN_PREFIX.length());
+  }
 
-      if (validateToken(refreshToken)) {
-        return generateAccessToken(getAuthentication(refreshToken));
+  public TokenResponse reissueAccessToken(String token) {
+    if (StringUtils.hasText(token)) {
+      Long memberId = getUserIdFromToken(token);
+      String existRefreshToken = tokenService.getRefreshToken(memberId);
+
+      if (validateToken(token) && existRefreshToken.equals(token)) {
+        String accessToken = generateAccessToken(getAuthentication(token));
+        String refreshToken = generateRefreshToken(getAuthentication(token));
+        return new TokenResponse(accessToken, refreshToken);
       }
     }
-    return null;
+    throw new TokenException(UNMATCHED_REFRESH_TOKEN);
   }
 
   public boolean validateToken(String token) {
