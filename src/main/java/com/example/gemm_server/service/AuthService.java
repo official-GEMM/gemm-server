@@ -1,5 +1,8 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_ALREADY_COMPLETED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.OWN_REFERRAL_CODE;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL_NOT_FOUND;
 import static com.example.gemm_server.common.constant.Policy.ATTENDANCE_COMPENSATION;
 
 import com.example.gemm_server.common.enums.GemUsage;

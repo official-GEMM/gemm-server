@@ -1,7 +1,7 @@
 package com.example.gemm_server.security.oauth2;
 
-import static com.example.gemm_server.common.code.MemberErrorCode.MEMBER_BANNED;
-import static com.example.gemm_server.common.code.MemberErrorCode.MEMBER_DELETED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_BANNED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_DELETED;
 import static com.example.gemm_server.common.constant.Policy.JOIN_COMPENSATION;
 
 import com.example.gemm_server.common.enums.GemUsage;

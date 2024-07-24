@@ -1,4 +1,4 @@
-package com.example.gemm_server.common.code;
+package com.example.gemm_server.common.code.error;
 
 import org.springframework.http.HttpStatus;
 

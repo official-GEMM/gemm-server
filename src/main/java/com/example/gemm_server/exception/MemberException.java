@@ -1,6 +1,6 @@
 package com.example.gemm_server.exception;
 
-import com.example.gemm_server.common.code.MemberErrorCode;
+import com.example.gemm_server.common.code.error.MemberErrorCode;
 
 public class MemberException extends CustomException {
 
