@@ -17,7 +17,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
@@ -46,8 +44,6 @@ public class TokenProvider {
   private long refreshTokenExpireTime;
   private SecretKey secretKey;
   private static final String AUTHORITIES_KEY = "role";
-  public static final String AUTHORIZATION = "Authorization";
-  public static final String TOKEN_PREFIX = "Bearer ";
 
   @PostConstruct
   public void setSecretKey() {
@@ -100,20 +96,12 @@ public class TokenProvider {
         claims.get(AUTHORITIES_KEY).toString()));
   }
 
-  public String resolveToken(HttpServletRequest request) {
-    String token = request.getHeader(AUTHORIZATION);
-    if (ObjectUtils.isEmpty(token) || !token.startsWith(TOKEN_PREFIX)) {
-      return null;
-    }
-    return token.substring(TOKEN_PREFIX.length());
-  }
-
   public TokenResponse reissueAccessToken(String token) {
     if (StringUtils.hasText(token)) {
       Long memberId = getUserIdFromToken(token);
       String existRefreshToken = tokenService.getRefreshToken(memberId);
 
-      if (validateToken(token) && existRefreshToken.equals(token)) {
+      if (validateToken(token) && token.equals(existRefreshToken)) {
         String accessToken = generateAccessToken(getAuthentication(token));
         String refreshToken = generateRefreshToken(getAuthentication(token));
         return new TokenResponse(accessToken, refreshToken);

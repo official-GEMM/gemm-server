@@ -15,12 +15,13 @@ import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,13 +67,11 @@ public class AuthController {
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_UPDATED));
   }
 
-  @BearerAuth(errorCode = REFRESH_TOKEN_NECESSARY)
-  @Operation(summary = "토큰 갱신", description = "accessToken과 refreshToken을 재발급하느 API")
+  @Operation(summary = "토큰 갱신", description = "accessToken과 refreshToken을 재발급하는 API")
   @PatchMapping("/reissue")
   public ResponseEntity<CommonResponse<TokenResponse>> reissueAccessToken(
-      HttpServletRequest request) {
-    String refreshToken = tokenProvider.resolveToken(request);
-    TokenResponse tokens = tokenProvider.reissueAccessToken(refreshToken);
+      @CookieValue(value = "refreshToken") Cookie refreshToken) {
+    TokenResponse tokens = tokenProvider.reissueAccessToken(refreshToken.getValue());
     return ResponseEntity.ok(new CommonResponse<>(tokens));
   }
 }

@@ -1,6 +1,6 @@
 package com.example.gemm_server.interceptor;
 
-import static com.example.gemm_server.security.jwt.TokenProvider.AUTHORIZATION;
+import static com.example.gemm_server.security.jwt.TokenAuthenticationFilter.AUTHORIZATION;
 
 import com.example.gemm_server.common.annotation.Admin;
 import com.example.gemm_server.common.annotation.BearerAuth;

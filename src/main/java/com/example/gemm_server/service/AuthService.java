@@ -31,7 +31,7 @@ public class AuthService {
       gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION, GemUsage.COMPENSATION);
     }
     member.setLastLoginAt(LocalDateTime.now());
-    return memberRepository.save(member);
+    return member;
   }
 
   @Transactional
@@ -55,8 +55,6 @@ public class AuthService {
     member.setNickname(memberInfo.getNickname());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     member.setManageAge(memberInfo.getManageAge());
-
-    memberRepository.save(member);
   }
 
   private Member getMemberByReferralCode(String referralCode) {
