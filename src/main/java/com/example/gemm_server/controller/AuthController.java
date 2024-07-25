@@ -13,6 +13,7 @@ import com.example.gemm_server.dto.member.NecessaryMemberDataPostRequest;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
+import com.example.gemm_server.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -37,6 +38,7 @@ public class AuthController {
 
   private final AuthService authService;
   private final TokenProvider tokenProvider;
+  private final MemberService memberService;
 
   @Operation(summary = "소셜 로그인", description = "소셜 로그인 처리 이후 redirect되는 API")
   @GetMapping("/login")
@@ -73,7 +75,7 @@ public class AuthController {
     if (referralCode != null) {
       authService.compensateMemberForReferral(user.getId(), referralCode);
     }
-    authService.updateNecessaryMemberData(user.getId(), memberNecessaryData);
+    memberService.updateNecessaryMemberData(user.getId(), memberNecessaryData);
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_UPDATED));
   }
 
