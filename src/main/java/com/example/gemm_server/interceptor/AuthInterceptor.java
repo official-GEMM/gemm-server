@@ -44,6 +44,9 @@ public class AuthInterceptor implements HandlerInterceptor {
   private void interceptBearerAuth(HandlerMethod handlerMethod, HttpServletRequest request) {
     BearerAuth bearerAuth = handlerMethod.getMethodAnnotation(BearerAuth.class);
     if (bearerAuth == null) {
+      bearerAuth = handlerMethod.getBeanType().getAnnotation(BearerAuth.class);
+    }
+    if (bearerAuth == null) {
       return;
     }
 
@@ -55,6 +58,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private void interceptAuthority(HandlerMethod handlerMethod) {
     Admin admin = handlerMethod.getMethodAnnotation(Admin.class);
+    if (admin == null) {
+      admin = handlerMethod.getBeanType().getAnnotation(Admin.class);
+    }
     if (admin == null) {
       return;
     }
