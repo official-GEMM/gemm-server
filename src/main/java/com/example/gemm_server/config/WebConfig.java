@@ -1,6 +1,6 @@
 package com.example.gemm_server.config;
 
-import com.example.gemm_server.interceptor.AuthInterceptor;
+import com.example.gemm_server.common.annotation.auth.AuthInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
