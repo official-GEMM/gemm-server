@@ -3,7 +3,7 @@ package com.example.gemm_server.service;
 import static com.example.gemm_server.common.constant.Policy.ATTENDANCE_COMPENSATION;
 import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATION;
 
-import com.example.gemm_server.common.enums.GemUsage;
+import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.MemberRepository;
@@ -31,7 +31,8 @@ public class AuthService {
   public Member compensateMemberForDailyAttendance(Long memberId) {
     Member member = memberRepository.findOneById(memberId);
     if (!DateUtil.isToday(member.getLastLoginAt())) {
-      gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION, GemUsage.COMPENSATION);
+      gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION,
+          GemUsageType.COMPENSATION);
     }
     member.setLastLoginAt(LocalDateTime.now());
     return member;
@@ -44,9 +45,9 @@ public class AuthService {
     Member referralMember = memberService.getMemberByReferralCode(referralCode);
 
     gemService.saveChangesOfGemWithMember(currentMember, REFERRAL_COMPENSATION,
-        GemUsage.COMPENSATION);
+        GemUsageType.COMPENSATION);
     gemService.saveChangesOfGemWithMember(referralMember, REFERRAL_COMPENSATION,
-        GemUsage.COMPENSATION);
+        GemUsageType.COMPENSATION);
 
   }
 }

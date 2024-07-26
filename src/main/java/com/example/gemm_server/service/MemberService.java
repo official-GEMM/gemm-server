@@ -7,7 +7,7 @@ import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.MemberRepository;
-import com.example.gemm_server.dto.member.NecessaryMemberDataPostRequest;
+import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class MemberService {
   }
 
   public Member updateNecessaryMemberData(Long memberId,
-      NecessaryMemberDataPostRequest memberInfo) {
+      PostNecessaryMemberDataRequest memberInfo) {
     Member member = memberRepository.findOneById(memberId);
 
     member.setName(memberInfo.getName());

@@ -4,7 +4,7 @@ import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_B
 import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_DELETED;
 import static com.example.gemm_server.common.constant.Policy.JOIN_COMPENSATION;
 
-import com.example.gemm_server.common.enums.GemUsage;
+import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.MemberRepository;
 import com.example.gemm_server.service.GemService;
@@ -52,7 +52,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private Member joinMemberWithJoinCompensation(Member notYetJoinedMember) {
     Member joinedMember = memberRepository.save(notYetJoinedMember);
-    gemService.saveChangesOfGemWithMember(joinedMember, JOIN_COMPENSATION, GemUsage.COMPENSATION);
+    gemService.saveChangesOfGemWithMember(joinedMember, JOIN_COMPENSATION,
+        GemUsageType.COMPENSATION);
     return joinedMember;
   }
 

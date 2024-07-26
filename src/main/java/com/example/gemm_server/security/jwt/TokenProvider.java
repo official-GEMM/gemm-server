@@ -6,7 +6,7 @@ import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_J
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNMATCHED_REFRESH_TOKEN;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNSUPPORTED_JWT_TOKEN;
 
-import com.example.gemm_server.dto.auth.TokenResponse;
+import com.example.gemm_server.dto.auth.response.TokenResponse;
 import com.example.gemm_server.exception.TokenException;
 import com.example.gemm_server.service.TokenService;
 import io.jsonwebtoken.Claims;
