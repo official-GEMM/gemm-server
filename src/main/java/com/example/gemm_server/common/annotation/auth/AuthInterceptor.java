@@ -1,9 +1,7 @@
-package com.example.gemm_server.interceptor;
+package com.example.gemm_server.common.annotation.auth;
 
 import static com.example.gemm_server.security.jwt.TokenAuthenticationFilter.AUTHORIZATION;
 
-import com.example.gemm_server.common.annotation.Admin;
-import com.example.gemm_server.common.annotation.BearerAuth;
 import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.exception.MemberException;
@@ -44,6 +42,9 @@ public class AuthInterceptor implements HandlerInterceptor {
   private void interceptBearerAuth(HandlerMethod handlerMethod, HttpServletRequest request) {
     BearerAuth bearerAuth = handlerMethod.getMethodAnnotation(BearerAuth.class);
     if (bearerAuth == null) {
+      bearerAuth = handlerMethod.getBeanType().getAnnotation(BearerAuth.class);
+    }
+    if (bearerAuth == null) {
       return;
     }
 
@@ -55,6 +56,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private void interceptAuthority(HandlerMethod handlerMethod) {
     Admin admin = handlerMethod.getMethodAnnotation(Admin.class);
+    if (admin == null) {
+      admin = handlerMethod.getBeanType().getAnnotation(Admin.class);
+    }
     if (admin == null) {
       return;
     }

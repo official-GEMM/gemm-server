@@ -2,7 +2,7 @@ package com.example.gemm_server.common.enums;
 
 import lombok.Getter;
 
-public enum GemUsage {
+public enum GemUsageType {
   COMPENSATION("보상", Transaction.DEPOSIT),
   CHARGE("충전", Transaction.DEPOSIT),
   MARKET_SALE("마켓 판매", Transaction.DEPOSIT),
@@ -13,7 +13,7 @@ public enum GemUsage {
   private final String description;
   private final Transaction transaction;
 
-  GemUsage(String description, Transaction transaction) {
+  GemUsageType(String description, Transaction transaction) {
     this.description = description;
     this.transaction = transaction;
   }

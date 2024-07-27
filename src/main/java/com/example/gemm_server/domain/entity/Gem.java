@@ -1,6 +1,6 @@
 package com.example.gemm_server.domain.entity;
 
-import com.example.gemm_server.common.enums.GemUsage;
+import com.example.gemm_server.common.enums.GemUsageType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,13 +43,13 @@ public class Gem extends Timestamped {
 
   @Column(name = "usage_type", nullable = false)
   @Enumerated(value = EnumType.STRING)
-  private GemUsage usageType;
+  private GemUsageType usageType;
 
   @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 
-  public Gem(Integer amount, GemUsage usageType, Long memberId) {
+  public Gem(Integer amount, GemUsageType usageType, Long memberId) {
     this.amount = amount;
     this.usageType = usageType;
     this.member = new Member();
