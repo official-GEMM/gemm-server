@@ -7,9 +7,11 @@ import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MemberRepository;
+import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateActivityGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveActivityGuideRequest;
 import com.example.gemm_server.dto.generator.response.ActivityGuideResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmActivityGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedActivityResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +28,7 @@ public class ActivityService {
     private final MemberRepository memberRepository;
 
     public ActivityGuideResponse generateActivityGuide(GenerateActivityGuideRequest generateActivityGuideRequest) {
-        LlmActivityGuideResponse llmActivityGuideResponse = webClientUtil.post("http://localhost:8000/generate/activity/guide",
+        LlmActivityGuideResponse llmActivityGuideResponse = webClientUtil.post("/generate/activity/guide",
                 generateActivityGuideRequest, LlmActivityGuideResponse.class);
         log.info(llmActivityGuideResponse.content());
 
@@ -49,5 +51,13 @@ public class ActivityService {
                 .build();
         Generation savedGeneration = generationRepository.save(generation);
         return new SavedActivityResponse(savedGeneration.getId());
+    }
+
+    public UpdatedGuideResponse updateActivityGuide(UpdateGuideRequest UpdateGuideRequest) {
+        UpdatedGuideResponse updatedGuideResponse = webClientUtil.put("/generate/activity/guide/result",
+                UpdateGuideRequest, UpdatedGuideResponse.class);
+        log.info(updatedGuideResponse.content());
+
+        return new UpdatedGuideResponse(updatedGuideResponse.content());
     }
 }

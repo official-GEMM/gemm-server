@@ -18,7 +18,7 @@ import java.time.Duration;
 @Slf4j
 @Configuration
 public class WebClientConfig {
-    @Value("${llm.url}")
+    @Value("${llm.server.url}")
     private String llmServerUrl;
 
     @Bean
