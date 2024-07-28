@@ -14,31 +14,24 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE activity SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "activity")
-public class Activity extends Timestamped{
-
+@Table(name = "generation")
+public class Generation extends Timestamped{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name="title", length = 30, nullable = false)
-    private String title;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Member ownerId;
 
-    @Column(name="age", nullable = false)
-    private Short age;
-
-    @Column(name="material_type", columnDefinition = "BIT(3)", nullable = false)
-    private Short materialType;
-
-    @Column(name="content", columnDefinition = "TEXT", nullable = false)
-    private String content;
+    @OneToOne
+    @JoinColumn(name = "activity_id", nullable = false)
+    private Activity activityId;
 
     @Builder
-    public Activity(String title, Short age, Short materialType, String content) {
-        this.title = title;
-        this.age = age;
-        this.materialType = materialType;
-        this.content = content;
+    public Generation(Member ownerId, Activity activityId) {
+        this.ownerId = ownerId;
+        this.activityId = activityId;
     }
 }
