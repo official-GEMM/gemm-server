@@ -1,7 +1,6 @@
 package com.example.gemm_server.config;
 
 import io.netty.channel.ChannelOption;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +14,6 @@ import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 
-@Slf4j
 @Configuration
 public class WebClientConfig {
     @Value("${llm.server.url}")
@@ -31,8 +29,8 @@ public class WebClientConfig {
                 .forEach(writer -> ((LoggingCodecSupport) writer).setEnableLoggingRequestDetails(true));
 
         ReactorClientHttpConnector reactorClientHttpConnector = new ReactorClientHttpConnector(
-                HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000*60*3)
-                        .responseTimeout(Duration.ofSeconds(60*3))
+                HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000 * 60 * 3)
+                        .responseTimeout(Duration.ofSeconds(60 * 3))
         );
 
         return WebClient.builder()

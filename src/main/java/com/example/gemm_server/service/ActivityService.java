@@ -30,7 +30,6 @@ public class ActivityService {
     public ActivityGuideResponse generateActivityGuide(GenerateActivityGuideRequest generateActivityGuideRequest) {
         LlmActivityGuideResponse llmActivityGuideResponse = webClientUtil.post("/generate/activity/guide",
                 generateActivityGuideRequest, LlmActivityGuideResponse.class);
-        log.info(llmActivityGuideResponse.content());
 
         return new ActivityGuideResponse(llmActivityGuideResponse.content());
     }
@@ -56,7 +55,6 @@ public class ActivityService {
     public UpdatedGuideResponse updateActivityGuide(UpdateGuideRequest UpdateGuideRequest) {
         UpdatedGuideResponse updatedGuideResponse = webClientUtil.put("/generate/activity/guide/result",
                 UpdateGuideRequest, UpdatedGuideResponse.class);
-        log.info(updatedGuideResponse.content());
 
         return new UpdatedGuideResponse(updatedGuideResponse.content());
     }

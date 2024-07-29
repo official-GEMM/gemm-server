@@ -4,6 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record SavedActivityResponse(
         @Schema(description = "저장한 활동 방법 아이디")
-        Long storageId
+        Long generationId
 ) {
 }
