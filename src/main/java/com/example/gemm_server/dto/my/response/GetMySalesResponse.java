@@ -1,6 +1,6 @@
 package com.example.gemm_server.dto.my.response;
 
-import com.example.gemm_server.dto.common.PageInformation;
+import com.example.gemm_server.dto.common.response.PageInformationResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -13,7 +13,7 @@ public class GetMySalesResponse {
   private Sale[] sales;
 
   @Schema(description = "페이지 정보")
-  private PageInformation pageInfo;
+  private PageInformationResponse pageInfo;
 
   @Getter
   private static class Sale {

@@ -7,7 +7,7 @@ import lombok.Getter;
 public class CheckNicknameDuplicationResponse {
 
   @Schema(description = "닉네임 중복 여부")
-  private boolean isDuplicated;
+  private Boolean isDuplicated;
 
   public CheckNicknameDuplicationResponse() {
   }

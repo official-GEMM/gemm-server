@@ -1,0 +1,46 @@
+package com.example.gemm_server.dto.market;
+
+import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
+import com.example.gemm_server.dto.common.response.MemberResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+
+@Getter
+public class MarketItemDetailResponse extends ActivityDetailResponse {
+
+  @Schema(description = "마켓 상품 아이디")
+  private long marketItemId;
+
+  @Schema(description = "스크랩 수")
+  private int scrapCount;
+
+  @Schema(description = "내 스크랩 여부")
+  private Boolean isScrapped;
+
+  @Schema(description = "판매자")
+  private MemberResponse seller;
+
+  @Schema(description = "내 마켓 상품 여부")
+  private Boolean isMyMarketItem;
+
+  @Schema(description = "구매 여부")
+  private Boolean isBought;
+
+  @Schema(description = "리뷰 평점")
+  private float reviewAverageScore;
+
+  @Schema(description = "리뷰 수")
+  private int reviewCount;
+
+  @Schema(description = "가격")
+  private int price;
+
+  @Schema(description = "연도")
+  private int year;
+
+  @Schema(description = "월")
+  private short month;
+
+  public MarketItemDetailResponse() {
+  }
+}

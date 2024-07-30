@@ -4,9 +4,9 @@ import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
-import com.example.gemm_server.dto.my.response.GetGemResponse;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
 import com.example.gemm_server.dto.my.response.GetMyInformationResponse;
 import com.example.gemm_server.dto.my.response.GetMyNotificationsResponse;
@@ -108,8 +108,8 @@ public class MyController {
 
   @Operation(summary = "내 보유 젬 조회", description = "사용자의 보유한 젬의 수를 조회하는 API")
   @GetMapping("/gem")
-  public ResponseEntity<CommonResponse<GetGemResponse>> getGemCount() {
-    GetGemResponse response = new GetGemResponse();
+  public ResponseEntity<CommonResponse<GemResponse>> getGemCount() {
+    GemResponse response = new GemResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

@@ -1,10 +1,10 @@
-package com.example.gemm_server.dto.common;
+package com.example.gemm_server.dto.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-public class PageInformation {
+public class PageInformationResponse {
 
   @Schema(description = "현재 페이지")
   private int currentPage;
@@ -12,6 +12,6 @@ public class PageInformation {
   @Schema(description = "총 페이지 수")
   private int totalPages;
 
-  public PageInformation() {
+  public PageInformationResponse() {
   }
 }

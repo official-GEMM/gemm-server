@@ -1,14 +1,14 @@
 package com.example.gemm_server.dto.storage;
 
-import com.example.gemm_server.dto.common.Guides;
+import com.example.gemm_server.dto.common.response.GuidesResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class GeneratedGuides extends Guides {
+public class GeneratedGuidesResponse extends GuidesResponse {
 
   @Schema(description = "생성물 아이디")
   private long generationId;
 
-  public GeneratedGuides() {
+  public GeneratedGuidesResponse() {
     super();
   }
 }

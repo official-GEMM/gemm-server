@@ -1,6 +1,6 @@
 package com.example.gemm_server.dto.my.response;
 
-import com.example.gemm_server.dto.common.PageInformation;
+import com.example.gemm_server.dto.common.response.PageInformationResponse;
 import com.example.gemm_server.dto.my.Scraps;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -12,7 +12,7 @@ public class GetMyScrapsResponse {
   private Scraps[] scraps;
 
   @Schema(description = "페이지 정보")
-  private PageInformation pageInfo;
+  private PageInformationResponse pageInfo;
 
   public GetMyScrapsResponse() {
   }

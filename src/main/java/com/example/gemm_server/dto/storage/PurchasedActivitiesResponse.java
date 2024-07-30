@@ -1,16 +1,16 @@
 package com.example.gemm_server.dto.storage;
 
-import com.example.gemm_server.dto.common.Activities;
+import com.example.gemm_server.dto.common.response.ActivitiesResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-public class PurchasedActivities extends Activities {
+public class PurchasedActivitiesResponse extends ActivitiesResponse {
 
   @Schema(description = "내용")
   private long dealId;
 
-  public PurchasedActivities() {
+  public PurchasedActivitiesResponse() {
     super();
   }
 }
