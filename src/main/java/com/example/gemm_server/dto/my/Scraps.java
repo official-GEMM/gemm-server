@@ -2,6 +2,7 @@ package com.example.gemm_server.dto.my;
 
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.MaterialType;
+import com.example.gemm_server.dto.common.response.MemberResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import org.springframework.core.io.UrlResource;
@@ -19,7 +20,7 @@ public class Scraps {
   private UrlResource thumbnailPath;
 
   @Schema(description = "판매자")
-  private Seller seller;
+  private MemberResponse seller;
 
   @Schema(description = "리뷰 평점")
   private float reviewAverageScore;
@@ -38,16 +39,6 @@ public class Scraps {
 
   @Schema(description = "자료 종류")
   private MaterialType[] materialType;
-
-  @Getter
-  private static class Seller {
-
-    @Schema(description = "사용자 아이디")
-    private long memberId;
-
-    @Schema(description = "사용자 닉네임")
-    private String nickname;
-  }
 
   public Scraps() {
   }
