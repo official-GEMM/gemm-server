@@ -3,7 +3,7 @@ package com.example.gemm_server.controller;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
-import com.example.gemm_server.dto.common.DownloadMaterial;
+import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivityDetailResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedGuideDetailResponse;
@@ -91,10 +91,10 @@ public class StorageController {
 
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/activities/{generationId}/download")
-  public ResponseEntity<DownloadMaterial> downloadGeneratedActivityMaterial(
+  public ResponseEntity<DownloadMaterialResponse> downloadGeneratedActivityMaterial(
       @PathParam("generationId") Long generationId
   ) {
-    DownloadMaterial response = new DownloadMaterial();
+    DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
   }
 
@@ -118,10 +118,10 @@ public class StorageController {
 
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
-  public ResponseEntity<DownloadMaterial> downloadPurchasedActivityMaterial(
+  public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(
       @PathParam("dealId") Long dealId
   ) {
-    DownloadMaterial response = new DownloadMaterial();
+    DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
   }
 }
