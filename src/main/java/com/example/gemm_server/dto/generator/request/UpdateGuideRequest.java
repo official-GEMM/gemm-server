@@ -14,6 +14,6 @@ public record UpdateGuideRequest(
         @Schema(description = "수정에 적용할 코멘트")
         @NotNull
         @Size(min = 1)
-        List<CommentRequest> comments
+        List<CommentGuideRequest> comments
 ) {
 }
