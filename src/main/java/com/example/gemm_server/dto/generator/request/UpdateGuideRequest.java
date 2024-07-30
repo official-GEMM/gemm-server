@@ -9,7 +9,7 @@ import java.util.List;
 
 public record UpdateGuideRequest(
         @Schema(description = "수정할 내용")
-        @NotNull @NotBlank
+        @NotBlank
         String content,
         @Schema(description = "수정에 적용할 코멘트")
         @NotNull

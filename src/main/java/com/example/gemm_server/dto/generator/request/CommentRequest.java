@@ -9,7 +9,7 @@ public record CommentRequest(
         @NotNull
         String section,
         @Schema(description = "수정에 적용하고 싶은 내용")
-        @NotNull @NotBlank
+        @NotBlank
         String comment
 ) {
 }

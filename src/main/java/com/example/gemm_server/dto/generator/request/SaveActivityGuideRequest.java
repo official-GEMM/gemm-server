@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record SaveActivityGuideRequest(
         @Schema(description = "생성하고자 하는 주제")
-        @NotNull @NotBlank
+        @NotBlank
         String title,
         @Schema(description = "교육 대상 연령")
         @NotNull
@@ -16,7 +16,7 @@ public record SaveActivityGuideRequest(
         @NotNull
         Category category,
         @Schema(description = "생성 내용")
-        @NotNull @NotBlank
+        @NotBlank
         String content
 ) {
 }
