@@ -14,7 +14,7 @@ public class GetHeaderResponse {
   private UrlResource profileImagePath;
 
   @Schema(description = "미확인 알림 존재 여부")
-  private boolean hasUnreadNotification;
+  private Boolean hasUnreadNotification;
 
   public GetHeaderResponse() {
   }
