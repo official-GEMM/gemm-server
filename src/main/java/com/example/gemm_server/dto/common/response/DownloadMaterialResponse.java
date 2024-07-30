@@ -1,15 +1,15 @@
-package com.example.gemm_server.dto.common;
+package com.example.gemm_server.dto.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import org.springframework.core.io.UrlResource;
 
 @Getter
-public class DownloadMaterial {
+public class DownloadMaterialResponse {
 
   @Schema(description = "자료 다운로드 경로 리스트")
   private UrlResource[] materialPaths;
 
-  public DownloadMaterial() {
+  public DownloadMaterialResponse() {
   }
 }
