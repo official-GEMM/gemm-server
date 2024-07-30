@@ -1,21 +1,18 @@
 package com.example.gemm_server.controller;
 
-import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.dto.CommonResponse;
-import com.example.gemm_server.dto.generator.request.GenerateActivityGuideRequest;
-import com.example.gemm_server.dto.generator.request.SaveActivityGuideRequest;
+import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
+import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
-import com.example.gemm_server.dto.generator.response.ActivityGuideResponse;
-import com.example.gemm_server.dto.generator.response.SavedActivityResponse;
+import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
+import com.example.gemm_server.dto.generator.response.SavedGenerationResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
-import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 //@BearerAuth
@@ -28,21 +25,21 @@ public class GeneratorController {
 
     @Operation(summary = "활동 방법 생성", description = "활동 방법을 생성하는 API")
     @PostMapping("/guide")
-    public ResponseEntity<CommonResponse<ActivityGuideResponse>> generateActivityGuide(
-            @Valid @RequestBody GenerateActivityGuideRequest generateActivityGuideRequest
+    public ResponseEntity<CommonResponse<GeneratedGuideResponse>> generateActivityGuide(
+            @Valid @RequestBody GenerateGuideRequest generateGuideRequest
     ) {
-        ActivityGuideResponse activityGuideResponse = activityService.generateActivityGuide(generateActivityGuideRequest);
-        return ResponseEntity.ok(new CommonResponse<>(activityGuideResponse));
+        GeneratedGuideResponse generatedGuideResponse = activityService.generateActivityGuide(generateGuideRequest);
+        return ResponseEntity.ok(new CommonResponse<>(generatedGuideResponse));
     }
 
     @Operation(summary = "활동 방법 저장", description = "활동 방법을 내 저장소에 저장하는 API")
     @PostMapping("/guide/result")
-    public ResponseEntity<CommonResponse<SavedActivityResponse>> saveActivityGuide(
-            @Valid @RequestBody SaveActivityGuideRequest saveActivityGuideRequest
+    public ResponseEntity<CommonResponse<SavedGenerationResponse>> saveActivityGuide(
+            @Valid @RequestBody SaveGuideRequest saveGuideRequest
 //            @AuthenticationPrincipal CustomUser user
     ) {
-        SavedActivityResponse savedActivityResponse = activityService.saveActivityGuide(saveActivityGuideRequest, 1L);
-        return ResponseEntity.ok(new CommonResponse<>(savedActivityResponse));
+        SavedGenerationResponse savedGenerationResponse = activityService.saveActivityGuide(saveGuideRequest, 1L);
+        return ResponseEntity.ok(new CommonResponse<>(savedGenerationResponse));
     }
 
     @Operation(summary = "활동 방법 수정", description = "활동 방법을 수정하는 API")

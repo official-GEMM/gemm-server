@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record SaveActivityGuideRequest(
+public record SaveGuideRequest(
         @Schema(description = "생성하고자 하는 주제")
         @NotBlank
         String title,

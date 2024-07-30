@@ -8,12 +8,12 @@ import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MemberRepository;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
-import com.example.gemm_server.dto.generator.request.GenerateActivityGuideRequest;
-import com.example.gemm_server.dto.generator.request.SaveActivityGuideRequest;
-import com.example.gemm_server.dto.generator.response.ActivityGuideResponse;
+import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
+import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
+import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
-import com.example.gemm_server.dto.generator.response.LlmActivityGuideResponse;
-import com.example.gemm_server.dto.generator.response.SavedActivityResponse;
+import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
+import com.example.gemm_server.dto.generator.response.SavedGenerationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,19 +27,19 @@ public class ActivityService {
     private final GenerationRepository generationRepository;
     private final MemberRepository memberRepository;
 
-    public ActivityGuideResponse generateActivityGuide(GenerateActivityGuideRequest generateActivityGuideRequest) {
-        LlmActivityGuideResponse llmActivityGuideResponse = webClientUtil.post("/generate/activity/guide",
-                generateActivityGuideRequest, LlmActivityGuideResponse.class);
+    public GeneratedGuideResponse generateActivityGuide(GenerateGuideRequest generateGuideRequest) {
+        LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/activity/guide",
+                generateGuideRequest, LlmGuideResponse.class);
 
-        return new ActivityGuideResponse(llmActivityGuideResponse.content());
+        return new GeneratedGuideResponse(llmGuideResponse.content());
     }
 
-    public SavedActivityResponse saveActivityGuide(SaveActivityGuideRequest saveActivityGuideRequest, Long memberId) {
+    public SavedGenerationResponse saveActivityGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
         Member member = memberRepository.findOneById(1L);
 
-        Activity activity = Activity.builder().title(saveActivityGuideRequest.title())
-                .age(saveActivityGuideRequest.age())
-                .content(saveActivityGuideRequest.content())
+        Activity activity = Activity.builder().title(saveGuideRequest.title())
+                .age(saveGuideRequest.age())
+                .content(saveGuideRequest.content())
                 .materialType((short) 0)
                 .build();
         Activity savedActivity = activityRepository.save(activity);
@@ -49,7 +49,7 @@ public class ActivityService {
                 .ownerId(member)
                 .build();
         Generation savedGeneration = generationRepository.save(generation);
-        return new SavedActivityResponse(savedGeneration.getId());
+        return new SavedGenerationResponse(savedGeneration.getId());
     }
 
     public UpdatedGuideResponse updateActivityGuide(UpdateGuideRequest UpdateGuideRequest) {
