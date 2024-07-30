@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record UpdatedPptResponse(
         @Schema(description = "수정된 PPT 정보")
         CommentedPptResponse ppt,
-        @Schema(description = "잔여 잼")
+        @Schema(description = "잔여 젬")
         int gem
 ) {
 }

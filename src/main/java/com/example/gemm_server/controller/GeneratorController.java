@@ -27,8 +27,9 @@ public class GeneratorController {
     @PostMapping("/guide")
     public ResponseEntity<CommonResponse<GeneratedGuideResponse>> generateActivityGuide(
             @Valid @RequestBody GenerateGuideRequest generateGuideRequest
+            //            @AuthenticationPrincipal CustomUser user
     ) {
-        GeneratedGuideResponse generatedGuideResponse = activityService.generateActivityGuide(generateGuideRequest);
+        GeneratedGuideResponse generatedGuideResponse = activityService.generateGuide(generateGuideRequest, 1L);
         return ResponseEntity.ok(new CommonResponse<>(generatedGuideResponse));
     }
 
@@ -38,7 +39,7 @@ public class GeneratorController {
             @Valid @RequestBody SaveGuideRequest saveGuideRequest
 //            @AuthenticationPrincipal CustomUser user
     ) {
-        SavedGenerationResponse savedGenerationResponse = activityService.saveActivityGuide(saveGuideRequest, 1L);
+        SavedGenerationResponse savedGenerationResponse = activityService.saveGuide(saveGuideRequest, 1L);
         return ResponseEntity.ok(new CommonResponse<>(savedGenerationResponse));
     }
 
@@ -46,8 +47,9 @@ public class GeneratorController {
     @PutMapping("/guide/result")
     public ResponseEntity<CommonResponse<UpdatedGuideResponse>> updateActivityGuide(
             @Valid @RequestBody UpdateGuideRequest updateGuideRequest
+            //            @AuthenticationPrincipal CustomUser user
     ) {
-        UpdatedGuideResponse updatedGuideResponse = activityService.updateActivityGuide(updateGuideRequest);
+        UpdatedGuideResponse updatedGuideResponse = activityService.updateGuide(updateGuideRequest, 1L);
         return ResponseEntity.ok(new CommonResponse<>(updatedGuideResponse));
     }
 }

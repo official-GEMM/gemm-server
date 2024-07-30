@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record GeneratedGuideResponse(
         @Schema(description = "생성한 내용")
-        String content
+        String content,
+        @Schema(description = "잔여 젬")
+        int gem
 ) {
 }

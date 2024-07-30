@@ -9,7 +9,7 @@ public record GeneratedMaterialsResponse(
         ActivitySheetPathResponse activitySheet,
         @Schema(description = "생성한 컷/도안 썸네일과 파일 링크")
         CutoutPathResponse cutout,
-        @Schema(description = "잔여 잼")
+        @Schema(description = "잔여 젬")
         int gem
 ) {
 }
