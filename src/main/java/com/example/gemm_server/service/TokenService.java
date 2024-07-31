@@ -1,7 +1,8 @@
 package com.example.gemm_server.service;
 
-import com.example.gemm_server.domain.entity.Member;
-import com.example.gemm_server.domain.repository.MemberRepository;
+import com.example.gemm_server.domain.entity.redis.RefreshToken;
+import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,15 +10,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TokenService {
 
-  private final MemberRepository memberRepository;
+  private final RefreshTokenRepository refreshTokenRepository;
 
   public String getRefreshToken(Long memberId) {
-    return memberRepository.findOneById(memberId).getRefreshToken();
+    Optional<RefreshToken> refreshToken = refreshTokenRepository.findById(memberId);
+    return refreshToken
+        .map(RefreshToken::getRefreshToken)
+        .orElse(null);
   }
 
   public void updateRefreshToken(Long memberId, String refreshToken) {
-    Member member = memberRepository.findOneById(memberId);
-    member.setRefreshToken(refreshToken);
-    memberRepository.save(member);
+    RefreshToken redis = new RefreshToken(memberId, refreshToken);
+    refreshTokenRepository.save(redis);
   }
 }

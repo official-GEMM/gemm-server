@@ -1,23 +1,25 @@
 package com.example.gemm_server.common.annotation.auth;
 
-import static com.example.gemm_server.security.jwt.TokenAuthenticationFilter.AUTHORIZATION;
-
 import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.exception.MemberException;
+import com.example.gemm_server.security.jwt.TokenProvider;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+@RequiredArgsConstructor
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
+
+  private final TokenProvider tokenProvider;
 
   @Override
   public boolean preHandle(
@@ -48,8 +50,8 @@ public class AuthInterceptor implements HandlerInterceptor {
       return;
     }
 
-    String bearerToken = request.getHeader(AUTHORIZATION);
-    if (!StringUtils.hasText(bearerToken)) { // 헤더에 토큰이 있을 경우, 필터에서 유효하지 않은 토큰에 대해 예외처리를 해준다.
+    String bearerToken = tokenProvider.resolveToken(request);
+    if (!tokenProvider.validateToken(bearerToken)) {
       throw new MemberException(bearerAuth.errorCode());
     }
   }

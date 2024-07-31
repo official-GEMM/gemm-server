@@ -22,6 +22,7 @@ import com.example.gemm_server.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
@@ -46,6 +47,7 @@ public class AuthController {
   private final TokenProvider tokenProvider;
   private final MemberService memberService;
 
+
   @Operation(summary = "소셜 로그인", description = "소셜 로그인 처리 이후 redirect되는 API")
   @GetMapping("/login")
   public ResponseEntity<CommonResponse<LoginResponse>> login(
@@ -64,9 +66,11 @@ public class AuthController {
   @Operation(summary = "로그아웃", description = "로그아웃 API")
   @PostMapping("/logout")
   public ResponseEntity<EmptyDataResponse> logout(
+      HttpServletRequest request,
       @AuthenticationPrincipal CustomUser user
   ) {
-    authService.logout(user.getId());
+    String token = tokenProvider.resolveToken(request);
+    authService.logout(user.getId(), token);
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_LOGOUT));
   }
 

@@ -6,7 +6,10 @@ import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATI
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.redis.TokenBlackList;
 import com.example.gemm_server.domain.repository.MemberRepository;
+import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
+import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,12 +22,15 @@ public class AuthService {
   private final MemberRepository memberRepository;
   private final MemberService memberService;
   private final GemService gemService;
+  private final TokenBlackListRepository tokenBlackListRepository;
+  private final RefreshTokenRepository refreshTokenRepository;
 
   @Transactional
-  public void logout(Long memberId) {
-    // TODO: access token을 redis에 blacklist로 등록
-    Member member = memberRepository.findOneById(memberId);
-    member.setRefreshToken(null);
+  public void logout(Long memberId, String token) {
+    TokenBlackList blackList = new TokenBlackList(token);
+    tokenBlackListRepository.save(blackList);
+
+    refreshTokenRepository.deleteById(memberId);
   }
 
   @Transactional
