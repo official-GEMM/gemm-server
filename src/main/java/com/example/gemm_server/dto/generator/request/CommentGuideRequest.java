@@ -4,12 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CommentRequest(
+public record CommentGuideRequest(
         @Schema(description = "방법에서 수정할 부분")
         @NotNull
         String section,
         @Schema(description = "수정에 적용하고 싶은 내용")
-        @NotNull @NotBlank
+        @NotBlank
         String comment
 ) {
 }
