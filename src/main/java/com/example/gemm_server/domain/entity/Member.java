@@ -69,9 +69,6 @@ public class Member extends Timestamped {
   @Column(name = "birth")
   private LocalDate birth;
 
-  @Column(name = "refresh_token")
-  private String refreshToken;
-
   @Column(name = "banned_at")
   private LocalDateTime bannedAt;
 

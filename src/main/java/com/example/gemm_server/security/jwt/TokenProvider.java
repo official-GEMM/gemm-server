@@ -7,6 +7,7 @@ import static com.example.gemm_server.common.code.error.TokenErrorCode.INVALID_J
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNMATCHED_REFRESH_TOKEN;
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNSUPPORTED_JWT_TOKEN;
 
+import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
 import com.example.gemm_server.dto.auth.response.TokenResponse;
 import com.example.gemm_server.exception.TokenException;
 import com.example.gemm_server.service.TokenService;
@@ -18,6 +19,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +44,8 @@ public class TokenProvider {
   public static final String TOKEN_PREFIX = "Bearer ";
 
   private final TokenService tokenService;
+  private final TokenBlackListRepository tokenBlackListRepository;
+
   @Value("${jwt.key}")
   private String key;
   @Value("${jwt.access-token-expire-time}")
@@ -126,6 +130,9 @@ public class TokenProvider {
 
   public boolean validateToken(String token) {
     if (!StringUtils.hasText(token)) {
+      return false;
+    }
+    if (tokenBlackListRepository.existsById(token)) {
       return false;
     }
     Claims claims = parseClaims(token);
