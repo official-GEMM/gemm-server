@@ -5,7 +5,7 @@ import org.springframework.core.io.UrlResource;
 
 public record CommentedCutoutResponse(
         @Schema(description = "수정한 컷/도안 썸네일 주소")
-        UrlResource[] thumbnailPaths,
+        UrlResource thumbnailPath,
         @Schema(description = "수정한 컷/도안 파일 주소")
         UrlResource filePath
 ) {
