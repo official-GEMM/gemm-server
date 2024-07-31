@@ -1,6 +1,6 @@
 package com.example.gemm_server.dto.generator.response;
 
-public record LlmActivityGuideResponse(
+public record LlmGuideResponse(
         String content
 ) {
 }

@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record GenerateActivityGuideRequest(
+import java.util.List;
+
+public record GenerateMaterialRequest(
         @Schema(description = "생성하고자 하는 주제")
-        @NotNull @NotBlank
+        @NotBlank
         String title,
         @Schema(description = "교육 대상 연령")
         @NotNull
@@ -16,6 +18,15 @@ public record GenerateActivityGuideRequest(
         @NotNull
         Category category,
         @Schema(description = "생성 추가 전달 내용")
-        String additionalContent
+        String additionalContent,
+        @Schema(description = "PPT 슬라이드에 반영하고 싶은 내용")
+        @NotNull
+        List<String> ppt,
+        @Schema(description = "활동지에 반영하고 싶은 내용")
+        @NotNull
+        String activitySheet,
+        @Schema(description = "컷/도안에 반영하고 싶은 내용")
+        @NotNull
+        String cutout
 ) {
 }
