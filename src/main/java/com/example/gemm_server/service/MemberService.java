@@ -11,6 +11,7 @@ import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class MemberService {
     return currentMember;
   }
 
+  @Transactional
   public Member updateNecessaryMemberData(Long memberId,
       PostNecessaryMemberDataRequest memberInfo) {
     Member member = memberRepository.findOneById(memberId);
