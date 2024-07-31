@@ -29,11 +29,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Component
 public class TokenProvider {
+
+  private static final String AUTHORITIES_KEY = "role";
+  public static final String AUTHORIZATION = "Authorization";
+  public static final String TOKEN_PREFIX = "Bearer ";
 
   private final TokenService tokenService;
   @Value("${jwt.key}")
@@ -108,6 +113,14 @@ public class TokenProvider {
       }
     }
     throw new TokenException(UNMATCHED_REFRESH_TOKEN);
+  }
+
+  public String resolveToken(HttpServletRequest request) {
+    String token = request.getHeader(AUTHORIZATION);
+    if (ObjectUtils.isEmpty(token) || !token.startsWith(TOKEN_PREFIX)) {
+      return null;
+    }
+    return token.substring(TOKEN_PREFIX.length());
   }
 
   public boolean validateToken(String token) {

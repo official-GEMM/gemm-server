@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
@@ -19,27 +18,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private final TokenProvider tokenProvider;
 
-  public static final String AUTHORIZATION = "Authorization";
-  public static final String TOKEN_PREFIX = "Bearer ";
-
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request,
       @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain) throws ServletException, IOException {
-    String accessToken = resolveToken(request);
+    String accessToken = tokenProvider.resolveToken(request);
 
     if (tokenProvider.validateToken(accessToken)) {
       setAuthentication(accessToken);
     }
     filterChain.doFilter(request, response);
-  }
-
-  private String resolveToken(HttpServletRequest request) {
-    String token = request.getHeader(AUTHORIZATION);
-    if (ObjectUtils.isEmpty(token) || !token.startsWith(TOKEN_PREFIX)) {
-      return null;
-    }
-    return token.substring(TOKEN_PREFIX.length());
   }
 
   private void setAuthentication(String accessToken) {
