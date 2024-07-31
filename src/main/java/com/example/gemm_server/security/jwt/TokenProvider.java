@@ -107,8 +107,9 @@ public class TokenProvider {
       String existRefreshToken = tokenService.getRefreshToken(memberId);
 
       if (validateToken(token) && token.equals(existRefreshToken)) {
-        String accessToken = generateAccessToken(getAuthentication(token));
-        String refreshToken = generateRefreshToken(getAuthentication(token));
+        Authentication authentication = getAuthentication(token);
+        String accessToken = generateAccessToken(authentication);
+        String refreshToken = generateRefreshToken(authentication);
         return new TokenResponse(accessToken, refreshToken);
       }
     }
@@ -153,6 +154,8 @@ public class TokenProvider {
       throw new TokenException(UNSUPPORTED_JWT_TOKEN);
     } catch (IllegalArgumentException e) {
       throw new TokenException(INVALID_JWT_TOKEN);
+    } catch (Exception e) {
+      throw new TokenException(INTERNAL_SERVER_ERROR);
     }
   }
 }
