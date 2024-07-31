@@ -19,8 +19,11 @@ public class TokenExceptionFilter extends OncePerRequestFilter {
 
     try {
       filterChain.doFilter(request, response);
-    } catch (TokenException error) {
-      EmptyDataResponse.setJsonResponse(response, error.getStatusCode(), error.getMessage());
+    } catch (TokenException e) {
+      EmptyDataResponse.setJsonResponse(response, e.getStatusCode(), e.getMessage());
+    } catch (Exception e) {
+      EmptyDataResponse.setJsonResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          e.getMessage());
     }
   }
 }
