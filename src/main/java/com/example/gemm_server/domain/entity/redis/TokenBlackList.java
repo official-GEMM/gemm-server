@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 @Getter
-@RedisHash(value = "tokenBlackList")
+@RedisHash(value = "tokenBlackList", timeToLive = 3600)
 public class TokenBlackList {
 
   @Id
