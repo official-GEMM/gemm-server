@@ -74,6 +74,18 @@ public class MyController {
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
+  @Operation(summary = "닉네임 변경", description = "사용자의 닉네임을 변경하는 API")
+  @PatchMapping(value = "/nickname")
+  public ResponseEntity<CommonResponse<UpdateMyNicknameResponse>> updateNickname(
+      @Valid @RequestBody UpdateMyNicknameRequest request,
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    String nickname = memberService.updateNickname(user.getId(), request.getNickname());
+    UpdateMyNicknameResponse response = new UpdateMyNicknameResponse(nickname);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  // 미완성 API
   @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
   @GetMapping("/notifications")
   public ResponseEntity<CommonResponse<GetMyNotificationsResponse[]>> getMyNotifications() {

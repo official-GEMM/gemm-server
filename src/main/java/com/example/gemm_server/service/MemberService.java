@@ -9,6 +9,7 @@ import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.MemberRepository;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
+import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,14 @@ public class MemberService {
     member.setManageAge(memberInfo.getManageAge());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     return member;
+  }
+
+  @Transactional
+  public String updateNickname(Long memberId, String nickname) {
+    Member member = findMemberByMemberId(memberId);
+
+    member.setNickname(nickname);
+    return member.getNickname();
   }
 
   public void withdrawMember(Long memberId) {
