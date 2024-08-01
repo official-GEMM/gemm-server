@@ -47,4 +47,8 @@ public class MemberService {
     member.setManageAge(memberInfo.getManageAge());
     return member;
   }
+
+  public boolean isNicknameExists(String nickname) {
+    return memberRepository.existsByNickname(nickname);
+  }
 }
