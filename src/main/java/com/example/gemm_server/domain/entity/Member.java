@@ -3,13 +3,17 @@ package com.example.gemm_server.domain.entity;
 import com.example.gemm_server.common.enums.Provider;
 import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.common.util.UUIDUtil;
+import com.example.gemm_server.common.util.UrlUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -22,6 +26,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.core.io.UrlResource;
 
 @Getter
 @Setter
@@ -80,6 +85,10 @@ public class Member extends Timestamped {
   @ColumnDefault("'USER'")
   private Role role;
 
+  @OneToOne(targetEntity = ProfileImage.class, fetch = FetchType.LAZY)
+  @JoinColumn(name = "profile_image_id")
+  private ProfileImage profileImage;
+
   public static Member createForSignUp(String name, String socialId, Provider provider,
       LocalDate birth) {
     return Member.builder()
@@ -91,6 +100,13 @@ public class Member extends Timestamped {
         .gem(0)
         .role(Role.USER)
         .build();
+  }
+
+  public UrlResource getProfileImageUrl() {
+    if (profileImage == null) {
+      return null; // TODO: 기본 프로필 이미지 전송
+    }
+    return UrlUtil.createUrlResource(this.profileImage.getFilePath());
   }
 
   public boolean isDataCompleted() {
