@@ -57,9 +57,11 @@ public class MyController {
   @Operation(summary = "내 정보 변경", description = "로그인한 사용자의 관리 연령과 휴대전화 번호를 변경하는 API")
   @PutMapping()
   public ResponseEntity<CommonResponse<UpdateMyInformationResponse>> updateMyInformation(
-      @Valid @RequestBody UpdateMyInformationRequest request
+      @Valid @RequestBody UpdateMyInformationRequest updateMyInformationRequest,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    UpdateMyInformationResponse response = new UpdateMyInformationResponse(new Member());
+    Member member = memberService.updateMyInformation(user.getId(), updateMyInformationRequest);
+    UpdateMyInformationResponse response = new UpdateMyInformationResponse(member);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
