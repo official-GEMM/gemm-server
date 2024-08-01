@@ -95,11 +95,21 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @Operation(summary = "헤더 정보 조회", description = "헤더에 필요한 사용자의 정보를 가져오는 API")
+  @GetMapping("/header")
+  public ResponseEntity<CommonResponse<GetHeaderResponse>> getHeaderInformation(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberId(user.getId());
+    GetHeaderResponse response = new GetHeaderResponse(member);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
   // 미완성 API
   @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
   @GetMapping("/notifications")
-  public ResponseEntity<CommonResponse<GetMyNotificationsResponse[]>> getMyNotifications() {
-    GetMyNotificationsResponse[] response = {};
+  public ResponseEntity<CommonResponse<GetMyNotificationsResponse>> getMyNotifications() {
+    GetMyNotificationsResponse response = new GetMyNotificationsResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -109,15 +119,6 @@ public class MyController {
       @Valid @RequestBody UpdateProfileImageRequest request
   ) {
     UpdateProfileImageResponse response = new UpdateProfileImageResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
-  }
-
-  @Operation(summary = "닉네임 변경", description = "사용자의 닉네임을 변경하는 API")
-  @PatchMapping(value = "/nickname")
-  public ResponseEntity<CommonResponse<UpdateMyNicknameResponse>> updateNickname(
-      @Valid @RequestBody UpdateMyNicknameRequest request
-  ) {
-    UpdateMyNicknameResponse response = new UpdateMyNicknameResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -149,20 +150,6 @@ public class MyController {
       @Param("month") Short month
   ) {
     GetMySalesResponse response = new GetMySalesResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
-  }
-
-  @Operation(summary = "내 보유 젬 조회", description = "사용자의 보유한 젬의 수를 조회하는 API")
-  @GetMapping("/gem")
-  public ResponseEntity<CommonResponse<GemResponse>> getGemCount() {
-    GemResponse response = new GemResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
-  }
-
-  @Operation(summary = "헤더 정보 조회", description = "헤더에 필요한 사용자의 정보를 가져오는 API")
-  @GetMapping("/header")
-  public ResponseEntity<CommonResponse<GetHeaderResponse>> getHeaderInformation() {
-    GetHeaderResponse response = new GetHeaderResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }
