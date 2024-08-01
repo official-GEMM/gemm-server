@@ -85,6 +85,16 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @Operation(summary = "내 보유 젬 조회", description = "사용자의 보유한 젬의 수를 조회하는 API")
+  @GetMapping("/gem")
+  public ResponseEntity<CommonResponse<GemResponse>> getGemCount(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberId(user.getId());
+    GemResponse response = new GemResponse(member.getGem());
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
   // 미완성 API
   @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
   @GetMapping("/notifications")

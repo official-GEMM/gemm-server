@@ -9,6 +9,7 @@ public class GemResponse {
   @Schema(description = "보유 젬 개수")
   private int gem;
 
-  public GemResponse() {
+  public GemResponse(int gem) {
+    this.gem = gem;
   }
 }
