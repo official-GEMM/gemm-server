@@ -1,6 +1,7 @@
 package com.example.gemm_server.service;
 
 import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_ALREADY_COMPLETED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.OWN_REFERRAL_CODE;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL_NOT_FOUND;
 
@@ -19,13 +20,18 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
 
+  public Member findMemberByMemberId(Long memberId) {
+    return memberRepository.findOneById(memberId)
+        .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+  }
+
   public Member getMemberByReferralCode(String referralCode) {
     return memberRepository.findOneByReferralCode(referralCode)
         .orElseThrow(() -> new MemberException(REFERRAL_NOT_FOUND));
   }
 
   public Member checkReferralCompenstableAndGetMember(Long memberId, String referralCode) {
-    Member currentMember = memberRepository.findOneById(memberId);
+    Member currentMember = findMemberByMemberId(memberId);
     if (currentMember.isDataCompleted()) {
       throw new MemberException(MEMBER_ALREADY_COMPLETED);
     }
@@ -38,7 +44,7 @@ public class MemberService {
   @Transactional
   public Member updateNecessaryMemberData(Long memberId,
       PostNecessaryMemberDataRequest memberInfo) {
-    Member member = memberRepository.findOneById(memberId);
+    Member member = findMemberByMemberId(memberId);
 
     member.setName(memberInfo.getName());
     member.setBirth(DateUtil.parseYearMonthDay(memberInfo.getBirth()));
