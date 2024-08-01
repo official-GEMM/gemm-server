@@ -15,7 +15,7 @@ import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
-import com.example.gemm_server.dto.my.response.UpdateNicknameResponse;
+import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -80,10 +80,10 @@ public class MyController {
 
   @Operation(summary = "닉네임 변경", description = "사용자의 닉네임을 변경하는 API")
   @PatchMapping(value = "/nickname")
-  public ResponseEntity<CommonResponse<UpdateNicknameResponse>> updateNickname(
+  public ResponseEntity<CommonResponse<UpdateMyNicknameResponse>> updateNickname(
       @Valid @RequestBody UpdateMyNicknameRequest request
   ) {
-    UpdateNicknameResponse response = new UpdateNicknameResponse();
+    UpdateMyNicknameResponse response = new UpdateMyNicknameResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
