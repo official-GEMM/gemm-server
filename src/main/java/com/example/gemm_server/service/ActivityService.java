@@ -50,8 +50,8 @@ public class ActivityService {
         Activity savedActivity = activityRepository.save(activity);
 
         Generation generation = Generation.builder()
-                .activityId(savedActivity)
-                .ownerId(member)
+        .activity(savedActivity)
+        .owner(member)
                 .build();
         Generation savedGeneration = generationRepository.save(generation);
         return new SavedGenerationResponse(savedGeneration.getId());
