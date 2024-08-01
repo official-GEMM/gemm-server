@@ -62,4 +62,13 @@ public class MemberService {
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     return member;
   }
+
+  public void withdrawMember(Long memberId) {
+    // TODO: 해당 회원의 마켓 자료 삭제
+    deleteMember(memberId);
+  }
+
+  public void deleteMember(Long memberId) {
+    memberRepository.deleteById(memberId);
+  }
 }

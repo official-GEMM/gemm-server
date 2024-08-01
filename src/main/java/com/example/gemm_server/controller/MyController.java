@@ -67,7 +67,10 @@ public class MyController {
 
   @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 API")
   @DeleteMapping()
-  public ResponseEntity<EmptyDataResponse> withdraw() {
+  public ResponseEntity<EmptyDataResponse> withdraw(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    memberService.withdrawMember(user.getId());
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
