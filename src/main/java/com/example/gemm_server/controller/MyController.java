@@ -17,6 +17,8 @@ import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
+import com.example.gemm_server.security.jwt.CustomUser;
+import com.example.gemm_server.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,11 +42,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "My", description = "사용자 정보 관리 API")
 public class MyController {
 
-  // 미완성 API
+  private final MemberService memberService;
+
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
-  public ResponseEntity<CommonResponse<GetMyInformationResponse>> getMyInformation() {
-    GetMyInformationResponse response = new GetMyInformationResponse(new Member());
+  public ResponseEntity<CommonResponse<GetMyInformationResponse>> getMyInformation(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberId(user.getId());
+    GetMyInformationResponse response = new GetMyInformationResponse(member);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
