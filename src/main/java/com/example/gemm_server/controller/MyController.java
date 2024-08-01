@@ -6,6 +6,7 @@ import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
+import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
 import com.example.gemm_server.dto.my.response.GetMyInformationResponse;
@@ -14,6 +15,7 @@ import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
+import com.example.gemm_server.dto.my.response.UpdateNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,6 +75,15 @@ public class MyController {
       @Valid @RequestBody UpdateProfileImageRequest request
   ) {
     UpdateProfileImageResponse response = new UpdateProfileImageResponse();
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  @Operation(summary = "닉네임 변경", description = "사용자의 닉네임을 변경하는 API")
+  @PatchMapping(value = "/nickname")
+  public ResponseEntity<CommonResponse<UpdateNicknameResponse>> updateNickname(
+      @Valid @RequestBody UpdateMyNicknameRequest request
+  ) {
+    UpdateNicknameResponse response = new UpdateNicknameResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
