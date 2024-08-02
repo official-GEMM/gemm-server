@@ -4,7 +4,6 @@ import com.example.gemm_server.common.enums.EventType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class Notifications {
@@ -16,7 +15,7 @@ public class Notifications {
   private String senderNickname;
 
   @Schema(description = "알림 보낸이의 프로필")
-  private UrlResource profileImagePath;
+  private String profileImagePath;
 
   @Schema(description = "알림 메세지")
   private String message;

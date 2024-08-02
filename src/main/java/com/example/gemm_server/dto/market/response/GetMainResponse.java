@@ -3,13 +3,12 @@ package com.example.gemm_server.dto.market.response;
 import com.example.gemm_server.dto.market.MarketItemsResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class GetMainResponse {
 
   @Schema(description = "배너 이미지 경로")
-  private UrlResource bannerImagePaths;
+  private String bannerImagePaths;
 
   @Schema(description = "추천 상품")
   private MarketItemsResponse[] recommendedMarketItems;

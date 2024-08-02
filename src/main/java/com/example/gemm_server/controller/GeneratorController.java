@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,8 +70,8 @@ public class GeneratorController {
             @Valid @RequestBody GenerateMaterialRequest generateMaterialRequest
             //            @AuthenticationPrincipal CustomUser user
     ) throws MalformedURLException {
-        UrlResource testSource = new UrlResource("/test");
-        UrlResource[] testSources = new UrlResource[]{new UrlResource("test1"), new UrlResource("test2")};
+        String testSource = new String("/test");
+        String[] testSources = new String[]{new String("test1"), new String("test2")};
         return ResponseEntity.ok(new CommonResponse<>(new GeneratedMaterialsResponse(
                 new PptPathResponse(testSources, testSource),
                 new ActivitySheetPathResponse(testSource, testSource),
@@ -98,8 +97,8 @@ public class GeneratorController {
             @Valid @RequestBody UpdatePptRequest updatePptRequest
             //            @AuthenticationPrincipal CustomUser user
     ) throws MalformedURLException {
-        UrlResource testSource = new UrlResource("/test");
-        UrlResource[] testSources = new UrlResource[]{new UrlResource("test1"), new UrlResource("test2")};
+        String testSource = new String("/test");
+        String[] testSources = new String[]{new String("test1"), new String("test2")};
         return ResponseEntity.ok(new CommonResponse<>(new UpdatedPptResponse(
                 new CommentedPptResponse(testSources, testSource),
                 0
@@ -112,7 +111,7 @@ public class GeneratorController {
             @Valid @RequestBody UpdateActivitySheetRequest updateActivitySheetRequest
             //            @AuthenticationPrincipal CustomUser user
     ) throws MalformedURLException {
-        UrlResource testSource = new UrlResource("/test");
+        String testSource = new String("/test");
         return ResponseEntity.ok(new CommonResponse<>(new UpdatedActivitySheetResponse(
                 new CommentedActivitySheetResponse(testSource, testSource),
                 0
@@ -125,7 +124,7 @@ public class GeneratorController {
             @Valid @RequestBody UpdateCutoutRequest updateCutoutRequest
             //            @AuthenticationPrincipal CustomUser user
     ) throws MalformedURLException {
-        UrlResource testSource = new UrlResource("/test");
+        String testSource = new String("/test");
         return ResponseEntity.ok(new CommonResponse<>(new UpdatedCutoutResponse(
                 new CommentedCutoutResponse(testSource, testSource),
                 0

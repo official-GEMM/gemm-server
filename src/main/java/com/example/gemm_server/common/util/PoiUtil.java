@@ -2,7 +2,6 @@ package com.example.gemm_server.common.util;
 
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.springframework.core.io.UrlResource;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -11,7 +10,7 @@ import java.io.*;
 import java.util.List;
 
 public class PoiUtil {
-    public static List<UrlResource> pptToImages(UrlResource filePath) {
+    public static List<String> pptToImages(String filePath) {
         File file = new File("pptToImage.pptx");
         try {
             XMLSlideShow ppt = new XMLSlideShow(new FileInputStream(file));
