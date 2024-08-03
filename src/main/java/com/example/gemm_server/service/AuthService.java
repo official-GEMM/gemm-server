@@ -7,7 +7,6 @@ import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.TokenBlackList;
-import com.example.gemm_server.domain.repository.MemberRepository;
 import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
 import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
 import java.time.LocalDateTime;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-  private final MemberRepository memberRepository;
   private final MemberService memberService;
   private final GemService gemService;
   private final TokenBlackListRepository tokenBlackListRepository;
@@ -35,7 +33,7 @@ public class AuthService {
 
   @Transactional
   public Member compensateMemberForDailyAttendance(Long memberId) {
-    Member member = memberRepository.findOneById(memberId);
+    Member member = memberService.findMemberByMemberId(memberId);
     if (!DateUtil.isToday(member.getLastLoginAt())) {
       gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION,
           GemUsageType.COMPENSATION);

@@ -90,7 +90,7 @@ public class MarketController {
   public ResponseEntity<CommonResponse<GemResponse>> buyMarketItem(
       @PathParam("marketItemId") Long marketItemId
   ) {
-    GemResponse response = new GemResponse();
+    GemResponse response = new GemResponse(0);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
