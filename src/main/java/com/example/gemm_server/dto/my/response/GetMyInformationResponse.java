@@ -33,7 +33,7 @@ public class GetMyInformationResponse {
     this.name = member.getName();
     this.manageAge = member.getManageAge();
     this.phoneNumber = member.getPhoneNumber();
-    // this.profileImagePath
+    this.profileImagePath = member.getProfileImageUrl();
     this.nickname = member.getNickname();
     this.referralCode = member.getReferralCode();
     this.gem = member.getGem();

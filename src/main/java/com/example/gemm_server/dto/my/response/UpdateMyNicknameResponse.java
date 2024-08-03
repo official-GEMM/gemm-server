@@ -8,4 +8,8 @@ public class UpdateMyNicknameResponse {
 
   @Schema(description = "변경된 닉네임")
   private String nickname;
+
+  public UpdateMyNicknameResponse(String nickname) {
+    this.nickname = nickname;
+  }
 }
