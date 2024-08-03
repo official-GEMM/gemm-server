@@ -9,6 +9,7 @@ public class CheckNicknameDuplicationResponse {
   @Schema(description = "닉네임 중복 여부")
   private Boolean isDuplicated;
 
-  public CheckNicknameDuplicationResponse() {
+  public CheckNicknameDuplicationResponse(boolean isDuplicated) {
+    this.isDuplicated = isDuplicated;
   }
 }

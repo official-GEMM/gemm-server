@@ -116,8 +116,11 @@ public class AuthController {
   @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 여부를 확인하는 API")
   @PutMapping("/nickname/duplicate")
   public ResponseEntity<CommonResponse<CheckNicknameDuplicationResponse>> checkNicknameDuplication(
-      @Valid @RequestBody CheckNicknameDuplicationRequest request) {
-    CheckNicknameDuplicationResponse response = new CheckNicknameDuplicationResponse();
+      @Valid @RequestBody CheckNicknameDuplicationRequest nicknameDuplicationRequest) {
+    String nickname = nicknameDuplicationRequest.getNickname();
+    boolean isNicknameDuplicated = memberService.isNicknameExists(nickname);
+    CheckNicknameDuplicationResponse response = new CheckNicknameDuplicationResponse(
+        isNicknameDuplicated);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }

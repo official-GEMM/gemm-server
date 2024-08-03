@@ -55,6 +55,10 @@ public class MemberService {
     return member;
   }
 
+  public boolean isNicknameExists(String nickname) {
+    return memberRepository.existsByNickname(nickname);
+  }
+  
   @Transactional
   public Member updateMyInformation(Long memberId, UpdateMyInformationRequest memberInfo) {
     Member member = findMemberByMemberId(memberId);
