@@ -1,15 +1,13 @@
 package com.example.gemm_server.common.util;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.util.IOUtils;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Component
 @RequiredArgsConstructor
@@ -17,13 +15,15 @@ public class S3Util {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket.name}")
     private String bucketName;
-    private final String tempFilePath = "../";
 
-    public File downloadFile(String filePath) {
-        S3Object s3FileObject = amazonS3.getObject(bucketName, filePath);
+    public String uploadFile(MultipartFile materialFile) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType(materialFile.getContentType());
+        objectMetadata.setContentLength(materialFile.getSize());
+
         try {
-            byte[] s3fileBytes = IOUtils.toByteArray(s3FileObject.getObjectContent());
-            return Files.write(Path.of(tempFilePath), s3fileBytes).toFile();
+            amazonS3.putObject(bucketName, materialFile.getName(), materialFile.getInputStream(), objectMetadata);
+            return amazonS3.getUrl(bucketName, materialFile.getName()).toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
