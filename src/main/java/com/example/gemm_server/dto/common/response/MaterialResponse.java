@@ -3,7 +3,6 @@ package com.example.gemm_server.dto.common.response;
 import com.example.gemm_server.common.enums.MaterialType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class MaterialResponse {
@@ -15,7 +14,7 @@ public class MaterialResponse {
   private MaterialType type;
 
   @Schema(description = "썸네일 경로 리스트")
-  private UrlResource[] thumbnailPaths;
+  private String[] thumbnailPaths;
 
   public MaterialResponse() {
   }

@@ -3,7 +3,6 @@ package com.example.gemm_server.dto.my.response;
 import com.example.gemm_server.domain.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class GetHeaderResponse {
@@ -12,7 +11,7 @@ public class GetHeaderResponse {
   private int gem;
 
   @Schema(description = "프로필 경로")
-  private UrlResource profileImagePath;
+  private String profileImagePath;
 
   @Schema(description = "미확인 알림 존재 여부")
   private Boolean hasUnreadNotification;

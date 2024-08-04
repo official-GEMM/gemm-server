@@ -5,7 +5,6 @@ import com.example.gemm_server.common.enums.MaterialType;
 import com.example.gemm_server.dto.common.response.MemberResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class Scraps {
@@ -17,7 +16,7 @@ public class Scraps {
   private String title;
 
   @Schema(description = "썸네일 경로")
-  private UrlResource thumbnailPath;
+  private String thumbnailPath;
 
   @Schema(description = "판매자")
   private MemberResponse seller;

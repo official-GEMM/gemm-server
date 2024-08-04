@@ -4,7 +4,6 @@ import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.MaterialType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class ActivitiesResponse {
@@ -13,7 +12,7 @@ public class ActivitiesResponse {
   private String title;
 
   @Schema(description = "썸네일 경로")
-  private UrlResource thumbnailPath;
+  private String thumbnailPath;
 
   @Schema(description = "타겟 연령")
   private int age;

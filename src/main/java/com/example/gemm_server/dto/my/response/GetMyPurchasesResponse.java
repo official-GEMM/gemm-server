@@ -4,7 +4,6 @@ import com.example.gemm_server.dto.common.response.PageInformationResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 public class GetMyPurchasesResponse {
@@ -28,7 +27,7 @@ public class GetMyPurchasesResponse {
     private String title;
 
     @Schema(description = "썸네일 경로")
-    private UrlResource thumbnailPath;
+    private String thumbnailPath;
 
     @Schema(description = "구매 일시")
     private LocalDateTime buyAt;

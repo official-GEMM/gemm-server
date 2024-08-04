@@ -3,7 +3,6 @@ package com.example.gemm_server.domain.entity;
 import com.example.gemm_server.common.enums.Provider;
 import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.common.util.UUIDUtil;
-import com.example.gemm_server.common.util.UrlUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,7 +25,6 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.springframework.core.io.UrlResource;
 
 @Getter
 @Setter
@@ -102,11 +100,11 @@ public class Member extends Timestamped {
         .build();
   }
 
-  public UrlResource getProfileImageUrl() {
+  public String getProfileImageUrl() {
     if (profileImage == null) {
       return null; // TODO: 기본 프로필 이미지 전송
     }
-    return UrlUtil.createUrlResource(this.profileImage.getFilePath());
+    return this.profileImage.getFilePath();
   }
 
   public boolean isDataCompleted() {
