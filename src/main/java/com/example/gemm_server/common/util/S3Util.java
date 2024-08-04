@@ -1,6 +1,10 @@
 package com.example.gemm_server.common.util;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.Headers;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,20 +16,36 @@ import java.io.*;
 @Component
 @RequiredArgsConstructor
 public class S3Util {
+
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket.name}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile materialFile) {
+    public String uploadFile(MultipartFile file) {
+        System.out.println(file.getName());
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(materialFile.getContentType());
-        objectMetadata.setContentLength(materialFile.getSize());
+        objectMetadata.setContentType(file.getContentType());
+        objectMetadata.setContentLength(file.getSize());
 
         try {
-            amazonS3.putObject(bucketName, materialFile.getName(), materialFile.getInputStream(), objectMetadata);
-            return amazonS3.getUrl(bucketName, materialFile.getName()).toString();
+            amazonS3.putObject(bucketName, "testfile", file.getInputStream(),
+                objectMetadata);
+            return generatePresignedUrl("testfile");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected String generatePresignedUrl(String fileName) {
+        GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
+            bucketName, fileName)
+            .withMethod(HttpMethod.GET)
+            .withExpiration(DateUtil.getExpirationDate(1000 * 60 * 2L));
+        presignedUrlRequest.addRequestParameter(
+            Headers.S3_CANNED_ACL,
+            CannedAccessControlList.PublicRead.toString()
+        );
+
+        return amazonS3.generatePresignedUrl(presignedUrlRequest).toString();
     }
 }
