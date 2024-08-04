@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,18 +23,22 @@ public class S3Util {
     private String bucketName;
 
     public String uploadFile(MultipartFile file) {
-        System.out.println(file.getName());
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
         objectMetadata.setContentLength(file.getSize());
 
+        String fileName = getUUIDFileName(file.getOriginalFilename());
         try {
-            amazonS3.putObject(bucketName, "testfile", file.getInputStream(),
+            amazonS3.putObject(bucketName, fileName, file.getInputStream(),
                 objectMetadata);
-            return generatePresignedUrl("testfile");
+            return fileName;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getFileUrl(String fileName) {
+        return generatePresignedUrl(fileName);
     }
 
     protected String generatePresignedUrl(String fileName) {
@@ -47,5 +52,13 @@ public class S3Util {
         );
 
         return amazonS3.generatePresignedUrl(presignedUrlRequest).toString();
+    }
+
+    protected String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf("."));
+    }
+
+    protected String getUUIDFileName(String fileName) {
+        return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
     }
 }
