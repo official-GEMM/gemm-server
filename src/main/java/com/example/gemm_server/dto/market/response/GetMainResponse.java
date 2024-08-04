@@ -8,7 +8,7 @@ import lombok.Getter;
 public class GetMainResponse {
 
   @Schema(description = "배너 이미지 경로")
-  private String bannerImagePaths;
+  private String[] bannerImagePaths;
 
   @Schema(description = "추천 상품")
   private MarketItemsResponse[] recommendedMarketItems;
