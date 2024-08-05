@@ -5,12 +5,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 
@@ -18,47 +17,40 @@ import java.io.*;
 @RequiredArgsConstructor
 public class S3Util {
 
-    private final AmazonS3 amazonS3;
-    @Value("${cloud.aws.s3.bucket.name}")
-    private String bucketName;
+  private final AmazonS3 amazonS3;
+  @Value("${cloud.aws.s3.bucket.name}")
+  private String bucketName;
 
-    public String uploadFile(MultipartFile file) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(file.getContentType());
-        objectMetadata.setContentLength(file.getSize());
+  public String uploadFile(File file) {
+    String fileName = getUUIDFileName(file.getName());
+    amazonS3.putObject(bucketName, fileName, file);
+    return fileName;
+  }
 
-        String fileName = getUUIDFileName(file.getOriginalFilename());
-        try {
-            amazonS3.putObject(bucketName, fileName, file.getInputStream(),
-                objectMetadata);
-            return fileName;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  public InputStream downloadFile(String fileName) {
+    S3Object s3Object = amazonS3.getObject(bucketName, fileName);
+    InputStream objectContentStream = s3Object.getObjectContent();
+    return objectContentStream;
+  }
 
-    public String getFileUrl(String fileName) {
-        return generatePresignedUrl(fileName);
-    }
+  public String getFileUrl(String fileName) {
+    GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
+        bucketName, fileName)
+        .withMethod(HttpMethod.GET)
+        .withExpiration(DateUtil.getExpirationDate(1000 * 60 * 2L));
+    presignedUrlRequest.addRequestParameter(
+        Headers.S3_CANNED_ACL,
+        CannedAccessControlList.PublicRead.toString()
+    );
 
-    protected String generatePresignedUrl(String fileName) {
-        GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
-            bucketName, fileName)
-            .withMethod(HttpMethod.GET)
-            .withExpiration(DateUtil.getExpirationDate(1000 * 60 * 2L));
-        presignedUrlRequest.addRequestParameter(
-            Headers.S3_CANNED_ACL,
-            CannedAccessControlList.PublicRead.toString()
-        );
+    return amazonS3.generatePresignedUrl(presignedUrlRequest).toString();
+  }
 
-        return amazonS3.generatePresignedUrl(presignedUrlRequest).toString();
-    }
+  protected String getFileExtension(String fileName) {
+    return fileName.substring(fileName.lastIndexOf("."));
+  }
 
-    protected String getFileExtension(String fileName) {
-        return fileName.substring(fileName.lastIndexOf("."));
-    }
-
-    protected String getUUIDFileName(String fileName) {
-        return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
-    }
+  protected String getUUIDFileName(String fileName) {
+    return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
+  }
 }

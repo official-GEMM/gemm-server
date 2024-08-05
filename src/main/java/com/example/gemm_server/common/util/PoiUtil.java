@@ -9,14 +9,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
-import org.springframework.web.multipart.MultipartFile;
 
 public class PoiUtil {
 
-  public static List<String> pptToImages(MultipartFile pptFile) {
+  public static List<String> pptToImages(InputStream fileInputStream) {
     List<String> imageFileNames = new ArrayList<>();
     try {
-      XMLSlideShow ppt = new XMLSlideShow(pptFile.getInputStream());
+      XMLSlideShow ppt = new XMLSlideShow(fileInputStream);
 
       Dimension pgsize = ppt.getPageSize();
       List<XSLFSlide> slides = ppt.getSlides();
