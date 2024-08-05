@@ -26,4 +26,8 @@ public class UUIDUtil {
     }
     return sb.toString();
   }
+
+  public static String getRandomUUID() {
+    return UUID.randomUUID().toString();
+  }
 }
