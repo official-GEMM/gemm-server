@@ -58,13 +58,12 @@ public class GeneratorController {
   @Operation(summary = "활동 방법 자료 생성 연동", description = "활동 방법을 자료 생성에 연동하는 API")
   @PostMapping("/guide/sync")
   public ResponseEntity<CommonResponse<LinkedMaterialGuideResponse>> linkGuideToMaterial(
-      @Valid @RequestBody LinkMaterialGuideRequest linkedMaterialGuideResponse
+      @Valid @RequestBody LinkMaterialGuideRequest linkMaterialGuideRequest
       //            @AuthenticationPrincipal CustomUser user
   ) {
-    String[] test = {"1", "2", "3"};
-    return ResponseEntity.ok(new CommonResponse<>(new LinkedMaterialGuideResponse(
-        "", (short) 2, Category.ART_AREA, "", test, "", ""
-    )));
+    LinkedMaterialGuideResponse linkedMaterialGuideResponse = activityService.linkGuideToMaterial(
+        linkMaterialGuideRequest);
+    return ResponseEntity.ok(new CommonResponse<>(linkedMaterialGuideResponse));
   }
 
   @Operation(summary = "활동 자료 생성", description = "활동 자료를 생성하는 API")

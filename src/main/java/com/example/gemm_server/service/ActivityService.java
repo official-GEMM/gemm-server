@@ -12,12 +12,15 @@ import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
+import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
+import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
+import com.example.gemm_server.dto.generator.response.LlmDesignedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
@@ -60,8 +63,11 @@ public class ActivityService {
   public SavedGenerationResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberId(memberId);
 
-    Activity activity = Activity.builder().title(saveGuideRequest.title())
-        .age(saveGuideRequest.age()).content(saveGuideRequest.content()).materialType((short) 0)
+    Activity activity = Activity.builder()
+        .title(saveGuideRequest.title())
+        .age(saveGuideRequest.age())
+        .content(saveGuideRequest.content())
+        .materialType((short) 0)
         .build();
     Activity savedActivity = activityRepository.save(activity);
 
@@ -80,6 +86,24 @@ public class ActivityService {
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
 
     return new UpdatedGuideResponse(updatedGuideResponse.content(), member.getGem());
+  }
+
+  @Transactional
+  public LinkedMaterialGuideResponse linkGuideToMaterial(
+      LinkMaterialGuideRequest linkMaterialGuideRequest) {
+    LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
+        "/generate/activity/guide/sync",
+        linkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
+
+    return new LinkedMaterialGuideResponse(
+        linkMaterialGuideRequest.title(),
+        linkMaterialGuideRequest.age(),
+        linkMaterialGuideRequest.category(),
+        linkMaterialGuideRequest.content(),
+        llmDesignedMaterialResponse.ppt(),
+        llmDesignedMaterialResponse.activitySheet(),
+        llmDesignedMaterialResponse.cutout()
+    );
   }
 
   @Transactional
@@ -118,5 +142,19 @@ public class ActivityService {
 
     return new GeneratedMaterialsResponse(pptPathResponse, activitySheetPathResponse,
         cutoutPathResponse, member.getGem());
+  }
+
+  protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
+    short materialBit = 0;
+    if (ppt != null && !ppt.isBlank()) {
+      materialBit += (short) 4;
+    }
+    if (activitySheet != null && !activitySheet.isBlank()) {
+      materialBit += (short) 2;
+    }
+    if (cutout != null && !cutout.isBlank()) {
+      materialBit += (short) 1;
+    }
+    return materialBit;
   }
 }
