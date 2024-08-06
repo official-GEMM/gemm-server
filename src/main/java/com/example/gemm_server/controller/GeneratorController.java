@@ -1,6 +1,5 @@
 package com.example.gemm_server.controller;
 
-import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
@@ -11,15 +10,12 @@ import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
 import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
-import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
-import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
-import com.example.gemm_server.dto.generator.response.PptPathResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
@@ -65,7 +61,8 @@ public class GeneratorController {
       @Valid @RequestBody SaveGuideRequest saveGuideRequest
 //            @AuthenticationPrincipal CustomUser user
   ) {
-    SavedGuideResponse savedGuideResponse = activityService.saveGuide(saveGuideRequest, 1L);
+    SavedGuideResponse savedGuideResponse = activityService.saveGuide(saveGuideRequest,
+        1L);
     return ResponseEntity.ok(new CommonResponse<>(savedGuideResponse));
   }
 
@@ -82,13 +79,12 @@ public class GeneratorController {
   @Operation(summary = "활동 방법 자료 생성 연동", description = "활동 방법을 자료 생성에 연동하는 API")
   @PostMapping("/guide/sync")
   public ResponseEntity<CommonResponse<LinkedMaterialGuideResponse>> linkGuideToMaterial(
-      @Valid @RequestBody LinkMaterialGuideRequest linkedMaterialGuideResponse
+      @Valid @RequestBody LinkMaterialGuideRequest linkMaterialGuideRequest
       //            @AuthenticationPrincipal CustomUser user
   ) {
-    String[] test = {"1", "2", "3"};
-    return ResponseEntity.ok(new CommonResponse<>(new LinkedMaterialGuideResponse(
-        "", (short) 2, Category.ART_AREA, "", test, "", ""
-    )));
+    LinkedMaterialGuideResponse linkedMaterialGuideResponse = activityService.linkGuideToMaterial(
+        linkMaterialGuideRequest);
+    return ResponseEntity.ok(new CommonResponse<>(linkedMaterialGuideResponse));
   }
 
   @Operation(summary = "활동 자료 생성", description = "활동 자료를 생성하는 API")
@@ -96,15 +92,10 @@ public class GeneratorController {
   public ResponseEntity<CommonResponse<GeneratedMaterialsResponse>> generateMaterial(
       @Valid @RequestBody GenerateMaterialRequest generateMaterialRequest
       //            @AuthenticationPrincipal CustomUser user
-  ) throws MalformedURLException {
-    String testSource = new String("/test");
-    String[] testSources = new String[]{new String("test1"), new String("test2")};
-    return ResponseEntity.ok(new CommonResponse<>(new GeneratedMaterialsResponse(
-        new PptPathResponse(testSources, testSource),
-        new ActivitySheetPathResponse(testSource, testSource),
-        new CutoutPathResponse(testSource, testSource),
-        0
-    )));
+  ) {
+    GeneratedMaterialsResponse generatedMaterialsResponse = activityService.generateMaterials(
+        generateMaterialRequest, 1L);
+    return ResponseEntity.ok(new CommonResponse<>(generatedMaterialsResponse));
   }
 
   @Operation(summary = "활동 자료 저장", description = "활동 자료를 저장하는 API")
@@ -113,9 +104,9 @@ public class GeneratorController {
       @Valid @RequestBody SaveMaterialRequest saveMaterialRequest
       //            @AuthenticationPrincipal CustomUser user
   ) {
-    return ResponseEntity.ok(new CommonResponse<>(new SavedMaterialResponse(
-        0L
-    )));
+    SavedMaterialResponse savedMaterialResponse = activityService.saveMaterials(saveMaterialRequest,
+        1L);
+    return ResponseEntity.ok(new CommonResponse<>(savedMaterialResponse));
   }
 
   @Operation(summary = "PPT 자료 수정", description = "PPT를 수정하는 API")
