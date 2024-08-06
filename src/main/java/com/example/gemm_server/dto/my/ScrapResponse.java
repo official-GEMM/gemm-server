@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-public class Scraps {
+@Schema(description = "스크랩 응답", requiredProperties = {"scrapId", "title", "thumbnailPath",
+    "seller", "reviewAverageScore", "reviewCount", "price", "age", "category", "materialType"})
+public class ScrapResponse {
 
   @Schema(description = "스크랩 아이디")
   private long scrapId;
@@ -39,6 +41,6 @@ public class Scraps {
   @Schema(description = "자료 종류")
   private MaterialType[] materialType;
 
-  public Scraps() {
+  public ScrapResponse() {
   }
 }
