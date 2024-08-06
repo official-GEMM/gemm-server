@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "내 판매 내역 응답", requiredProperties = {"sales", "pageInfo"})
 public class GetMySalesResponse {
 
   @Schema(description = "구매 내역")

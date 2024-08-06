@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Schema(description = "로그인 응답", requiredProperties = {"accessToken", "refreshToken", "isCompleted"})
 public class LoginResponse {
 
   @Schema(description = "access token")

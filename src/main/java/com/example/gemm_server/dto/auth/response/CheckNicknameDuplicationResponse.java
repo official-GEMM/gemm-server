@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "닉네임 중복 여부 응답", requiredProperties = {"isDuplicated"})
 public class CheckNicknameDuplicationResponse {
 
   @Schema(description = "닉네임 중복 여부")

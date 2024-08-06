@@ -6,7 +6,6 @@ import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
-import com.example.gemm_server.dto.market.MarketItemDetailResponse;
 import com.example.gemm_server.dto.market.request.PostMarketItemRequest;
 import com.example.gemm_server.dto.market.request.PostReviewRequest;
 import com.example.gemm_server.dto.market.request.SearchQueryRequest;
@@ -16,6 +15,7 @@ import com.example.gemm_server.dto.market.response.GetMarketItemsOfSellerRespons
 import com.example.gemm_server.dto.market.response.GetMarketItemsResponse;
 import com.example.gemm_server.dto.market.response.GetOtherMarketItemsOfSellerResponse;
 import com.example.gemm_server.dto.market.response.GetReviewsForMarketItemResponse;
+import com.example.gemm_server.dto.market.response.MarketItemDetailResponse;
 import com.example.gemm_server.dto.market.response.MarketItemIdResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

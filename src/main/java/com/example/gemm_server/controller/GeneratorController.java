@@ -1,18 +1,39 @@
 package com.example.gemm_server.controller;
 
-import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.dto.CommonResponse;
-import com.example.gemm_server.dto.generator.request.*;
-import com.example.gemm_server.dto.generator.response.*;
+import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
+import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
+import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
+import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
+import com.example.gemm_server.dto.generator.request.SaveMaterialRequest;
+import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
+import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
+import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
+import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
+import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
+import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
+import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
+import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
+import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
+import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
+import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
+import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
 import com.example.gemm_server.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.net.MalformedURLException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.net.MalformedURLException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 //@BearerAuth
 @RequiredArgsConstructor
@@ -36,13 +57,13 @@ public class GeneratorController {
 
   @Operation(summary = "활동 방법 저장", description = "활동 방법을 내 저장소에 저장하는 API")
   @PostMapping("/guide/result")
-  public ResponseEntity<CommonResponse<SavedGenerationResponse>> saveActivityGuide(
+  public ResponseEntity<CommonResponse<SavedGuideResponse>> saveActivityGuide(
       @Valid @RequestBody SaveGuideRequest saveGuideRequest
 //            @AuthenticationPrincipal CustomUser user
   ) {
-    SavedGenerationResponse savedGenerationResponse = activityService.saveGuide(saveGuideRequest,
+    SavedGuideResponse savedGuideResponse = activityService.saveGuide(saveGuideRequest,
         1L);
-    return ResponseEntity.ok(new CommonResponse<>(savedGenerationResponse));
+    return ResponseEntity.ok(new CommonResponse<>(savedGuideResponse));
   }
 
   @Operation(summary = "활동 방법 수정", description = "활동 방법을 수정하는 API")

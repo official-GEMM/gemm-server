@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-public class GuideDetailResponse extends GuidesResponse {
+@Schema(description = "활동 방법 상세 응답", requiredProperties = {"title", "content", "age", "category"})
+public class GuideDetailResponse extends GuideResponse {
 
   @Schema(description = "타켓 연령")
   private int age;

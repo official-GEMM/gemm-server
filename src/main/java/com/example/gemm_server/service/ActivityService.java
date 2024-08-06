@@ -23,9 +23,9 @@ import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmDesignedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
+import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
-import com.example.gemm_server.dto.generator.response.SavedGenerationResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import jakarta.transaction.Transactional;
@@ -62,7 +62,7 @@ public class ActivityService {
   }
 
   @Transactional
-  public SavedGenerationResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
+  public SavedGuideResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberId(memberId);
 
     Activity savedActivity = activityRepository.save(Activity.builder()
@@ -74,7 +74,7 @@ public class ActivityService {
 
     Generation savedGeneration = generationRepository.save(
         Generation.builder().activity(savedActivity).owner(member).build());
-    return new SavedGenerationResponse(savedGeneration.getId());
+    return new SavedGuideResponse(savedGeneration.getId());
   }
 
   @Transactional

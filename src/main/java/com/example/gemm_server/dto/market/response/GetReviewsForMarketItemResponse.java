@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "상품에 대한 리뷰 응답", requiredProperties = {"otherReviews", "pageInfo"})
 public class GetReviewsForMarketItemResponse {
 
   @Schema(description = "내 리뷰")

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "페이지 정보 응답", requiredProperties = {"currentPage", "totalPages"})
 public class PageInformationResponse {
 
   @Schema(description = "현재 페이지")

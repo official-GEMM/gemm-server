@@ -1,4 +1,4 @@
-package com.example.gemm_server.dto.market;
+package com.example.gemm_server.dto.market.response;
 
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
 import com.example.gemm_server.dto.common.response.MemberResponse;
@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "마켓 상품 상세 응답", requiredProperties = {"marketItemId", "title", "materials",
+    "age", "category", "content", "scrapCount", "isScrapped", "seller", "isMyMarketItem",
+    "isBought", "reviewAverageScore", "reviewCount", "price"})
 public class MarketItemDetailResponse extends ActivityDetailResponse {
 
   @Schema(description = "마켓 상품 아이디")

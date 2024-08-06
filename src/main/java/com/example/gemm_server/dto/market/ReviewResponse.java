@@ -6,21 +6,23 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "리뷰 응답", requiredProperties = {"reviewId", "writer", "score", "content",
+    "createdAt"})
 public class ReviewResponse {
 
-  @Schema(description = "마켓 상품 아이디")
+  @Schema(description = "리뷰 아이디")
   private long reviewId;
 
   @Schema(description = "작성자")
   private MemberWithProfileImageResponse writer;
 
-  @Schema(description = "스크랩 수")
+  @Schema(description = "점수")
   private float score;
 
-  @Schema(description = "내 스크랩 여부")
+  @Schema(description = "내용")
   private String content;
 
-  @Schema(description = "스크랩 수")
+  @Schema(description = "생성 일시")
   private LocalDateTime createdAt;
 
   public ReviewResponse() {
