@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "헤더 정보 응답", requiredProperties = {"gem", "profileImagePath",
+    "hasUnreadNotification"})
 public class GetHeaderResponse {
 
   @Schema(description = "보유 젬")

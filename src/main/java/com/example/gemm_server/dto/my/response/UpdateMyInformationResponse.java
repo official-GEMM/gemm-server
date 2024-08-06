@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "내 정보 수정 응답", requiredProperties = {"manageAge", "phoneNumber"})
 public class UpdateMyInformationResponse {
 
   @Schema(description = "관리 대상자의 연령")
