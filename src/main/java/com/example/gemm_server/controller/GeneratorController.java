@@ -83,9 +83,9 @@ public class GeneratorController {
       @Valid @RequestBody SaveMaterialRequest saveMaterialRequest
       //            @AuthenticationPrincipal CustomUser user
   ) {
-    return ResponseEntity.ok(new CommonResponse<>(new SavedMaterialResponse(
-        0L
-    )));
+    SavedMaterialResponse savedMaterialResponse = activityService.saveMaterials(saveMaterialRequest,
+        1L);
+    return ResponseEntity.ok(new CommonResponse<>(savedMaterialResponse));
   }
 
   @Operation(summary = "PPT 자료 수정", description = "PPT를 수정하는 API")

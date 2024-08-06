@@ -14,6 +14,7 @@ import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
+import com.example.gemm_server.dto.generator.request.SaveMaterialRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
@@ -25,6 +26,7 @@ import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
 import com.example.gemm_server.dto.generator.response.SavedGenerationResponse;
+import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import jakarta.transaction.Transactional;
 import java.io.File;
@@ -63,16 +65,15 @@ public class ActivityService {
   public SavedGenerationResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberId(memberId);
 
-    Activity activity = Activity.builder()
+    Activity savedActivity = activityRepository.save(Activity.builder()
         .title(saveGuideRequest.title())
         .age(saveGuideRequest.age())
         .content(saveGuideRequest.content())
         .materialType((short) 0)
-        .build();
-    Activity savedActivity = activityRepository.save(activity);
+        .build());
 
-    Generation generation = Generation.builder().activity(savedActivity).owner(member).build();
-    Generation savedGeneration = generationRepository.save(generation);
+    Generation savedGeneration = generationRepository.save(
+        Generation.builder().activity(savedActivity).owner(member).build());
     return new SavedGenerationResponse(savedGeneration.getId());
   }
 
@@ -116,6 +117,7 @@ public class ActivityService {
 
     PptPathResponse pptPathResponse = null;
     if (llmMaterialResponse.ppt() != null) {
+      // S3로부터 PPT를 다운로드받아서 썸네일 추출
       List<String> imagePaths = PoiUtil.pptToImages(
           s3Util.downloadFile(llmMaterialResponse.ppt().fileName()));
       String[] thumbnailPaths = new String[imagePaths.size()];
@@ -142,6 +144,44 @@ public class ActivityService {
 
     return new GeneratedMaterialsResponse(pptPathResponse, activitySheetPathResponse,
         cutoutPathResponse, member.getGem());
+  }
+
+  @Transactional
+  public SavedMaterialResponse saveMaterials(SaveMaterialRequest saveMaterialRequest,
+      Long memberId) {
+    Member member = memberService.findMemberByMemberId(memberId);
+
+    Activity savedActivity = activityRepository.save(Activity.builder()
+        .title(saveMaterialRequest.title())
+        .age(saveMaterialRequest.age())
+        .content(saveMaterialRequest.additionalContent())
+        .materialType(getMaterialBitMask(saveMaterialRequest.ppt(),
+            saveMaterialRequest.activitySheet(), saveMaterialRequest.cutout()))
+        .build());
+
+    if (saveMaterialRequest.ppt() != null) {
+        // TODO: 파일 이름을 db에 저장
+    }
+    if (saveMaterialRequest.activitySheet() != null) {
+        // TODO: 파일 이름을 db에 저장
+    }
+    if (saveMaterialRequest.cutout() != null) {
+        // TODO: 파일 이름을 db에 저장
+    }
+
+    if (saveMaterialRequest.ppt() != null) {
+      // TODO: 썸네일 파일 이름을 db에 저장
+    }
+    if (saveMaterialRequest.activitySheet() != null) {
+      // TODO: 썸네일 파일 이름을 db에 저장
+    }
+    if (saveMaterialRequest.cutout() != null) {
+      // TODO: 썸네일 파일 이름을 db에 저장
+    }
+
+    Generation savedGeneration = generationRepository.save(
+        Generation.builder().activity(savedActivity).owner(member).build());
+    return new SavedMaterialResponse(savedGeneration.getId());
   }
 
   protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
