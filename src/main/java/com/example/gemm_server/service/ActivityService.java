@@ -13,7 +13,7 @@ import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
-import com.example.gemm_server.dto.generator.response.SavedGenerationResponse;
+import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class ActivityService {
     return new GeneratedGuideResponse(llmGuideResponse.content(), member.getGem());
   }
 
-  public SavedGenerationResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
+  public SavedGuideResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberId(memberId);
 
     Activity activity = Activity.builder().title(saveGuideRequest.title())
@@ -58,7 +58,7 @@ public class ActivityService {
         .owner(member)
         .build();
     Generation savedGeneration = generationRepository.save(generation);
-    return new SavedGenerationResponse(savedGeneration.getId());
+    return new SavedGuideResponse(savedGeneration.getId());
   }
 
   public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
