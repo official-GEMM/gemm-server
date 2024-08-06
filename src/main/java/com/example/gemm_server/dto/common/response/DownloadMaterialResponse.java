@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "활동 자료 다운로드 응답", requiredProperties = {"materialPaths"})
 public class DownloadMaterialResponse {
 
   @Schema(description = "자료 다운로드 경로 리스트")

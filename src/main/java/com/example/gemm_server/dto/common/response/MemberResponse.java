@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "사용자 정보 응답", requiredProperties = {"memberId", "nickname"})
 public class MemberResponse {
 
   @Schema(description = "사용자 아이디")

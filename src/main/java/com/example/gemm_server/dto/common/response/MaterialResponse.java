@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "활동 자료 응답", requiredProperties = {"materialId", "type", "thumbnailPaths"})
 public class MaterialResponse {
 
   @Schema(description = "자료 아이디")

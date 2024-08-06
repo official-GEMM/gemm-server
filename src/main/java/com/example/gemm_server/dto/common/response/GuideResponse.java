@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-public class GuidesResponse {
+@Schema(description = "활동 방법 응답", requiredProperties = {"title", "content"})
+public class GuideResponse {
 
   @Schema(description = "제목")
   private String title;
@@ -12,6 +13,6 @@ public class GuidesResponse {
   @Schema(description = "내용")
   private String content;
 
-  public GuidesResponse() {
+  public GuideResponse() {
   }
 }
