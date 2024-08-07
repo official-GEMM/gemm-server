@@ -38,7 +38,7 @@ public class AuthService {
       gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION,
           GemUsageType.COMPENSATION);
     }
-    member.setLastLoginAt(LocalDateTime.now());
+    member.setLastLoginAt(LocalDateTime.now(TimeZone.DEFAULT));
     return member;
   }
 
