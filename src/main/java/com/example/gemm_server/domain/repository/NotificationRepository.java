@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-  @Query("SELECT e FROM Notification e WHERE e.createdAt >= :dateThreshold AND e.receiver.id = :memberId")
+  @Query("SELECT e FROM Notification e WHERE e.createdAt >= :dateThreshold AND e.receiver.id = :memberId ORDER BY e.createdAt DESC")
   List<Notification> findByReceiverIdAndCreatedAtDateAfter(
       @Param("memberId") Long memberId,
       @Param("dateThreshold") LocalDateTime dateThreshold);
