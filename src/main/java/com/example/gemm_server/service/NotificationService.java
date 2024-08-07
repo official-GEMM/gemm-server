@@ -32,4 +32,23 @@ public class NotificationService {
         .build();
     return notificationRepository.save(notification);
   }
+
+  @Transactional
+  public List<NotificationResponse> getAllNotifications(Long memberId) {
+    LocalDateTime dateBeforeExpiration = LocalDateTime.now(TimeZone.DEFAULT)
+        .minusDays(EXPIRATION_DAY);
+    List<Notification> notifications = notificationRepository.findByReceiverIdAndCreatedAtDateAfter(
+        memberId, dateBeforeExpiration);
+    List<NotificationResponse> notificationResponses = notifications.stream()
+        .map(NotificationResponse::new).toList();
+
+    markNotificationsAsOpened(notifications);
+    return notificationResponses;
+  }
+
+  @Transactional
+  public List<Notification> markNotificationsAsOpened(List<Notification> notifications) {
+    notifications.forEach(notification -> notification.setOpened(true));
+    return notifications;
+  }
 }

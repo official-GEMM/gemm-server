@@ -5,6 +5,7 @@ import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
+import com.example.gemm_server.dto.my.NotificationResponse;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
@@ -19,9 +20,11 @@ import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.MemberService;
+import com.example.gemm_server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
@@ -43,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyController {
 
   private final MemberService memberService;
+  private final NotificationService notificationService;
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
@@ -105,14 +109,19 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
   @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
   @GetMapping("/notifications")
-  public ResponseEntity<CommonResponse<GetMyNotificationsResponse>> getMyNotifications() {
-    GetMyNotificationsResponse response = new GetMyNotificationsResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
+  public ResponseEntity<CommonResponse<GetMyNotificationsResponse>> getMyNotifications(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    List<NotificationResponse> notificationResponses = notificationService.getAllNotifications(
+        user.getId());
+    GetMyNotificationsResponse notificationsResponse = new GetMyNotificationsResponse(
+        notificationResponses);
+    return ResponseEntity.ok(new CommonResponse<>(notificationsResponse));
   }
 
+  // 미완성 API
   @Operation(summary = "프로필 이미지 변경", description = "사용자의 프로필 이미지를 변경하는 API")
   @PutMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<UpdateProfileImageResponse>> getMyNotifications(

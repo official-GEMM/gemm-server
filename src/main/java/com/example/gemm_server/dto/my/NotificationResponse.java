@@ -1,6 +1,8 @@
 package com.example.gemm_server.dto.my;
 
 import com.example.gemm_server.common.enums.EventType;
+import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.Notification;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -23,7 +25,7 @@ public class NotificationResponse {
   private String message;
 
   @Schema(description = "알림 발생지")
-  private long subjectId;
+  private Long subjectId;
 
   @Schema(description = "알림 발생 종류")
   private EventType eventType;
@@ -31,6 +33,14 @@ public class NotificationResponse {
   @Schema(description = "알림 생성일")
   private LocalDateTime createdAt;
 
-  public NotificationResponse() {
+  public NotificationResponse(Notification notification) {
+    Member sender = notification.getSender();
+    this.notificationId = notification.getId();
+    this.senderNickname = sender.getNickname();
+    this.profileImagePath = sender.getProfileImageUrl();
+    this.message = notification.getMessage();
+    this.eventType = notification.getEventType();
+    this.createdAt = notification.getCreatedAt();
+    this.subjectId = notification.getSubjectId();
   }
 }
