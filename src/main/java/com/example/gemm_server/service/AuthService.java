@@ -53,5 +53,7 @@ public class AuthService {
     gemService.saveChangesOfGemWithMember(referralMember, REFERRAL_COMPENSATION,
         GemUsageType.COMPENSATION);
 
+    notificationService.publishReferralNotification(referralMember,
+        currentMember);
   }
 }
