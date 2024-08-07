@@ -16,11 +16,11 @@ public class GetHeaderResponse {
   private String profileImagePath;
 
   @Schema(description = "미확인 알림 존재 여부")
-  private Boolean hasUnreadNotification;
+  private Boolean hasNotification;
 
-  public GetHeaderResponse(Member member) {
+  public GetHeaderResponse(Member member, boolean hasNotification) {
     this.gem = member.getGem();
     this.profileImagePath = member.getProfileImageUrl();
-    this.hasUnreadNotification = false; // TODO: redis에서 사용자 알림 조회
+    this.hasNotification = hasNotification;
   }
 }

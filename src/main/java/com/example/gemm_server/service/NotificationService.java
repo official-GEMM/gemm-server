@@ -51,4 +51,12 @@ public class NotificationService {
     notifications.forEach(notification -> notification.setOpened(true));
     return notifications;
   }
+
+  public int countOfUnopenedNotifications(Long memberId) {
+    LocalDateTime dateBeforeExpiration = LocalDateTime.now(TimeZone.DEFAULT)
+        .minusDays(EXPIRATION_DAY);
+
+    return notificationRepository.countByReceiverIdAndOpenedAndCreatedAtDateAfter(memberId, false,
+        dateBeforeExpiration);
+  }
 }

@@ -105,7 +105,9 @@ public class MyController {
       @AuthenticationPrincipal CustomUser user
   ) {
     Member member = memberService.findMemberByMemberId(user.getId());
-    GetHeaderResponse response = new GetHeaderResponse(member);
+    boolean hasUnreadNotification =
+        notificationService.countOfUnopenedNotifications(user.getId()) > 0;
+    GetHeaderResponse response = new GetHeaderResponse(member, hasUnreadNotification);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
