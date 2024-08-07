@@ -5,9 +5,9 @@ import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMB
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
-import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.auth.MemberCompensation;
 import com.example.gemm_server.dto.auth.request.CheckNicknameDuplicationRequest;
 import com.example.gemm_server.dto.auth.request.CheckPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
@@ -55,10 +55,12 @@ public class AuthController {
       @Param("refreshToken") String refreshToken
   ) {
     Long userId = tokenProvider.getUserIdFromToken(accessToken);
-    Member member = authService.compensateMemberForDailyAttendance(userId);
+    MemberCompensation memberCompensation = authService.compensateMemberForDailyAttendance(userId);
 
-    LoginResponse loginResponse = new LoginResponse(accessToken, refreshToken,
-        member.isDataCompleted());
+    boolean isDataCompleted = memberCompensation.member().isDataCompleted();
+    boolean isCompensated = memberCompensation.isCompensated();
+    LoginResponse loginResponse =
+        new LoginResponse(accessToken, refreshToken, isDataCompleted, isCompensated);
     return ResponseEntity.ok(new CommonResponse<>(loginResponse));
   }
 
@@ -97,6 +99,17 @@ public class AuthController {
     return ResponseEntity.ok(new CommonResponse<>(tokens));
   }
 
+  @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 여부를 확인하는 API")
+  @PutMapping("/nickname/duplicate")
+  public ResponseEntity<CommonResponse<CheckNicknameDuplicationResponse>> checkNicknameDuplication(
+      @Valid @RequestBody CheckNicknameDuplicationRequest nicknameDuplicationRequest) {
+    String nickname = nicknameDuplicationRequest.getNickname();
+    boolean isNicknameDuplicated = memberService.isNicknameExists(nickname);
+    CheckNicknameDuplicationResponse response = new CheckNicknameDuplicationResponse(
+        isNicknameDuplicated);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
   // 미완성 API
   @BearerAuth
   @Operation(summary = "휴대폰 인증번호 전송", description = "사용자의 휴대전화를 인증할 수 있는 코드를 전송하는 API")
@@ -111,16 +124,5 @@ public class AuthController {
   public ResponseEntity<EmptyDataResponse> checkPhoneVerificationCode(
       @Valid @RequestBody CheckPhoneVerificationCodeRequest request) {
     return ResponseEntity.ok(new EmptyDataResponse());
-  }
-
-  @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 여부를 확인하는 API")
-  @PutMapping("/nickname/duplicate")
-  public ResponseEntity<CommonResponse<CheckNicknameDuplicationResponse>> checkNicknameDuplication(
-      @Valid @RequestBody CheckNicknameDuplicationRequest nicknameDuplicationRequest) {
-    String nickname = nicknameDuplicationRequest.getNickname();
-    boolean isNicknameDuplicated = memberService.isNicknameExists(nickname);
-    CheckNicknameDuplicationResponse response = new CheckNicknameDuplicationResponse(
-        isNicknameDuplicated);
-    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }
