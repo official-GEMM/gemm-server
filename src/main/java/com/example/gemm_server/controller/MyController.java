@@ -53,7 +53,7 @@ public class MyController {
   public ResponseEntity<CommonResponse<GetMyInformationResponse>> getMyInformation(
       @AuthenticationPrincipal CustomUser user
   ) {
-    Member member = memberService.findMemberByMemberId(user.getId());
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
     GetMyInformationResponse response = new GetMyInformationResponse(member);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
@@ -94,7 +94,7 @@ public class MyController {
   public ResponseEntity<CommonResponse<GemResponse>> getGemCount(
       @AuthenticationPrincipal CustomUser user
   ) {
-    Member member = memberService.findMemberByMemberId(user.getId());
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
     GemResponse response = new GemResponse(member.getGem());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
@@ -104,7 +104,7 @@ public class MyController {
   public ResponseEntity<CommonResponse<GetHeaderResponse>> getHeaderInformation(
       @AuthenticationPrincipal CustomUser user
   ) {
-    Member member = memberService.findMemberByMemberId(user.getId());
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
     boolean hasUnreadNotification =
         notificationService.countOfUnopenedNotifications(user.getId()) > 0;
     GetHeaderResponse response = new GetHeaderResponse(member, hasUnreadNotification);

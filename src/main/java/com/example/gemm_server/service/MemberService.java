@@ -21,7 +21,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
 
-  public Member findMemberByMemberId(Long memberId) {
+  public Member findMemberByMemberIdOrThrow(Long memberId) {
     return memberRepository.findOneById(memberId)
         .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
   }
@@ -45,7 +45,7 @@ public class MemberService {
   @Transactional
   public Member updateNecessaryMemberData(Long memberId,
       PostNecessaryMemberDataRequest memberInfo) {
-    Member member = findMemberByMemberId(memberId);
+    Member member = findMemberByMemberIdOrThrow(memberId);
 
     member.setName(memberInfo.getName());
     member.setBirth(DateUtil.parseYearMonthDay(memberInfo.getBirth()));
@@ -61,7 +61,7 @@ public class MemberService {
   
   @Transactional
   public Member updateMyInformation(Long memberId, UpdateMyInformationRequest memberInfo) {
-    Member member = findMemberByMemberId(memberId);
+    Member member = findMemberByMemberIdOrThrow(memberId);
 
     member.setManageAge(memberInfo.getManageAge());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
@@ -70,7 +70,7 @@ public class MemberService {
 
   @Transactional
   public String updateNickname(Long memberId, String nickname) {
-    Member member = findMemberByMemberId(memberId);
+    Member member = findMemberByMemberIdOrThrow(memberId);
 
     member.setNickname(nickname);
     return member.getNickname();

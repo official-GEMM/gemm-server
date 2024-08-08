@@ -36,7 +36,7 @@ public class AuthService {
 
   @Transactional
   public MemberCompensation compensateMemberForDailyAttendance(Long memberId) {
-    Member member = memberService.findMemberByMemberId(memberId);
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     boolean isCompensated = false;
     if (!DateUtil.isToday(member.getLastLoginAt())) {
       gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION,
