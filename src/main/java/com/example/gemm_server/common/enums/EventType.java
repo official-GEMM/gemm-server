@@ -5,7 +5,8 @@ import lombok.Getter;
 public enum EventType {
   PURCHASE("구매"),
   REVIEW("리뷰"),
-  REFERRAL("추천인");
+  REFERRAL("추천인"),
+  ATTENDANCE("출석");
 
   @Getter
   private final String description;

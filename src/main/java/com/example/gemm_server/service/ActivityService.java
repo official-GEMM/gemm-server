@@ -23,9 +23,9 @@ import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmDesignedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
-import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
+import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import jakarta.transaction.Transactional;
@@ -51,7 +51,7 @@ public class ActivityService {
   @Transactional
   public GeneratedGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
       Long memberId) {
-    Member member = memberService.findMemberByMemberId(memberId);
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
     LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/activity/guide",
         generateGuideRequest, LlmGuideResponse.class);
@@ -63,7 +63,7 @@ public class ActivityService {
 
   @Transactional
   public SavedGuideResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
-    Member member = memberService.findMemberByMemberId(memberId);
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
     Activity savedActivity = activityRepository.save(Activity.builder()
         .title(saveGuideRequest.title())
@@ -79,7 +79,7 @@ public class ActivityService {
 
   @Transactional
   public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
-    Member member = memberService.findMemberByMemberId(memberId);
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
     UpdatedGuideResponse updatedGuideResponse = webClientUtil.put("/generate/activity/guide/result",
         UpdateGuideRequest, UpdatedGuideResponse.class);
@@ -110,7 +110,7 @@ public class ActivityService {
   @Transactional
   public GeneratedMaterialsResponse generateMaterials(
       GenerateMaterialRequest generateMaterialRequest, Long memberId) {
-    Member member = memberService.findMemberByMemberId(memberId);
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
     LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/activity/materials",
         generateMaterialRequest, LlmMaterialResponse.class);
@@ -149,7 +149,7 @@ public class ActivityService {
   @Transactional
   public SavedMaterialResponse saveMaterials(SaveMaterialRequest saveMaterialRequest,
       Long memberId) {
-    Member member = memberService.findMemberByMemberId(memberId);
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
     Activity savedActivity = activityRepository.save(Activity.builder()
         .title(saveMaterialRequest.title())
@@ -160,13 +160,13 @@ public class ActivityService {
         .build());
 
     if (saveMaterialRequest.ppt() != null) {
-        // TODO: 파일 이름을 db에 저장
+      // TODO: 파일 이름을 db에 저장
     }
     if (saveMaterialRequest.activitySheet() != null) {
-        // TODO: 파일 이름을 db에 저장
+      // TODO: 파일 이름을 db에 저장
     }
     if (saveMaterialRequest.cutout() != null) {
-        // TODO: 파일 이름을 db에 저장
+      // TODO: 파일 이름을 db에 저장
     }
 
     if (saveMaterialRequest.ppt() != null) {

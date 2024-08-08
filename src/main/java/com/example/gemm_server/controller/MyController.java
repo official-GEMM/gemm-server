@@ -2,6 +2,7 @@ package com.example.gemm_server.controller;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
@@ -10,18 +11,20 @@ import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
 import com.example.gemm_server.dto.my.response.GetMyInformationResponse;
-import com.example.gemm_server.dto.my.response.GetMyNotificationsResponse;
 import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
+import com.example.gemm_server.dto.my.response.GetNotificationsByUserResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.MemberService;
+import com.example.gemm_server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
@@ -43,13 +46,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyController {
 
   private final MemberService memberService;
+  private final NotificationService notificationService;
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
   public ResponseEntity<CommonResponse<GetMyInformationResponse>> getMyInformation(
       @AuthenticationPrincipal CustomUser user
   ) {
-    Member member = memberService.findMemberByMemberId(user.getId());
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
     GetMyInformationResponse response = new GetMyInformationResponse(member);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
@@ -90,7 +94,7 @@ public class MyController {
   public ResponseEntity<CommonResponse<GemResponse>> getGemCount(
       @AuthenticationPrincipal CustomUser user
   ) {
-    Member member = memberService.findMemberByMemberId(user.getId());
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
     GemResponse response = new GemResponse(member.getGem());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
@@ -100,19 +104,27 @@ public class MyController {
   public ResponseEntity<CommonResponse<GetHeaderResponse>> getHeaderInformation(
       @AuthenticationPrincipal CustomUser user
   ) {
-    Member member = memberService.findMemberByMemberId(user.getId());
-    GetHeaderResponse response = new GetHeaderResponse(member);
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    boolean hasUnreadNotification =
+        notificationService.countOfUnopenedNotifications(user.getId()) > 0;
+    GetHeaderResponse response = new GetHeaderResponse(member, hasUnreadNotification);
     return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
+  @GetMapping("/notifications")
+  public ResponseEntity<CommonResponse<GetNotificationsByUserResponse>> getMyNotifications(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    List<Notification> notifications = notificationService.getRecentNotificationsByMember(
+        user.getId());
+    notificationService.markNotificationsAsOpened(notifications);
+    GetNotificationsByUserResponse notificationsResponse = new GetNotificationsByUserResponse(
+        notifications);
+    return ResponseEntity.ok(new CommonResponse<>(notificationsResponse));
   }
 
   // 미완성 API
-  @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
-  @GetMapping("/notifications")
-  public ResponseEntity<CommonResponse<GetMyNotificationsResponse>> getMyNotifications() {
-    GetMyNotificationsResponse response = new GetMyNotificationsResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
-  }
-
   @Operation(summary = "프로필 이미지 변경", description = "사용자의 프로필 이미지를 변경하는 API")
   @PutMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<UpdateProfileImageResponse>> getMyNotifications(
