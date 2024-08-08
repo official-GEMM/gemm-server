@@ -2,19 +2,19 @@ package com.example.gemm_server.controller;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
-import com.example.gemm_server.dto.my.NotificationResponse;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
 import com.example.gemm_server.dto.my.response.GetMyInformationResponse;
-import com.example.gemm_server.dto.my.response.GetMyNotificationsResponse;
 import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
+import com.example.gemm_server.dto.my.response.GetNotificationsByUserResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
@@ -113,13 +113,14 @@ public class MyController {
 
   @Operation(summary = "알림 조회", description = "사용자의 알림을 가져오는 API")
   @GetMapping("/notifications")
-  public ResponseEntity<CommonResponse<GetMyNotificationsResponse>> getMyNotifications(
+  public ResponseEntity<CommonResponse<GetNotificationsByUserResponse>> getMyNotifications(
       @AuthenticationPrincipal CustomUser user
   ) {
-    List<NotificationResponse> notificationResponses = notificationService.getAllNotifications(
+    List<Notification> notifications = notificationService.getRecentNotificationsByMember(
         user.getId());
-    GetMyNotificationsResponse notificationsResponse = new GetMyNotificationsResponse(
-        notificationResponses);
+    notificationService.markNotificationsAsOpened(notifications);
+    GetNotificationsByUserResponse notificationsResponse = new GetNotificationsByUserResponse(
+        notifications);
     return ResponseEntity.ok(new CommonResponse<>(notificationsResponse));
   }
 

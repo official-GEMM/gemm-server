@@ -14,19 +14,20 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GemService {
 
-    private final GemRepository gemRepository;
+  private final GemRepository gemRepository;
 
-    @Transactional
-    public Gem saveChangesOfGemWithMember(Member member, int amount, GemUsageType usageType) {
-        // TODO: 필요시 gem 변경 대한 알림 생성
-        if (member.getGem() + usageType.getSignedAmount(amount) < 0)
-            throw new GemException(GemErrorCode.NOT_ENOUGH_GEM);
-        member.setGem(member.getGem() + usageType.getSignedAmount(amount));
-        return saveGem(amount, usageType, member.getId());
+  @Transactional
+  public Gem saveChangesOfGemWithMember(Member member, int amount, GemUsageType usageType) {
+    // TODO: 필요시 gem 변경 대한 알림 생성
+    if (member.getGem() + usageType.getSignedAmount(amount) < 0) {
+      throw new GemException(GemErrorCode.NOT_ENOUGH_GEM);
     }
+    member.setGem(member.getGem() + usageType.getSignedAmount(amount));
+    return saveGem(amount, usageType, member.getId());
+  }
 
-    private Gem saveGem(int amount, GemUsageType usageType, Long memberId) {
-        Gem gem = new Gem(amount, usageType, memberId);
-        return gemRepository.save(gem);
-    }
+  private Gem saveGem(int amount, GemUsageType usageType, Long memberId) {
+    Gem gem = new Gem(amount, usageType, memberId);
+    return gemRepository.save(gem);
+  }
 }

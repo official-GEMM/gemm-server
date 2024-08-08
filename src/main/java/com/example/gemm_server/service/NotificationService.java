@@ -7,7 +7,6 @@ import com.example.gemm_server.common.enums.EventType;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.domain.repository.NotificationRepository;
-import com.example.gemm_server.dto.my.NotificationResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class NotificationService {
 
-  private static final int EXPIRATION_DAY = 30;
+  private static final int DAYS_TO_EXPIRATION = 30;
   private final NotificationRepository notificationRepository;
 
   public Notification publishReferralNotification(Member receiver, Member sender) {
@@ -34,16 +33,11 @@ public class NotificationService {
   }
 
   @Transactional
-  public List<NotificationResponse> getAllNotifications(Long memberId) {
+  public List<Notification> getRecentNotificationsByMember(Long memberId) {
     LocalDateTime dateBeforeExpiration = LocalDateTime.now(TimeZone.DEFAULT)
-        .minusDays(EXPIRATION_DAY);
-    List<Notification> notifications = notificationRepository.findByReceiverIdAndCreatedAtDateAfter(
+        .minusDays(DAYS_TO_EXPIRATION);
+    return notificationRepository.findByReceiverIdAndCreatedAtDateAfter(
         memberId, dateBeforeExpiration);
-    List<NotificationResponse> notificationResponses = notifications.stream()
-        .map(NotificationResponse::new).toList();
-
-    markNotificationsAsOpened(notifications);
-    return notificationResponses;
   }
 
   @Transactional
@@ -54,7 +48,7 @@ public class NotificationService {
 
   public int countOfUnopenedNotifications(Long memberId) {
     LocalDateTime dateBeforeExpiration = LocalDateTime.now(TimeZone.DEFAULT)
-        .minusDays(EXPIRATION_DAY);
+        .minusDays(DAYS_TO_EXPIRATION);
 
     return notificationRepository.countByReceiverIdAndOpenedAndCreatedAtDateAfter(memberId, false,
         dateBeforeExpiration);
