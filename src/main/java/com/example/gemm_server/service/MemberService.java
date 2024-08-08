@@ -1,8 +1,6 @@
 package com.example.gemm_server.service;
 
-import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_ALREADY_COMPLETED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_NOT_FOUND;
-import static com.example.gemm_server.common.code.error.MemberErrorCode.OWN_REFERRAL_CODE;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL_NOT_FOUND;
 
 import com.example.gemm_server.common.util.DateUtil;
@@ -26,20 +24,9 @@ public class MemberService {
         .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
   }
 
-  public Member getMemberByReferralCode(String referralCode) {
+  public Member findMemberByReferralCodeOrThrow(String referralCode) {
     return memberRepository.findOneByReferralCode(referralCode)
         .orElseThrow(() -> new MemberException(REFERRAL_NOT_FOUND));
-  }
-
-  public Member checkReferralCompenstableAndGetMember(Long memberId, String referralCode) {
-    Member currentMember = findMemberByMemberId(memberId);
-    if (currentMember.isDataCompleted()) {
-      throw new MemberException(MEMBER_ALREADY_COMPLETED);
-    }
-    if (referralCode.equals(currentMember.getReferralCode())) {
-      throw new MemberException(OWN_REFERRAL_CODE);
-    }
-    return currentMember;
   }
 
   @Transactional
@@ -58,7 +45,7 @@ public class MemberService {
   public boolean isNicknameExists(String nickname) {
     return memberRepository.existsByNickname(nickname);
   }
-  
+
   @Transactional
   public Member updateMyInformation(Long memberId, UpdateMyInformationRequest memberInfo) {
     Member member = findMemberByMemberIdOrThrow(memberId);

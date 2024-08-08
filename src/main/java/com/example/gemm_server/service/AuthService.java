@@ -1,5 +1,7 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_ALREADY_COMPLETED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.OWN_REFERRAL_CODE;
 import static com.example.gemm_server.common.constant.Policy.ATTENDANCE_COMPENSATION;
 import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATION;
 
@@ -11,6 +13,7 @@ import com.example.gemm_server.domain.entity.redis.TokenBlackList;
 import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
 import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
 import com.example.gemm_server.dto.auth.MemberCompensation;
+import com.example.gemm_server.exception.MemberException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,17 +52,28 @@ public class AuthService {
   }
 
   @Transactional
-  public void compensateMemberForReferral(Long currentMemberId, String referralCode) {
-    Member currentMember = memberService.checkReferralCompenstableAndGetMember(currentMemberId,
-        referralCode);
-    Member referralMember = memberService.getMemberByReferralCode(referralCode);
+  public void compensateMemberForReferralIfValid(Long referrerMemberId, String referralCode) {
+    Member referrerMember = memberService.findMemberByMemberIdOrThrow(referrerMemberId);
+    Member refereeMember = memberService.findMemberByReferralCodeOrThrow(referralCode);
+    validateForReferral(referrerMember, refereeMember);
 
-    gemService.saveChangesOfGemWithMember(currentMember, REFERRAL_COMPENSATION,
+    gemService.saveChangesOfGemWithMember(referrerMember, REFERRAL_COMPENSATION,
         GemUsageType.COMPENSATION);
-    gemService.saveChangesOfGemWithMember(referralMember, REFERRAL_COMPENSATION,
+    gemService.saveChangesOfGemWithMember(refereeMember, REFERRAL_COMPENSATION,
         GemUsageType.COMPENSATION);
 
-    notificationService.publishReferralNotification(referralMember,
-        currentMember);
+    notificationService.publishReferralNotification(refereeMember, referrerMember);
+  }
+
+  private void validateForReferral(Member referrerMember, Member refereeMember) {
+    if (referrerMember.isDataCompleted()) {
+      throw new MemberException(MEMBER_ALREADY_COMPLETED);
+    }
+
+    long referrerMemberId = referrerMember.getId();
+    long refereeMemberId = refereeMember.getId();
+    if (referrerMemberId == refereeMemberId) {
+      throw new MemberException(OWN_REFERRAL_CODE);
+    }
   }
 }
