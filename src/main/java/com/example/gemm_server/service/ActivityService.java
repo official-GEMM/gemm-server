@@ -15,8 +15,14 @@ import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveMaterialRequest;
+import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
+import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
+import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
 import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
+import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
+import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
+import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
@@ -30,7 +36,10 @@ import com.example.gemm_server.dto.generator.response.LlmPptResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
+import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
 import jakarta.transaction.Transactional;
 import java.io.File;
 import java.util.List;
@@ -56,9 +65,8 @@ public class ActivityService {
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/activity/guide",
+    LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
         generateGuideRequest, LlmGuideResponse.class);
-
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
 
     return new GeneratedGuideResponse(llmGuideResponse.content(), member.getGem());
@@ -74,9 +82,9 @@ public class ActivityService {
         .content(saveGuideRequest.content())
         .materialType((short) 0)
         .build());
-
     Generation savedGeneration = generationRepository.save(
         Generation.builder().activity(savedActivity).owner(member).build());
+
     return new SavedGuideResponse(savedGeneration.getId());
   }
 
@@ -84,9 +92,8 @@ public class ActivityService {
   public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    UpdatedGuideResponse updatedGuideResponse = webClientUtil.put("/generate/activity/guide/result",
+    UpdatedGuideResponse updatedGuideResponse = webClientUtil.put("/generate/guide/result",
         UpdateGuideRequest, UpdatedGuideResponse.class);
-
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
 
     return new UpdatedGuideResponse(updatedGuideResponse.content(), member.getGem());
@@ -96,7 +103,7 @@ public class ActivityService {
   public LinkedMaterialGuideResponse linkGuideToMaterial(
       LinkMaterialGuideRequest linkMaterialGuideRequest) {
     LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
-        "/generate/activity/guide/sync",
+        "/generate/guide/sync",
         linkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
 
     return new LinkedMaterialGuideResponse(
@@ -115,18 +122,24 @@ public class ActivityService {
       GenerateMaterialRequest generateMaterialRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/activity/materials",
+    LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/materials",
         generateMaterialRequest, LlmMaterialResponse.class);
 
-    PptPathResponse pptPathResponse = getPptPathResponse(llmMaterialResponse.ppt());
+    PptPathResponse pptPathResponse = new PptPathResponse(
+        getPptThumbnailPaths(llmMaterialResponse.ppt()), llmMaterialResponse.ppt().filePath());
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_PPT, GemUsageType.AI_USE);
 
-    ActivitySheetPathResponse activitySheetPathResponse = getActivitySheetPathResponse(
-        llmMaterialResponse.activitySheet());
+    ActivitySheetPathResponse activitySheetPathResponse = new ActivitySheetPathResponse(
+        getActivitySheetThumbnailPath(llmMaterialResponse.activitySheet()),
+        llmMaterialResponse.activitySheet().filePath()
+    );
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_ACTIVITY_SHEET,
         GemUsageType.AI_USE);
 
-    CutoutPathResponse cutoutPathResponse = getCutoutPathResponse(llmMaterialResponse.cutout());
+    CutoutPathResponse cutoutPathResponse = new CutoutPathResponse(
+        getCutoutThumbnailPath(llmMaterialResponse.cutout()),
+        llmMaterialResponse.cutout().filePath()
+    );
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_CUTOUT, GemUsageType.AI_USE);
 
     return new GeneratedMaterialsResponse(pptPathResponse, activitySheetPathResponse,
@@ -171,6 +184,57 @@ public class ActivityService {
     return new SavedMaterialResponse(savedGeneration.getId());
   }
 
+  @Transactional
+  public UpdatedPptResponse updatePpt(UpdatePptRequest updatePptRequest, Long memberId) {
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+
+    LlmPptResponse llmPptResponse = webClientUtil.post("/generate/materials/ppt",
+        updatePptRequest, LlmPptResponse.class);
+
+    CommentedPptResponse commentedPptResponse = new CommentedPptResponse(
+        getPptThumbnailPaths(llmPptResponse), llmPptResponse.filePath()
+    );
+    gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_PPT, GemUsageType.AI_USE);
+
+    return new UpdatedPptResponse(commentedPptResponse, member.getGem());
+  }
+
+  @Transactional
+  public UpdatedActivitySheetResponse updateActivitySheet(
+      UpdateActivitySheetRequest updateActivitySheetRequest, Long memberId) {
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+
+    LlmActivitySheetResponse llmActivitySheetResponse = webClientUtil.post(
+        "/generate/materials/activity-sheet",
+        updateActivitySheetRequest, LlmActivitySheetResponse.class);
+
+    CommentedActivitySheetResponse commentedActivitySheetResponse = new CommentedActivitySheetResponse(
+        getActivitySheetThumbnailPath(llmActivitySheetResponse), llmActivitySheetResponse.filePath()
+    );
+    gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_ACTIVITY_SHEET,
+        GemUsageType.AI_USE);
+
+    return new UpdatedActivitySheetResponse(commentedActivitySheetResponse, member.getGem());
+  }
+
+  @Transactional
+  public UpdatedCutoutResponse updateCutout(
+      UpdateCutoutRequest updateCutoutRequest, Long memberId) {
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+
+    LlmCutoutResponse llmCutoutResponse = webClientUtil.post(
+        "/generate/materials/cutout",
+        updateCutoutRequest, LlmCutoutResponse.class);
+
+    CommentedCutoutResponse commentedCutoutResponse = new CommentedCutoutResponse(
+        getCutoutThumbnailPath(llmCutoutResponse), llmCutoutResponse.filePath()
+    );
+    gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_CUTOUT,
+        GemUsageType.AI_USE);
+
+    return new UpdatedCutoutResponse(commentedCutoutResponse, member.getGem());
+  }
+
   protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
     short materialBit = 0;
     if (ppt != null && !ppt.isBlank()) {
@@ -185,7 +249,7 @@ public class ActivityService {
     return materialBit;
   }
 
-  protected PptPathResponse getPptPathResponse(LlmPptResponse llmPptResponse) {
+  protected String[] getPptThumbnailPaths(LlmPptResponse llmPptResponse) {
     if (llmPptResponse != null) {
       List<String> imagePaths = PoiUtil.pptToImages(
           s3Util.downloadFile(llmPptResponse.fileName()));
@@ -194,26 +258,25 @@ public class ActivityService {
         File file = new File(imagePaths.get(i));
         thumbnailPaths[i] = s3Util.getFileUrl(s3Util.uploadFile(file, "temp/pptx/thumbnail/"));
       }
-      return new PptPathResponse(thumbnailPaths, llmPptResponse.filePath());
+      return thumbnailPaths;
     } else {
       return null;
     }
   }
 
-  protected ActivitySheetPathResponse getActivitySheetPathResponse(
+  protected String getActivitySheetThumbnailPath(
       LlmActivitySheetResponse llmActivitySheetResponse) {
     if (llmActivitySheetResponse != null) {
-      return new ActivitySheetPathResponse(null,
-          llmActivitySheetResponse.filePath());
+      // Todo: docx 썸네일 링크 반환
+      return null;
     } else {
       return null;
     }
   }
 
-  protected CutoutPathResponse getCutoutPathResponse(LlmCutoutResponse llmCutoutResponse) {
+  protected String getCutoutThumbnailPath(LlmCutoutResponse llmCutoutResponse) {
     if (llmCutoutResponse != null) {
-      return new CutoutPathResponse(llmCutoutResponse.filePath(),
-          llmCutoutResponse.filePath());
+      return llmCutoutResponse.filePath();
     } else {
       return null;
     }

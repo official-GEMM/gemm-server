@@ -13,7 +13,7 @@ public class ActivityDetailResponse {
   private String title;
 
   @Schema(description = "자료 리스트")
-  private MaterialResponse materials;
+  private MaterialResponse[] materials;
 
   @Schema(description = "타겟 연령")
   private int age;
