@@ -5,12 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateActivitySheetRequest(
-        @Schema(description = "수정할 활동지 파일 주소")
-        @NotNull
-        String activitySheet,
+    @Schema(description = "수정할 활동지 파일 주소")
+    @NotNull
+    String activitySheet,
 
-        @Schema(description = "수정에 반영할 코멘트")
-        @NotBlank
-        String comment
+    @Schema(description = "수정에 반영할 코멘트")
+    @NotBlank
+    String comment
 ) {
+
 }

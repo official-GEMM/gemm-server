@@ -256,7 +256,10 @@ public class ActivityService {
       String[] thumbnailPaths = new String[imagePaths.size()];
       for (int i = 0; i < imagePaths.size(); i++) {
         File file = new File(imagePaths.get(i));
-        thumbnailPaths[i] = s3Util.getFileUrl(s3Util.uploadFile(file, "temp/pptx/thumbnail/"));
+        thumbnailPaths[i] = s3Util.getFileUrl(
+            s3Util.uploadFile(file,
+                llmPptResponse.fileName() + i,
+                "temp/pptx/thumbnail/"));
       }
       return thumbnailPaths;
     } else {

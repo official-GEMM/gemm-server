@@ -21,8 +21,7 @@ public class S3Util {
   @Value("${cloud.aws.s3.bucket.name}")
   private String bucketName;
 
-  public String uploadFile(File file, String savePath) {
-    String fileName = getUUIDFileName(file.getName());
+  public String uploadFile(File file, String fileName, String savePath) {
     amazonS3.putObject(bucketName, savePath + fileName, file);
     return savePath + fileName;
   }
@@ -46,11 +45,11 @@ public class S3Util {
     return amazonS3.generatePresignedUrl(presignedUrlRequest).toString();
   }
 
-  protected String getFileExtension(String fileName) {
-    return fileName.substring(fileName.lastIndexOf("."));
+  public String getUUIDFileName(String fileName) {
+    return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
   }
 
-  protected String getUUIDFileName(String fileName) {
-    return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
+  protected String getFileExtension(String fileName) {
+    return fileName.substring(fileName.lastIndexOf("."));
   }
 }

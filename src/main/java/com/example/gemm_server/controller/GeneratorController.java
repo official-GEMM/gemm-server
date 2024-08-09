@@ -10,9 +10,6 @@ import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
 import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
-import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
-import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
-import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
@@ -26,7 +23,6 @@ import com.example.gemm_server.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.net.MalformedURLException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -114,13 +110,9 @@ public class GeneratorController {
   public ResponseEntity<CommonResponse<UpdatedPptResponse>> updatePpt(
       @Valid @RequestBody UpdatePptRequest updatePptRequest
       //            @AuthenticationPrincipal CustomUser user
-  ) throws MalformedURLException {
-    String testSource = new String("/test");
-    String[] testSources = new String[]{new String("test1"), new String("test2")};
-    return ResponseEntity.ok(new CommonResponse<>(new UpdatedPptResponse(
-        new CommentedPptResponse(testSources, testSource),
-        0
-    )));
+  ) {
+    UpdatedPptResponse updatedPptResponse = activityService.updatePpt(updatePptRequest, 1L);
+    return ResponseEntity.ok(new CommonResponse<>(updatedPptResponse));
   }
 
   @Operation(summary = "활동지 자료 수정", description = "활동지를 수정하는 API")
@@ -128,12 +120,10 @@ public class GeneratorController {
   public ResponseEntity<CommonResponse<UpdatedActivitySheetResponse>> updateActivitySheet(
       @Valid @RequestBody UpdateActivitySheetRequest updateActivitySheetRequest
       //            @AuthenticationPrincipal CustomUser user
-  ) throws MalformedURLException {
-    String testSource = new String("/test");
-    return ResponseEntity.ok(new CommonResponse<>(new UpdatedActivitySheetResponse(
-        new CommentedActivitySheetResponse(testSource, testSource),
-        0
-    )));
+  ) {
+    UpdatedActivitySheetResponse updatedActivitySheetResponse = activityService.updateActivitySheet(
+        updateActivitySheetRequest, 1L);
+    return ResponseEntity.ok(new CommonResponse<>(updatedActivitySheetResponse));
   }
 
   @Operation(summary = "컷/도안 자료 수정", description = "컷/도안을 수정하는 API")
@@ -141,11 +131,9 @@ public class GeneratorController {
   public ResponseEntity<CommonResponse<UpdatedCutoutResponse>> updateCutout(
       @Valid @RequestBody UpdateCutoutRequest updateCutoutRequest
       //            @AuthenticationPrincipal CustomUser user
-  ) throws MalformedURLException {
-    String testSource = new String("/test");
-    return ResponseEntity.ok(new CommonResponse<>(new UpdatedCutoutResponse(
-        new CommentedCutoutResponse(testSource, testSource),
-        0
-    )));
+  ) {
+    UpdatedCutoutResponse updatedCutoutResponse = activityService.updateCutout(updateCutoutRequest,
+        1L);
+    return ResponseEntity.ok(new CommonResponse<>(updatedCutoutResponse));
   }
 }
