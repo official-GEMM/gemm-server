@@ -21,9 +21,12 @@ import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
+import com.example.gemm_server.dto.generator.response.LlmActivitySheetResponse;
+import com.example.gemm_server.dto.generator.response.LlmCutoutResponse;
 import com.example.gemm_server.dto.generator.response.LlmDesignedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
+import com.example.gemm_server.dto.generator.response.LlmPptResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
@@ -115,32 +118,16 @@ public class ActivityService {
     LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/activity/materials",
         generateMaterialRequest, LlmMaterialResponse.class);
 
-    PptPathResponse pptPathResponse = null;
-    if (llmMaterialResponse.ppt() != null) {
-      // S3로부터 PPT를 다운로드받아서 썸네일 추출
-      List<String> imagePaths = PoiUtil.pptToImages(
-          s3Util.downloadFile(llmMaterialResponse.ppt().fileName()));
-      String[] thumbnailPaths = new String[imagePaths.size()];
-      for (int i = 0; i < imagePaths.size(); i++) {
-        File file = new File(imagePaths.get(i));
-        thumbnailPaths[i] = s3Util.getFileUrl(s3Util.uploadFile(file));
-      }
-      pptPathResponse = new PptPathResponse(thumbnailPaths, llmMaterialResponse.ppt().filePath());
-      gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_PPT, GemUsageType.AI_USE);
-    }
+    PptPathResponse pptPathResponse = getPptPathResponse(llmMaterialResponse.ppt());
+    gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_PPT, GemUsageType.AI_USE);
 
-    ActivitySheetPathResponse activitySheetPathResponse = null;
-    if (llmMaterialResponse.activitySheet() != null) {
-      gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_ACTIVITY_SHEET,
-          GemUsageType.AI_USE);
-    }
+    ActivitySheetPathResponse activitySheetPathResponse = getActivitySheetPathResponse(
+        llmMaterialResponse.activitySheet());
+    gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_ACTIVITY_SHEET,
+        GemUsageType.AI_USE);
 
-    CutoutPathResponse cutoutPathResponse = null;
-    if (llmMaterialResponse.cutout() != null) {
-      cutoutPathResponse = new CutoutPathResponse(llmMaterialResponse.cutout(),
-          llmMaterialResponse.cutout());
-      gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_CUTOUT, GemUsageType.AI_USE);
-    }
+    CutoutPathResponse cutoutPathResponse = getCutoutPathResponse(llmMaterialResponse.cutout());
+    gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_CUTOUT, GemUsageType.AI_USE);
 
     return new GeneratedMaterialsResponse(pptPathResponse, activitySheetPathResponse,
         cutoutPathResponse, member.getGem());
@@ -196,5 +183,39 @@ public class ActivityService {
       materialBit += (short) 1;
     }
     return materialBit;
+  }
+
+  protected PptPathResponse getPptPathResponse(LlmPptResponse llmPptResponse) {
+    if (llmPptResponse != null) {
+      List<String> imagePaths = PoiUtil.pptToImages(
+          s3Util.downloadFile(llmPptResponse.fileName()));
+      String[] thumbnailPaths = new String[imagePaths.size()];
+      for (int i = 0; i < imagePaths.size(); i++) {
+        File file = new File(imagePaths.get(i));
+        thumbnailPaths[i] = s3Util.getFileUrl(s3Util.uploadFile(file, "temp/pptx/thumbnail/"));
+      }
+      return new PptPathResponse(thumbnailPaths, llmPptResponse.filePath());
+    } else {
+      return null;
+    }
+  }
+
+  protected ActivitySheetPathResponse getActivitySheetPathResponse(
+      LlmActivitySheetResponse llmActivitySheetResponse) {
+    if (llmActivitySheetResponse != null) {
+      return new ActivitySheetPathResponse(null,
+          llmActivitySheetResponse.filePath());
+    } else {
+      return null;
+    }
+  }
+
+  protected CutoutPathResponse getCutoutPathResponse(LlmCutoutResponse llmCutoutResponse) {
+    if (llmCutoutResponse != null) {
+      return new CutoutPathResponse(llmCutoutResponse.filePath(),
+          llmCutoutResponse.filePath());
+    } else {
+      return null;
+    }
   }
 }

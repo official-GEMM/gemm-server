@@ -29,7 +29,7 @@ public class PoiUtil {
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
 
         slide.draw(graphics);
-        String saveFileName = UUIDUtil.getRandomUUID() + ".png";
+        String saveFileName = "temp/pptx/thumbnail/" + UUIDUtil.getRandomUUID() + ".png";
         FileOutputStream out = new FileOutputStream(saveFileName);
         javax.imageio.ImageIO.write(img, "png", out);
         ppt.write(out);

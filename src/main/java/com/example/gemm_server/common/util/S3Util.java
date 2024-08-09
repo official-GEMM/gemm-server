@@ -21,10 +21,10 @@ public class S3Util {
   @Value("${cloud.aws.s3.bucket.name}")
   private String bucketName;
 
-  public String uploadFile(File file) {
+  public String uploadFile(File file, String savePath) {
     String fileName = getUUIDFileName(file.getName());
-    amazonS3.putObject(bucketName, fileName, file);
-    return fileName;
+    amazonS3.putObject(bucketName, savePath + fileName, file);
+    return savePath + fileName;
   }
 
   public InputStream downloadFile(String fileName) {
