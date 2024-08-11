@@ -81,12 +81,21 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  @Operation(summary = "생성한 활동 방법 상세", description = "사용자가 생성한 활동 방법 상세를 조회하는 API")
-  @GetMapping("/generate/guides/{generationId}")
-  public ResponseEntity<CommonResponse<GetGeneratedGuideDetailResponse>> getGeneratedGuideDetail(
-      @PathParam("generationId") Long generationId
+  @Operation(summary = "생성한 활동 리스트 조회", description = "사용자가 생성한 활동 리스트를 조회하는 API")
+  @GetMapping("/generate/activities")
+  public ResponseEntity<CommonResponse<GetGeneratedActivitiesResponse>> getGeneratedActivities(
+      @AuthenticationPrincipal CustomUser user,
+      @Param("page") Integer page
   ) {
-    GetGeneratedGuideDetailResponse response = new GetGeneratedGuideDetailResponse();
+    Page<Generation> activities = generationService.getGenerationsHasMaterialByMemberIdAndPage(
+        user.getId(), page, Policy.STORAGE_LIMIT_LONG);
+    PageInfo pageInfo = new PageInfo(page, activities.getTotalPages());
+
+    List<GenerationWithThumbnail> generationWithThumbnails =
+        thumbnailService.getMainThumbnailForEachGeneration(activities.getContent());
+
+    GetGeneratedActivitiesResponse response =
+        new GetGeneratedActivitiesResponse(generationWithThumbnails, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
