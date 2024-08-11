@@ -26,7 +26,6 @@ import com.example.gemm_server.service.MaterialService;
 import com.example.gemm_server.service.ThumbnailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.websocket.server.PathParam;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -149,10 +148,11 @@ public class StorageController {
     return ResponseEntity.ok(new EmptyDataResponse(ACTIVITY_GENERATION_DELETED));
   }
 
+  // 미완성 API
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/activities/{generationId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadGeneratedActivityMaterial(
-      @PathParam("generationId") Long generationId
+      @PathVariable("generationId") Long generationId
   ) {
     DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
@@ -170,7 +170,7 @@ public class StorageController {
   @Operation(summary = "구매한 활동 상세", description = "사용자가 구매한 활동 상세를 조회하는 API")
   @GetMapping("/generate/purchases/{dealId}")
   public ResponseEntity<CommonResponse<GetPurchasedActivityDetailResponse>> getPurchasedActivityDetail(
-      @PathParam("dealId") Long dealId
+      @PathVariable("dealId") Long dealId
   ) {
     GetPurchasedActivityDetailResponse response = new GetPurchasedActivityDetailResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -179,7 +179,7 @@ public class StorageController {
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(
-      @PathParam("dealId") Long dealId
+      @PathVariable("dealId") Long dealId
   ) {
     DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
