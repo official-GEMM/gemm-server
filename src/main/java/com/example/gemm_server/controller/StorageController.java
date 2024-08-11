@@ -7,6 +7,7 @@ import com.example.gemm_server.domain.entity.Generation;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.storage.GenerationWithThumbnail;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivitiesResponse;
@@ -68,9 +69,15 @@ public class StorageController {
   @Operation(summary = "생성한 활동 방법 리스트 조회", description = "사용자가 생성한 활동 방법 리스트를 조회하는 API")
   @GetMapping("/generate/guides")
   public ResponseEntity<CommonResponse<GetGeneratedGuidesResponse>> getGeneratedGuides(
+      @AuthenticationPrincipal CustomUser user,
       @Param("page") Integer page
   ) {
-    GetGeneratedGuidesResponse response = new GetGeneratedGuidesResponse();
+    Page<Generation> guides = generationService.getGenerationsHasNoMaterialByMemberIdAndPage(
+        user.getId(), page, Policy.STORAGE_LIMIT_LONG);
+    PageInfo pageInfo = new PageInfo(page, guides.getTotalPages());
+
+    GetGeneratedGuidesResponse response =
+        new GetGeneratedGuidesResponse(guides.getContent(), pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
