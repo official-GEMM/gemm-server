@@ -1,5 +1,7 @@
 package com.example.gemm_server.dto.market;
 
+import com.example.gemm_server.common.enums.Category;
+import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.dto.common.response.ActivityResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -29,6 +31,7 @@ public class MarketItemResponse extends ActivityResponse {
   private Boolean isScrapped;
 
   public MarketItemResponse() {
+    super(new Activity("", (short) 0, (short) 0, Category.ART_AREA, ""), "");
   }
 
 }
