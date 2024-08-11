@@ -111,12 +111,18 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @GenerationBelonging()
   @Operation(summary = "생성한 활동 상세", description = "사용자가 생성한 활동 상세를 조회하는 API")
   @GetMapping("/generate/activities/{generationId}")
   public ResponseEntity<CommonResponse<GetGeneratedActivityDetailResponse>> getGeneratedActivityDetail(
-      @PathParam("generationId") Long generationId
+      @PathVariable("generationId") Long generationId
   ) {
-    GetGeneratedActivityDetailResponse response = new GetGeneratedActivityDetailResponse();
+    Generation generation = generationService.getGenerationOrThrow(generationId);
+
+    List<Material> materials = materialService.getMaterialsWithThumbnailByGenerationId(
+        generationId);
+    GetGeneratedActivityDetailResponse response = new GetGeneratedActivityDetailResponse(
+        generation, materials);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

@@ -1,6 +1,8 @@
 package com.example.gemm_server.dto.common.response;
 
 import com.example.gemm_server.common.enums.MaterialType;
+import com.example.gemm_server.domain.entity.Material;
+import com.example.gemm_server.domain.entity.Thumbnail;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -17,6 +19,10 @@ public class MaterialResponse {
   @Schema(description = "썸네일 경로 리스트")
   private String[] thumbnailPaths;
 
-  public MaterialResponse() {
+  public MaterialResponse(Material material) {
+    this.materialId = material.getId();
+    this.type = material.getType();
+    this.thumbnailPaths = material.getThumbnails().stream().map(Thumbnail::getFilePath)
+        .toArray(String[]::new);
   }
 }

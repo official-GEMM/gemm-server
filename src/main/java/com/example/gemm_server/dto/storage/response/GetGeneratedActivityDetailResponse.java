@@ -1,7 +1,10 @@
 package com.example.gemm_server.dto.storage.response;
 
+import com.example.gemm_server.domain.entity.Generation;
+import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -15,7 +18,9 @@ public class GetGeneratedActivityDetailResponse extends ActivityDetailResponse {
   @Schema(description = "마켓 업로드 여부")
   private Boolean isMarketUploaded;
 
-  public GetGeneratedActivityDetailResponse() {
-    super();
+  public GetGeneratedActivityDetailResponse(Generation generation, List<Material> materials) {
+    super(generation.getActivity(), materials);
+    this.generationId = generation.getId();
+    this.isMarketUploaded = false; // TODO: MARKET 구현 후 연동
   }
 }
