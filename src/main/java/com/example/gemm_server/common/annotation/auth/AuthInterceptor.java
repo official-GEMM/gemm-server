@@ -1,7 +1,7 @@
 package com.example.gemm_server.common.annotation.auth;
 
 import com.example.gemm_server.common.enums.Role;
-import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.ErrorResponse;
 import com.example.gemm_server.exception.MemberException;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import io.micrometer.common.lang.NonNull;
@@ -36,7 +36,7 @@ public class AuthInterceptor implements HandlerInterceptor {
       interceptAuthority(handlerMethod);
       return true;
     } catch (MemberException e) {
-      EmptyDataResponse.setJsonResponse(response, e.getStatusCode(), e.getMessage());
+      ErrorResponse.setJsonResponse(response, e.getStatusCode(), e.getMessage());
       return false;
     }
   }
