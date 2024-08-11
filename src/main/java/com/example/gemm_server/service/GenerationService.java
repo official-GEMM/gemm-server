@@ -36,4 +36,8 @@ public class GenerationService {
     return generationRepository.findById(generationId)
         .orElseThrow(() -> new GenerationException(GENERATION_NOT_FOUND));
   }
+
+  public void deleteGeneration(Long generationId) {
+    generationRepository.deleteById(generationId);
+  }
 }

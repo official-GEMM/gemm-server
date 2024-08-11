@@ -1,5 +1,8 @@
 package com.example.gemm_server.controller;
 
+import static com.example.gemm_server.common.code.success.GenerationSuccessCode.ACTIVITY_GENERATION_DELETED;
+import static com.example.gemm_server.common.code.success.GenerationSuccessCode.GUIDE_GENERATION_DELETED;
+
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.annotation.belong.GenerationBelonging;
 import com.example.gemm_server.common.constant.Policy;
@@ -126,12 +129,24 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @GenerationBelonging()
+  @Operation(summary = "생성한 활동 방법 삭제", description = "사용자가 생성한 활동 방법을 삭제하는 API")
+  @DeleteMapping("/generate/guides/{generationId}")
+  public ResponseEntity<EmptyDataResponse> deleteGeneratedGuide(
+      @PathVariable("generationId") Long generationId
+  ) {
+    generationService.deleteGeneration(generationId);
+    return ResponseEntity.ok(new EmptyDataResponse(GUIDE_GENERATION_DELETED));
+  }
+
+  @GenerationBelonging()
   @Operation(summary = "생성한 활동 삭제", description = "사용자가 생성한 활동을 삭제하는 API")
   @DeleteMapping("/generate/activities/{generationId}")
   public ResponseEntity<EmptyDataResponse> deleteGeneratedActivity(
-      @PathParam("generationId") Long generationId
+      @PathVariable("generationId") Long generationId
   ) {
-    return ResponseEntity.ok(new EmptyDataResponse());
+    generationService.deleteGeneration(generationId);
+    return ResponseEntity.ok(new EmptyDataResponse(ACTIVITY_GENERATION_DELETED));
   }
 
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
