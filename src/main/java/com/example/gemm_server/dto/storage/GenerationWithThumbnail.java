@@ -1,0 +1,21 @@
+package com.example.gemm_server.dto.storage;
+
+import com.example.gemm_server.domain.entity.Generation;
+import com.example.gemm_server.domain.entity.Thumbnail;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class GenerationWithThumbnail {
+
+  private Generation generation;
+  private Thumbnail thumbnail;
+
+  public String getThumbnailPath() {
+    if (thumbnail == null) {
+      return "default"; // TODO: 기본 썸네일 이미지 경로
+    }
+    return thumbnail.getFilePath();
+  }
+}

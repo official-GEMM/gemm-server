@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.common.response;
 
+import com.example.gemm_server.domain.entity.Activity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -13,6 +14,8 @@ public class GuideResponse {
   @Schema(description = "내용")
   private String content;
 
-  public GuideResponse() {
+  public GuideResponse(Activity activity) {
+    this.title = activity.getTitle();
+    this.content = activity.getContent();
   }
 }
