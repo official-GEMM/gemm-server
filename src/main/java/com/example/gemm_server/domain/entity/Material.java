@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.util.List;
 import lombok.Builder;
@@ -53,6 +54,7 @@ public class Material extends Timestamped {
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
 
+  @OrderBy("sequence ASC")
   @OneToMany(mappedBy = "material")
   private List<Thumbnail> thumbnails;
 
