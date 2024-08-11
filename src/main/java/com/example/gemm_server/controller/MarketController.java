@@ -1,7 +1,7 @@
 package com.example.gemm_server.controller;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
-import com.example.gemm_server.common.enums.Order;
+import com.example.gemm_server.common.enums.ReviewOrder;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
@@ -146,7 +146,7 @@ public class MarketController {
   @GetMapping("/{marketItemId}/reviews")
   public ResponseEntity<CommonResponse<GetReviewsForMarketItemResponse>> getReviewsOfMarketItem(
       @PathParam("marketItemId") Long marketItemId,
-      @Param("order") Order order,
+      @Param("order") ReviewOrder order,
       @Param("page") Integer page
   ) {
     GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse();

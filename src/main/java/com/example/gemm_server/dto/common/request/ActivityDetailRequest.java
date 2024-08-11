@@ -23,6 +23,10 @@ public class ActivityDetailRequest {
   private int age;
 
   @NotNull
+  @Schema(description = "가격")
+  private int price;
+
+  @NotNull
   @Schema(description = "영역 및 활동")
   private Category category;
 
