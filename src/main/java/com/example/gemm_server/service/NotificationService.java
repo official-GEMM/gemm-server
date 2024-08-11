@@ -36,7 +36,7 @@ public class NotificationService {
   public List<Notification> getRecentNotificationsByMember(Long memberId) {
     LocalDateTime dateBeforeExpiration = LocalDateTime.now(TimeZone.DEFAULT)
         .minusDays(DAYS_TO_EXPIRATION);
-    return notificationRepository.findByReceiverIdAndCreatedAtDateAfter(
+    return notificationRepository.findByReceiverIdAndCreatedAtDateAfterOrderByCreatedAtDesc(
         memberId, dateBeforeExpiration);
   }
 

@@ -12,7 +12,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
   @EntityGraph(attributePaths = {"sender"})
   @Query("SELECT e FROM Notification e WHERE e.createdAt >= :dateThreshold AND e.receiver.id = :memberId ORDER BY e.createdAt DESC")
-  List<Notification> findByReceiverIdAndCreatedAtDateAfter(
+  List<Notification> findByReceiverIdAndCreatedAtDateAfterOrderByCreatedAtDesc(
       @Param("memberId") Long memberId,
       @Param("dateThreshold") LocalDateTime dateThreshold);
 
