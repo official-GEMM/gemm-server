@@ -99,20 +99,15 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  @Operation(summary = "생성한 활동 방법 삭제", description = "사용자가 생성한 활동 방법을 삭제하는 API")
-  @DeleteMapping("/generate/guides/{generationId}")
-  public ResponseEntity<EmptyDataResponse> deleteGeneratedGuide(
-      @PathParam("generationId") Long generationId
+  @GenerationBelonging()
+  @Operation(summary = "생성한 활동 방법 상세", description = "사용자가 생성한 활동 방법 상세를 조회하는 API")
+  @GetMapping("/generate/guides/{generationId}")
+  public ResponseEntity<CommonResponse<GetGeneratedGuideDetailResponse>> getGeneratedGuideDetail(
+      @PathVariable("generationId") Long generationId
   ) {
-    return ResponseEntity.ok(new EmptyDataResponse());
-  }
+    Generation generation = generationService.getGenerationOrThrow(generationId);
 
-  @Operation(summary = "생성한 활동 리스트 조회", description = "사용자가 생성한 활동 리스트를 조회하는 API")
-  @GetMapping("/generate/activities")
-  public ResponseEntity<CommonResponse<GetGeneratedActivitiesResponse>> getGeneratedActivities(
-      @Param("page") Integer page
-  ) {
-    GetGeneratedActivitiesResponse response = new GetGeneratedActivitiesResponse();
+    GetGeneratedGuideDetailResponse response = new GetGeneratedGuideDetailResponse(generation);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

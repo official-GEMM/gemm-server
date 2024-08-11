@@ -31,4 +31,9 @@ public class GenerationService {
         memberId,
         (short) 0, pageable);
   }
+
+  public Generation getGenerationOrThrow(Long generationId) {
+    return generationRepository.findById(generationId)
+        .orElseThrow(() -> new GenerationException(GENERATION_NOT_FOUND));
+  }
 }
