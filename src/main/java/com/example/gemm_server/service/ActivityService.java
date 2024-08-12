@@ -7,9 +7,11 @@ import com.example.gemm_server.common.util.S3Util;
 import com.example.gemm_server.common.util.WebClientUtil;
 import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.domain.entity.Generation;
+import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
+import com.example.gemm_server.domain.repository.MaterialRepository;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
@@ -40,11 +42,23 @@ import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetRespon
 import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
+import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
+import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import jakarta.transaction.Transactional;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
+import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
 
 
@@ -59,6 +73,7 @@ public class ActivityService {
   private final GemService gemService;
   private final MemberService memberService;
   private final S3Util s3Util;
+  private final MaterialRepository materialRepository;
 
   @Transactional
   public GeneratedGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
@@ -160,7 +175,7 @@ public class ActivityService {
         .build());
 
     if (saveMaterialRequest.ppt() != null) {
-      // TODO: 파일 이름을 db에 저장
+
     }
     if (saveMaterialRequest.activitySheet() != null) {
       // TODO: 파일 이름을 db에 저장
@@ -258,7 +273,8 @@ public class ActivityService {
         File file = new File(imagePaths.get(i));
         thumbnailPaths[i] = s3Util.getFileUrl(
             s3Util.uploadFile(file,
-                llmPptResponse.fileName() + i,
+                llmPptResponse.fileName().substring(10, llmPptResponse.fileName().lastIndexOf('.'))
+                    + i + ".png",
                 "temp/pptx/thumbnail/"));
       }
       return thumbnailPaths;
@@ -270,8 +286,51 @@ public class ActivityService {
   protected String getActivitySheetThumbnailPath(
       LlmActivitySheetResponse llmActivitySheetResponse) {
     if (llmActivitySheetResponse != null) {
-      // Todo: docx 썸네일 링크 반환
+      String docxFilePath = convertDocxToPdf(
+          s3Util.downloadFile(llmActivitySheetResponse.fileName()),
+          llmActivitySheetResponse.fileName());
+      String thumbnailPath = convertPdfToImage(docxFilePath);
+      return thumbnailPath;
+    } else {
       return null;
+    }
+  }
+
+  protected String convertDocxToPdf(InputStream file, String fileName) {
+    try {
+      XWPFDocument docx = new XWPFDocument(file);
+      PdfOptions options = PdfOptions.create();
+
+      String filePath =
+          "temp/docx/pdf/" + fileName.substring(10, fileName.lastIndexOf('.')) + ".pdf";
+      FileOutputStream out = new FileOutputStream(new File(filePath));
+      PdfConverter.getInstance().convert(docx, out, options);
+      return filePath;
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected String convertPdfToImage(String filePath) {
+    if (filePath != null && !filePath.isBlank()) {
+      try {
+        PDDocument document = PDDocument.load(new File(filePath));
+        PDFRenderer pdfRenderer = new PDFRenderer(document);
+        BufferedImage bufferedImage = pdfRenderer.renderImage(0);
+
+        String newFilePath =
+            "temp/docx/thumbnail/" + filePath.substring(14, filePath.lastIndexOf('.')) + ".png";
+        ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
+        String thumbnailPath = s3Util.getFileUrl(
+            s3Util.uploadFile(new File(newFilePath),
+                "temp.png",
+                "temp/docx/thumbnail/"));
+        return thumbnailPath;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     } else {
       return null;
     }
