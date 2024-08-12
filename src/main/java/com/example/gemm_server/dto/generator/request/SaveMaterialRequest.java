@@ -22,15 +22,12 @@ public record SaveMaterialRequest(
         String additionalContent,
 
         @Schema(description = "PPT 파일 주소")
-        @NotNull
         String ppt,
 
         @Schema(description = "활동지 파일 주소")
-        @NotNull
         String activitySheet,
 
         @Schema(description = "컷/도안 파일 주소")
-        @NotNull
         String cutout
 ) {
 }

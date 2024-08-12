@@ -20,13 +20,10 @@ public record GenerateMaterialRequest(
         @Schema(description = "생성 추가 전달 내용")
         String additionalContent,
         @Schema(description = "PPT 슬라이드에 반영하고 싶은 내용")
-        @NotNull
         List<String> ppt,
         @Schema(description = "활동지에 반영하고 싶은 내용")
-        @NotNull
         String activitySheet,
         @Schema(description = "컷/도안에 반영하고 싶은 내용")
-        @NotNull
         String cutout
 ) {
 }
