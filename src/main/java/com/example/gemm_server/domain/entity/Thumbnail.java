@@ -9,10 +9,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -23,7 +25,8 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @SQLDelete(sql = "UPDATE thumbnail SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")
-@Table(name = "thumbnail")
+@Table(name = "thumbnail",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"material_id", "sequence"}))
 public class Thumbnail extends Timestamped {
 
   @Id
@@ -39,6 +42,10 @@ public class Thumbnail extends Timestamped {
 
   @Column(name = "file_path", nullable = false)
   private String filePath;
+
+  @Column(name = "sequence", nullable = false)
+  @ColumnDefault("0")
+  private Short sequence;
 
   @ManyToOne(targetEntity = Material.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "material_id", nullable = false)

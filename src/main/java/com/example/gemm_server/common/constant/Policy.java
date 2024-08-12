@@ -1,6 +1,7 @@
 package com.example.gemm_server.common.constant;
 
 public class Policy {
+
   // 로그인 및 회원가입 잼
   public static final int ATTENDANCE_COMPENSATION = 30;
   public static final int JOIN_COMPENSATION = 1000;
@@ -15,4 +16,8 @@ public class Policy {
   public static final int UPDATE_PPT = 20;
   public static final int UPDATE_ACTIVITY_SHEET = 15;
   public static final int UPDATE_CUTOUT = 15;
+
+  // 페이지 당 요소 개수
+  public static final int STORAGE_LIMIT_SHORT = 4;
+  public static final int STORAGE_LIMIT_LONG = 8;
 }

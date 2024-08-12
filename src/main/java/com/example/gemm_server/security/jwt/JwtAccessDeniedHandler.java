@@ -1,6 +1,6 @@
 package com.example.gemm_server.security.jwt;
 
-import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
       HttpServletResponse response,
       AccessDeniedException accessDeniedException
   ) throws IOException {
-    EmptyDataResponse.setJsonResponse(response, HttpServletResponse.SC_FORBIDDEN,
+    ErrorResponse.setJsonResponse(response, HttpServletResponse.SC_FORBIDDEN,
         accessDeniedException.getMessage());
   }
 }

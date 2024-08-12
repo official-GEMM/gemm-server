@@ -2,6 +2,8 @@ package com.example.gemm_server.dto.common.response;
 
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.MaterialType;
+import com.example.gemm_server.common.util.MaterialUtil;
+import com.example.gemm_server.domain.entity.Activity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -25,6 +27,13 @@ public class ActivityResponse {
   @Schema(description = "보유한 자료 종류")
   private MaterialType[] materialType;
 
-  public ActivityResponse() {
+  public ActivityResponse(Activity activity, String thumbnailPath) {
+    this.title = activity.getTitle();
+    this.thumbnailPath = thumbnailPath;
+    this.age = activity.getAge();
+    this.category = activity.getCategory();
+    this.materialType = MaterialUtil.binaryToList(activity.getMaterialType())
+        .toArray(MaterialType[]::new);
+
   }
 }

@@ -1,8 +1,11 @@
 package com.example.gemm_server.dto.market.response;
 
+import com.example.gemm_server.common.enums.Category;
+import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
 import com.example.gemm_server.dto.common.response.MemberResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.ArrayList;
 import lombok.Getter;
 
 @Getter
@@ -45,5 +48,6 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
   private short month;
 
   public MarketItemDetailResponse() {
+    super(new Activity("", (short) 0, (short) 0, Category.ART_AREA, ""), new ArrayList<>());
   }
 }

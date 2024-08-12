@@ -1,6 +1,6 @@
 package com.example.gemm_server.exception;
 
-import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -18,15 +18,15 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionHandler {
 
   @ExceptionHandler({CustomException.class})
-  protected ResponseEntity<EmptyDataResponse> handleCustomException(CustomException ex) {
+  protected ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
     return new ResponseEntity<>(
-        new EmptyDataResponse(ex.getStatusCode(),
+        new ErrorResponse(ex.getStatusCode(),
             ex.getMessage()),
         ex.getHttpStatus());
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<EmptyDataResponse> handleDtoValidation(
+  public ResponseEntity<ErrorResponse> handleDtoValidation(
       final MethodArgumentNotValidException ex) {
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -35,30 +35,30 @@ public class GlobalExceptionHandler {
       errors.put(fieldName, errorMessage);
     });
     return new ResponseEntity<>(
-        new EmptyDataResponse(HttpStatus.BAD_REQUEST.value(), errors.toString()),
+        new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errors.toString()),
         HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler({MissingRequestCookieException.class})
-  protected ResponseEntity<EmptyDataResponse> handleMissingRequestCookieException(
+  protected ResponseEntity<ErrorResponse> handleMissingRequestCookieException(
       MissingRequestCookieException ex) {
     return new ResponseEntity<>(
-        new EmptyDataResponse(HttpStatus.BAD_REQUEST.value(),
+        new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
             ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler({NoHandlerFoundException.class})
-  protected ResponseEntity<EmptyDataResponse> handleNoHandlerFoundException(
+  protected ResponseEntity<ErrorResponse> handleNoHandlerFoundException(
       NoHandlerFoundException ex) {
     return new ResponseEntity<>(
-        new EmptyDataResponse(HttpStatus.NOT_FOUND.value(),
+        new ErrorResponse(HttpStatus.NOT_FOUND.value(),
             ex.getMessage()), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler({Exception.class})
-  protected ResponseEntity<EmptyDataResponse> handleServerException(Exception ex) {
+  protected ResponseEntity<ErrorResponse> handleServerException(Exception ex) {
     return new ResponseEntity<>(
-        new EmptyDataResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
             ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
