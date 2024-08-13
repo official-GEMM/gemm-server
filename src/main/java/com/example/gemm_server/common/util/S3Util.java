@@ -32,6 +32,16 @@ public class S3Util {
     return objectContentStream;
   }
 
+  public String copyFile(String fileName, String filePath) {
+    if (amazonS3.doesObjectExist(bucketName, filePath + fileName)) {
+      String savePath = filePath.substring(5) + fileName;
+      amazonS3.copyObject(bucketName, filePath + fileName, bucketName, savePath);
+      return savePath;
+    } else {
+      return null;
+    }
+  }
+
   public String getFileUrl(String fileName) {
     GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
         bucketName, fileName)
@@ -47,6 +57,10 @@ public class S3Util {
 
   public String getUUIDFileName(String fileName) {
     return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
+  }
+
+  public String getFileNameFromPresignedUrl(String presignedUrl) {
+    return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('?'));
   }
 
   protected String getFileExtension(String fileName) {

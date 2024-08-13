@@ -9,9 +9,11 @@ import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.domain.entity.Generation;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
+import com.example.gemm_server.domain.repository.ThumbnailRepository;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
@@ -51,8 +53,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +76,7 @@ public class ActivityService {
   private final MemberService memberService;
   private final S3Util s3Util;
   private final MaterialRepository materialRepository;
+  private final ThumbnailRepository thumbnailRepository;
 
   @Transactional
   public GeneratedGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
@@ -175,23 +178,73 @@ public class ActivityService {
         .build());
 
     if (saveMaterialRequest.ppt() != null) {
-
+      String pptFileName = s3Util.getFileNameFromPresignedUrl(
+          saveMaterialRequest.ppt());
+      s3Util.copyFile(pptFileName, "temp/pptx/");
+      Material savedPptMaterial = materialRepository.save(Material.builder()
+          .originName(pptFileName)
+          .fileName(pptFileName)
+          .filePath("pptx/")
+          .activity(savedActivity)
+          .build());
+      String pptFileNameWithNoExtension = pptFileName.substring(0, pptFileName.lastIndexOf('.'));
+      List<Thumbnail> thumbnails = new ArrayList<>();
+      for (int i = 0; i < 20; i++) {
+        String thumbnailName = pptFileNameWithNoExtension + i + ".png";
+        log.info(thumbnailName);
+        if (s3Util.copyFile(thumbnailName, "temp/pptx/thumbnail/") != null) {
+          log.info("ppt 썸넬 저장");
+          thumbnails.add(Thumbnail.builder()
+              .originName(thumbnailName)
+              .fileName(thumbnailName)
+              .filePath("/pptx/thumbnail/")
+              .material(savedPptMaterial)
+              .build());
+        }
+      }
+      thumbnailRepository.saveAll(thumbnails);
     }
     if (saveMaterialRequest.activitySheet() != null) {
-      // TODO: 파일 이름을 db에 저장
+      String activitySheetFileName = s3Util.getFileNameFromPresignedUrl(
+          saveMaterialRequest.activitySheet());
+      s3Util.copyFile(activitySheetFileName, "temp/docx/");
+      Material savedActivitySheetMaterial = materialRepository.save(Material.builder()
+          .originName(activitySheetFileName)
+          .fileName(activitySheetFileName)
+          .filePath("docx/")
+          .activity(savedActivity)
+          .build());
+      String thumbnailName =
+          activitySheetFileName.substring(0, activitySheetFileName.lastIndexOf('.')) + ".png";
+      log.info(thumbnailName);
+      if (s3Util.copyFile(thumbnailName, "temp/docx/thumbnail/") != null) {
+        log.info("활동지 썸넬 저장");
+        thumbnailRepository.save(Thumbnail.builder()
+            .originName(thumbnailName)
+            .fileName(thumbnailName)
+            .filePath("/docx/thumbnail/")
+            .material(savedActivitySheetMaterial)
+            .build());
+      }
     }
     if (saveMaterialRequest.cutout() != null) {
-      // TODO: 파일 이름을 db에 저장
-    }
-
-    if (saveMaterialRequest.ppt() != null) {
-      // TODO: 썸네일 파일 이름을 db에 저장
-    }
-    if (saveMaterialRequest.activitySheet() != null) {
-      // TODO: 썸네일 파일 이름을 db에 저장
-    }
-    if (saveMaterialRequest.cutout() != null) {
-      // TODO: 썸네일 파일 이름을 db에 저장
+      String cutoutFileName = s3Util.getFileNameFromPresignedUrl(
+          saveMaterialRequest.cutout());
+      s3Util.copyFile(cutoutFileName, "temp/png/");
+      Material savedCutoutMaterial = materialRepository.save(Material.builder()
+          .originName(cutoutFileName)
+          .fileName(cutoutFileName)
+          .filePath("png/")
+          .activity(savedActivity)
+          .build());
+      if (s3Util.copyFile(cutoutFileName, "temp/cutout/") != null) {
+        thumbnailRepository.save(Thumbnail.builder()
+            .originName(cutoutFileName)
+            .fileName(cutoutFileName)
+            .filePath("cutout/thumbnail/")
+            .material(savedCutoutMaterial)
+            .build());
+      }
     }
 
     Generation savedGeneration = generationRepository.save(
