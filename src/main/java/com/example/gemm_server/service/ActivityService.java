@@ -1,5 +1,7 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.constant.FilePath.*;
+
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.PoiUtil;
@@ -44,23 +46,12 @@ import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetRespon
 import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
-import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
-import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import jakarta.transaction.Transactional;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
 
 
@@ -178,69 +169,28 @@ public class ActivityService {
         .build());
 
     if (saveMaterialRequest.ppt() != null) {
-      String pptFileName = s3Util.getFileNameFromPresignedUrl(
-          saveMaterialRequest.ppt());
-      s3Util.copyFile(pptFileName, "temp/pptx/");
-      Material savedPptMaterial = materialRepository.save(Material.builder()
-          .originName(pptFileName)
-          .fileName(pptFileName)
-          .filePath("pptx/")
-          .activity(savedActivity)
-          .build());
-      String pptFileNameWithNoExtension = pptFileName.substring(0, pptFileName.lastIndexOf('.'));
-      List<Thumbnail> thumbnails = new ArrayList<>();
-      for (int i = 0; i < 20; i++) {
-        String thumbnailName = pptFileNameWithNoExtension + i + ".png";
-        if (s3Util.copyFile(thumbnailName, "temp/pptx/thumbnail/") != null) {
-          thumbnails.add(Thumbnail.builder()
-              .originName(thumbnailName)
-              .fileName(thumbnailName)
-              .filePath("/pptx/thumbnail/")
-              .material(savedPptMaterial)
-              .build());
-        }
-      }
-      thumbnailRepository.saveAll(thumbnails);
+      Material savedPptMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
+          saveMaterialRequest.ppt()), TEMP_PPT_PATH, SAVE_PPT_PATH, savedActivity);
+      saveThumbnails(s3Util.getFileNameFromPresignedUrlWithNoExtension(
+              saveMaterialRequest.ppt()), TEMP_PPT_THUMBNAIL_PATH, SAVE_PPT_THUMBNAIL_PATH,
+          savedPptMaterial);
     }
+
     if (saveMaterialRequest.activitySheet() != null) {
-      String activitySheetFileName = s3Util.getFileNameFromPresignedUrl(
-          saveMaterialRequest.activitySheet());
-      s3Util.copyFile(activitySheetFileName, "temp/docx/");
-      Material savedActivitySheetMaterial = materialRepository.save(Material.builder()
-          .originName(activitySheetFileName)
-          .fileName(activitySheetFileName)
-          .filePath("docx/")
-          .activity(savedActivity)
-          .build());
-      String thumbnailName =
-          activitySheetFileName.substring(0, activitySheetFileName.lastIndexOf('.')) + ".png";
-      if (s3Util.copyFile(thumbnailName, "temp/docx/thumbnail/") != null) {
-        thumbnailRepository.save(Thumbnail.builder()
-            .originName(thumbnailName)
-            .fileName(thumbnailName)
-            .filePath("/docx/thumbnail/")
-            .material(savedActivitySheetMaterial)
-            .build());
-      }
+      Material savedActivitySheetMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
+              saveMaterialRequest.activitySheet()), TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH,
+          savedActivity);
+      saveThumbnail(
+          s3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.activitySheet()),
+          TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH, SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH,
+          savedActivitySheetMaterial);
     }
+
     if (saveMaterialRequest.cutout() != null) {
-      String cutoutFileName = s3Util.getFileNameFromPresignedUrl(
-          saveMaterialRequest.cutout());
-      s3Util.copyFile(cutoutFileName, "temp/png/");
-      Material savedCutoutMaterial = materialRepository.save(Material.builder()
-          .originName(cutoutFileName)
-          .fileName(cutoutFileName)
-          .filePath("png/")
-          .activity(savedActivity)
-          .build());
-      if (s3Util.copyFile(cutoutFileName, "temp/cutout/") != null) {
-        thumbnailRepository.save(Thumbnail.builder()
-            .originName(cutoutFileName)
-            .fileName(cutoutFileName)
-            .filePath("cutout/thumbnail/")
-            .material(savedCutoutMaterial)
-            .build());
-      }
+      Material savedCutoutMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
+          saveMaterialRequest.cutout()), TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedActivity);
+      saveThumbnail(s3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.cutout()),
+          TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedCutoutMaterial);
     }
 
     Generation savedGeneration = generationRepository.save(
@@ -299,6 +249,50 @@ public class ActivityService {
     return new UpdatedCutoutResponse(commentedCutoutResponse, member.getGem());
   }
 
+  protected Material saveMaterial(String fileName, String tempSavedFilePath,
+      String saveFilePath, Activity activity) {
+    s3Util.copyFile(fileName, tempSavedFilePath);
+    return materialRepository.save(Material.builder()
+        .originName(fileName)
+        .fileName(fileName)
+        .filePath(saveFilePath)
+        .activity(activity)
+        .build());
+  }
+
+  protected Thumbnail saveThumbnail(String fileNameWithNoExtension, String tempSavedFilePath,
+      String saveFilePath, Material material) {
+    String thumbnailName = fileNameWithNoExtension + ".png";
+    if (s3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
+      return thumbnailRepository.save(Thumbnail.builder()
+          .originName(thumbnailName)
+          .fileName(thumbnailName)
+          .filePath(saveFilePath)
+          .material(material)
+          .build());
+    } else {
+      return null;
+    }
+  }
+
+  protected List<Thumbnail> saveThumbnails(String fileNameWithNoExtension, String tempSavedFilePath,
+      String saveFilePath, Material material) {
+    List<Thumbnail> thumbnails = new ArrayList<>();
+    for (int i = 0; i < 20; i++) {
+      String thumbnailName = fileNameWithNoExtension + i + ".png";
+      if (s3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
+        Thumbnail thumbnail = Thumbnail.builder()
+            .originName(thumbnailName)
+            .fileName(thumbnailName)
+            .filePath(saveFilePath)
+            .material(material)
+            .build();
+        thumbnails.add(thumbnail);
+      }
+    }
+    return thumbnailRepository.saveAll(thumbnails);
+  }
+
   protected String[] getPptThumbnailPaths(LlmPptResponse llmPptResponse) {
     if (llmPptResponse != null) {
       List<String> imagePaths = PoiUtil.convertPptToPng(
@@ -325,11 +319,10 @@ public class ActivityService {
           s3Util.downloadFile(llmActivitySheetResponse.fileName()),
           llmActivitySheetResponse.fileName());
       String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
-      String thumbnailPath = s3Util.getFileUrl(
+      return s3Util.getFileUrl(
           s3Util.uploadFile(new File(pngFilePath),
               "temp.png",
               "temp/docx/thumbnail/"));
-      return thumbnailPath;
     } else {
       return null;
     }

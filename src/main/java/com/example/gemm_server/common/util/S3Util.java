@@ -63,6 +63,10 @@ public class S3Util {
     return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('?'));
   }
 
+  public String getFileNameFromPresignedUrlWithNoExtension(String presignedUrl) {
+    return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('.'));
+  }
+
   protected String getFileExtension(String fileName) {
     return fileName.substring(fileName.lastIndexOf("."));
   }

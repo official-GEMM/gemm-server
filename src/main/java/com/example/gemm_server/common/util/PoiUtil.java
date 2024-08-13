@@ -75,7 +75,7 @@ public class PoiUtil {
       BufferedImage bufferedImage = pdfRenderer.renderImage(0);
 
       String newFilePath =
-          "temp/docx/thumbnail/" + filePath.substring(14, filePath.lastIndexOf('.')) + ".png";
+          "temp/docx/thumbnail/" + filePath.substring(14, filePath.lastIndexOf('.')) + "0.png";
       ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
       return newFilePath;
     } catch (IOException e) {
