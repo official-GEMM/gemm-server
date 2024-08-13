@@ -191,9 +191,7 @@ public class ActivityService {
       List<Thumbnail> thumbnails = new ArrayList<>();
       for (int i = 0; i < 20; i++) {
         String thumbnailName = pptFileNameWithNoExtension + i + ".png";
-        log.info(thumbnailName);
         if (s3Util.copyFile(thumbnailName, "temp/pptx/thumbnail/") != null) {
-          log.info("ppt 썸넬 저장");
           thumbnails.add(Thumbnail.builder()
               .originName(thumbnailName)
               .fileName(thumbnailName)
@@ -216,9 +214,7 @@ public class ActivityService {
           .build());
       String thumbnailName =
           activitySheetFileName.substring(0, activitySheetFileName.lastIndexOf('.')) + ".png";
-      log.info(thumbnailName);
       if (s3Util.copyFile(thumbnailName, "temp/docx/thumbnail/") != null) {
-        log.info("활동지 썸넬 저장");
         thumbnailRepository.save(Thumbnail.builder()
             .originName(thumbnailName)
             .fileName(thumbnailName)
@@ -303,23 +299,9 @@ public class ActivityService {
     return new UpdatedCutoutResponse(commentedCutoutResponse, member.getGem());
   }
 
-  protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
-    short materialBit = 0;
-    if (ppt != null && !ppt.isBlank()) {
-      materialBit += (short) 4;
-    }
-    if (activitySheet != null && !activitySheet.isBlank()) {
-      materialBit += (short) 2;
-    }
-    if (cutout != null && !cutout.isBlank()) {
-      materialBit += (short) 1;
-    }
-    return materialBit;
-  }
-
   protected String[] getPptThumbnailPaths(LlmPptResponse llmPptResponse) {
     if (llmPptResponse != null) {
-      List<String> imagePaths = PoiUtil.pptToImages(
+      List<String> imagePaths = PoiUtil.convertPptToPng(
           s3Util.downloadFile(llmPptResponse.fileName()));
       String[] thumbnailPaths = new String[imagePaths.size()];
       for (int i = 0; i < imagePaths.size(); i++) {
@@ -339,51 +321,15 @@ public class ActivityService {
   protected String getActivitySheetThumbnailPath(
       LlmActivitySheetResponse llmActivitySheetResponse) {
     if (llmActivitySheetResponse != null) {
-      String docxFilePath = convertDocxToPdf(
+      String docxFilePath = PoiUtil.convertDocxToPdf(
           s3Util.downloadFile(llmActivitySheetResponse.fileName()),
           llmActivitySheetResponse.fileName());
-      String thumbnailPath = convertPdfToImage(docxFilePath);
+      String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
+      String thumbnailPath = s3Util.getFileUrl(
+          s3Util.uploadFile(new File(pngFilePath),
+              "temp.png",
+              "temp/docx/thumbnail/"));
       return thumbnailPath;
-    } else {
-      return null;
-    }
-  }
-
-  protected String convertDocxToPdf(InputStream file, String fileName) {
-    try {
-      XWPFDocument docx = new XWPFDocument(file);
-      PdfOptions options = PdfOptions.create();
-
-      String filePath =
-          "temp/docx/pdf/" + fileName.substring(10, fileName.lastIndexOf('.')) + ".pdf";
-      FileOutputStream out = new FileOutputStream(new File(filePath));
-      PdfConverter.getInstance().convert(docx, out, options);
-      return filePath;
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  protected String convertPdfToImage(String filePath) {
-    if (filePath != null && !filePath.isBlank()) {
-      try {
-        PDDocument document = PDDocument.load(new File(filePath));
-        PDFRenderer pdfRenderer = new PDFRenderer(document);
-        BufferedImage bufferedImage = pdfRenderer.renderImage(0);
-
-        String newFilePath =
-            "temp/docx/thumbnail/" + filePath.substring(14, filePath.lastIndexOf('.')) + ".png";
-        ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
-        String thumbnailPath = s3Util.getFileUrl(
-            s3Util.uploadFile(new File(newFilePath),
-                "temp.png",
-                "temp/docx/thumbnail/"));
-        return thumbnailPath;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
     } else {
       return null;
     }
@@ -395,5 +341,19 @@ public class ActivityService {
     } else {
       return null;
     }
+  }
+
+  protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
+    short materialBit = 0;
+    if (ppt != null && !ppt.isBlank()) {
+      materialBit += (short) 4;
+    }
+    if (activitySheet != null && !activitySheet.isBlank()) {
+      materialBit += (short) 2;
+    }
+    if (cutout != null && !cutout.isBlank()) {
+      materialBit += (short) 1;
+    }
+    return materialBit;
   }
 }
