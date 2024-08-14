@@ -10,8 +10,8 @@ public record UpdateCutoutRequest(
     String cutout,
 
     @Schema(description = "수정에 반영할 내용")
-    @NotBlank
-    String comment
+    @NotNull
+    String[] comments
 ) {
 
 }

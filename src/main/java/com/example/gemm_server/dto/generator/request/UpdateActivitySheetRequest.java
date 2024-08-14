@@ -10,8 +10,8 @@ public record UpdateActivitySheetRequest(
     String activitySheet,
 
     @Schema(description = "수정에 반영할 코멘트")
-    @NotBlank
-    String comment
+    @NotNull
+    String[] comments
 ) {
 
 }
