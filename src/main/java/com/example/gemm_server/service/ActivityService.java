@@ -53,6 +53,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -151,29 +154,52 @@ public class ActivityService {
   public GeneratedMaterialsResponse generateMaterials(
       GenerateMaterialRequest generateMaterialRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-
+    if (Stream.of(generateMaterialRequest.ppt(), generateMaterialRequest.activitySheet(),
+        generateMaterialRequest.cutout()).allMatch(Objects::isNull)) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_MATERIAL_GENERATE_REQUEST);
+    }
+    int remainGem = gemService.getRemainGem(member,
+        Stream.of(Optional.ofNullable(generateMaterialRequest.ppt()).map(p -> Policy.GENERATE_PPT),
+            Optional.ofNullable(generateMaterialRequest.activitySheet())
+                .map(a -> Policy.GENERATE_ACTIVITY_SHEET),
+            Optional.ofNullable(generateMaterialRequest.cutout()).map(c -> Policy.GENERATE_CUTOUT)
+        ).filter(Optional::isPresent).mapToInt(Optional::get).sum(),
+        GemUsageType.AI_USE);
     LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/materials",
         generateMaterialRequest, LlmMaterialResponse.class);
 
-    PptPathResponse pptPathResponse = new PptPathResponse(
-        getPptThumbnailPaths(llmMaterialResponse.ppt()), llmMaterialResponse.ppt().filePath());
-    gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_PPT, GemUsageType.AI_USE);
+    if (llmMaterialResponse == null) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_MATERIAL_RESULT);
+    }
+    int amount = 0;
+    PptPathResponse pptPathResponse = null;
+    if (llmMaterialResponse.ppt() != null) {
+      pptPathResponse = new PptPathResponse(getPptThumbnailPaths(llmMaterialResponse.ppt()),
+          llmMaterialResponse.ppt().filePath());
+      amount += Policy.GENERATE_PPT;
+    }
 
-    ActivitySheetPathResponse activitySheetPathResponse = new ActivitySheetPathResponse(
-        getActivitySheetThumbnailPath(llmMaterialResponse.activitySheet()),
-        llmMaterialResponse.activitySheet().filePath()
-    );
-    gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_ACTIVITY_SHEET,
-        GemUsageType.AI_USE);
+    ActivitySheetPathResponse activitySheetPathResponse = null;
+    if (llmMaterialResponse.activitySheet() != null) {
+      activitySheetPathResponse = new ActivitySheetPathResponse(
+          getActivitySheetThumbnailPath(llmMaterialResponse.activitySheet()),
+          llmMaterialResponse.activitySheet().filePath()
+      );
+      amount += Policy.GENERATE_ACTIVITY_SHEET;
+    }
 
-    CutoutPathResponse cutoutPathResponse = new CutoutPathResponse(
-        getCutoutThumbnailPath(llmMaterialResponse.cutout()),
-        llmMaterialResponse.cutout().filePath()
-    );
-    gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_CUTOUT, GemUsageType.AI_USE);
+    CutoutPathResponse cutoutPathResponse = null;
+    if (llmMaterialResponse.cutout() != null) {
+      cutoutPathResponse = new CutoutPathResponse(
+          getCutoutThumbnailPath(llmMaterialResponse.cutout()),
+          llmMaterialResponse.cutout().filePath()
+      );
+      amount += Policy.GENERATE_CUTOUT;
+    }
+    gemService.saveChangesOfGemWithMember(member, amount, GemUsageType.AI_USE);
 
     return new GeneratedMaterialsResponse(pptPathResponse, activitySheetPathResponse,
-        cutoutPathResponse, member.getGem());
+        cutoutPathResponse, remainGem);
   }
 
   @Transactional
@@ -222,10 +248,13 @@ public class ActivityService {
   @Transactional
   public UpdatedPptResponse updatePpt(UpdatePptRequest updatePptRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-
     LlmPptResponse llmPptResponse = webClientUtil.post("/generate/materials/ppt",
         updatePptRequest, LlmPptResponse.class);
 
+    if (llmPptResponse == null || llmPptResponse.fileName().isBlank() || llmPptResponse.filePath()
+        .isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_PPT_RESULT);
+    }
     CommentedPptResponse commentedPptResponse = new CommentedPptResponse(
         getPptThumbnailPaths(llmPptResponse), llmPptResponse.filePath()
     );
@@ -238,11 +267,14 @@ public class ActivityService {
   public UpdatedActivitySheetResponse updateActivitySheet(
       UpdateActivitySheetRequest updateActivitySheetRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-
     LlmActivitySheetResponse llmActivitySheetResponse = webClientUtil.post(
         "/generate/materials/activity-sheet",
         updateActivitySheetRequest, LlmActivitySheetResponse.class);
 
+    if (llmActivitySheetResponse == null || llmActivitySheetResponse.fileName().isBlank()
+        || llmActivitySheetResponse.filePath().isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_RESULT);
+    }
     CommentedActivitySheetResponse commentedActivitySheetResponse = new CommentedActivitySheetResponse(
         getActivitySheetThumbnailPath(llmActivitySheetResponse), llmActivitySheetResponse.filePath()
     );
@@ -256,11 +288,14 @@ public class ActivityService {
   public UpdatedCutoutResponse updateCutout(
       UpdateCutoutRequest updateCutoutRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-
     LlmCutoutResponse llmCutoutResponse = webClientUtil.post(
         "/generate/materials/cutout",
         updateCutoutRequest, LlmCutoutResponse.class);
 
+    if (llmCutoutResponse == null || llmCutoutResponse.fileName().isBlank()
+        || llmCutoutResponse.filePath().isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_CUTOUT_RESULT);
+    }
     CommentedCutoutResponse commentedCutoutResponse = new CommentedCutoutResponse(
         getCutoutThumbnailPath(llmCutoutResponse), llmCutoutResponse.filePath()
     );
