@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record CommentGuideRequest(
         @Schema(description = "방법에서 수정할 부분")
-        @NotNull
         String section,
         @Schema(description = "수정에 적용하고 싶은 내용")
         @NotBlank

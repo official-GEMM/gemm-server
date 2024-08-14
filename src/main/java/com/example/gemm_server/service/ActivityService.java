@@ -2,6 +2,7 @@ package com.example.gemm_server.service;
 
 import static com.example.gemm_server.common.constant.FilePath.*;
 
+import com.example.gemm_server.common.code.error.GeneratorErrorCode;
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.PoiUtil;
@@ -46,9 +47,11 @@ import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetRespon
 import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
+import com.example.gemm_server.exception.GeneratorException;
 import jakarta.transaction.Transactional;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,9 +76,12 @@ public class ActivityService {
   public GeneratedGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-
     LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
         generateGuideRequest, LlmGuideResponse.class);
+
+    if (llmGuideResponse == null || llmGuideResponse.content().isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_GUIDE_RESULT);
+    }
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
 
     return new GeneratedGuideResponse(llmGuideResponse.content(), member.getGem());
@@ -100,12 +106,15 @@ public class ActivityService {
   @Transactional
   public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
+        UpdateGuideRequest, LlmGuideResponse.class);
 
-    UpdatedGuideResponse updatedGuideResponse = webClientUtil.put("/generate/guide/result",
-        UpdateGuideRequest, UpdatedGuideResponse.class);
+    if (llmGuideResponse == null || llmGuideResponse.content().isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_GUIDE_RESULT);
+    }
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
 
-    return new UpdatedGuideResponse(updatedGuideResponse.content(), member.getGem());
+    return new UpdatedGuideResponse(llmGuideResponse.content(), member.getGem());
   }
 
   @Transactional
@@ -114,6 +123,18 @@ public class ActivityService {
     LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
         "/generate/guide/sync",
         linkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
+
+    if (llmDesignedMaterialResponse == null || llmDesignedMaterialResponse.ppt().length < 1 ||
+        Arrays.stream(llmDesignedMaterialResponse.ppt())
+            .anyMatch(design -> design == null || design.isBlank())) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_PPT_DESIGN_RESULT);
+    }
+    if (llmDesignedMaterialResponse.activitySheet().isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_DESIGN_RESULT);
+    }
+    if (llmDesignedMaterialResponse.cutout().isBlank()) {
+      throw new GeneratorException(GeneratorErrorCode.EMPTY_CUTOUT_DESIGN_RESULT);
+    }
 
     return new LinkedMaterialGuideResponse(
         linkMaterialGuideRequest.title(),
