@@ -3,7 +3,6 @@ package com.example.gemm_server.service;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
 import static com.example.gemm_server.common.constant.FilePath.*;
 
-import com.example.gemm_server.common.code.error.GeneratorErrorCode;
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.enums.MaterialType;
@@ -69,11 +68,11 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
 
   private final WebClientUtil webClientUtil;
-  private final ActivityRepository activityRepository;
-  private final GenerationRepository generationRepository;
+  private final S3Util s3Util;
   private final GemService gemService;
   private final MemberService memberService;
-  private final S3Util s3Util;
+  private final ActivityRepository activityRepository;
+  private final GenerationRepository generationRepository;
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
 
@@ -163,7 +162,7 @@ public class ActivityService {
         generateMaterialRequest.cutout()).allMatch(Objects::isNull)) {
       throw new GeneratorException(EMPTY_MATERIAL_GENERATE_REQUEST);
     }
-    int remainGem = gemService.getRemainGem(member,
+    gemService.getRemainGem(member,
         Stream.of(Optional.ofNullable(generateMaterialRequest.ppt()).map(p -> Policy.GENERATE_PPT),
             Optional.ofNullable(generateMaterialRequest.activitySheet())
                 .map(a -> Policy.GENERATE_ACTIVITY_SHEET),
@@ -176,6 +175,7 @@ public class ActivityService {
     if (llmMaterialResponse == null) {
       throw new GeneratorException(EMPTY_MATERIAL_RESULT);
     }
+
     int amount = 0;
     PptPathResponse pptPathResponse = null;
     if (llmMaterialResponse.ppt() != null) {
@@ -204,7 +204,7 @@ public class ActivityService {
     gemService.saveChangesOfGemWithMember(member, amount, GemUsageType.AI_USE);
 
     return new GeneratedMaterialsResponse(pptPathResponse, activitySheetPathResponse,
-        cutoutPathResponse, remainGem);
+        cutoutPathResponse, member.getGem());
   }
 
   @Transactional
@@ -381,8 +381,7 @@ public class ActivityService {
         thumbnailPaths[i] = s3Util.getFileUrl(
             s3Util.uploadFile(file,
                 llmPptResponse.fileName().substring(10, llmPptResponse.fileName().lastIndexOf('.'))
-                    + i + ".png",
-                "temp/pptx/thumbnail/"));
+                    + i + ".png", TEMP_PPT_THUMBNAIL_PATH));
       }
       return thumbnailPaths;
     } else {
@@ -398,9 +397,7 @@ public class ActivityService {
           llmActivitySheetResponse.fileName());
       String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
       return s3Util.getFileUrl(
-          s3Util.uploadFile(new File(pngFilePath),
-              "temp.png",
-              "temp/docx/thumbnail/"));
+          s3Util.uploadFile(new File(pngFilePath), "temp.png", TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH));
     } else {
       return null;
     }
