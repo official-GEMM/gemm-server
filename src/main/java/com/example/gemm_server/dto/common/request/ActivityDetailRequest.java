@@ -19,10 +19,6 @@ public class ActivityDetailRequest {
   private String title;
 
   @NotNull
-  @Schema(description = "가격")
-  private int price;
-
-  @NotNull
   @Schema(description = "타겟 연령")
   private int age;
 
