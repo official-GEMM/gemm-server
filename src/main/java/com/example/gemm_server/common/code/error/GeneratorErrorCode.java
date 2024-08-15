@@ -26,6 +26,9 @@ public enum GeneratorErrorCode implements ErrorCode {
   FAILED_TO_COPY_FILE(HttpStatus.NOT_FOUND, "임시 파일을 저장소로 옮기던 중 에러가 발생했습니다."),
   FAILED_TO_GENERATE_PRESIGNED_URL(HttpStatus.NOT_FOUND, "파일의 미리 서명된 URL을 생성하던 중 에러가 발생했습니다."),
 
+  NOT_EXIST_MATERIAL(HttpStatus.NOT_FOUND, "임시 자료 파일이 없습니다."),
+  NOT_EXIST_THUMBNAIL(HttpStatus.NOT_FOUND, "임시 썸네일이 없습니다."),
+
   FAILED_TO_CONNECT_TO_LLM_SERVER(HttpStatus.INTERNAL_SERVER_ERROR, "LLM 서버와 통신 중 에러가 발생했습니다."),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "LLM 서버 에러입니다. 서버 팀에 연락주세요!");
 

@@ -1,10 +1,12 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
 import static com.example.gemm_server.common.constant.FilePath.*;
 
 import com.example.gemm_server.common.code.error.GeneratorErrorCode;
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.GemUsageType;
+import com.example.gemm_server.common.enums.MaterialType;
 import com.example.gemm_server.common.util.PoiUtil;
 import com.example.gemm_server.common.util.S3Util;
 import com.example.gemm_server.common.util.WebClientUtil;
@@ -79,11 +81,12 @@ public class ActivityService {
   public GenerateGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    gemService.getRemainGem(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
     LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
         generateGuideRequest, LlmGuideResponse.class);
 
     if (llmGuideResponse == null || llmGuideResponse.content().isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_GUIDE_RESULT);
+      throw new GeneratorException(EMPTY_GUIDE_RESULT);
     }
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
 
@@ -97,6 +100,7 @@ public class ActivityService {
     Activity savedActivity = activityRepository.save(Activity.builder()
         .title(saveGuideRequest.title())
         .age(saveGuideRequest.age())
+        .category(saveGuideRequest.category())
         .content(saveGuideRequest.content())
         .materialType((short) 0)
         .build());
@@ -109,11 +113,12 @@ public class ActivityService {
   @Transactional
   public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    gemService.getRemainGem(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
         UpdateGuideRequest, LlmGuideResponse.class);
 
     if (llmGuideResponse == null || llmGuideResponse.content().isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_GUIDE_RESULT);
+      throw new GeneratorException(EMPTY_GUIDE_RESULT);
     }
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
 
@@ -130,13 +135,13 @@ public class ActivityService {
     if (llmDesignedMaterialResponse == null || llmDesignedMaterialResponse.ppt().length < 1 ||
         Arrays.stream(llmDesignedMaterialResponse.ppt())
             .anyMatch(design -> design == null || design.isBlank())) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_PPT_DESIGN_RESULT);
+      throw new GeneratorException(EMPTY_PPT_DESIGN_RESULT);
     }
     if (llmDesignedMaterialResponse.activitySheet().isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_DESIGN_RESULT);
+      throw new GeneratorException(EMPTY_ACTIVITY_SHEET_DESIGN_RESULT);
     }
     if (llmDesignedMaterialResponse.cutout().isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_CUTOUT_DESIGN_RESULT);
+      throw new GeneratorException(EMPTY_CUTOUT_DESIGN_RESULT);
     }
 
     return new LinkedMaterialGuideResponse(
@@ -156,7 +161,7 @@ public class ActivityService {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     if (Stream.of(generateMaterialRequest.ppt(), generateMaterialRequest.activitySheet(),
         generateMaterialRequest.cutout()).allMatch(Objects::isNull)) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_MATERIAL_GENERATE_REQUEST);
+      throw new GeneratorException(EMPTY_MATERIAL_GENERATE_REQUEST);
     }
     int remainGem = gemService.getRemainGem(member,
         Stream.of(Optional.ofNullable(generateMaterialRequest.ppt()).map(p -> Policy.GENERATE_PPT),
@@ -169,7 +174,7 @@ public class ActivityService {
         generateMaterialRequest, LlmMaterialResponse.class);
 
     if (llmMaterialResponse == null) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_MATERIAL_RESULT);
+      throw new GeneratorException(EMPTY_MATERIAL_RESULT);
     }
     int amount = 0;
     PptPathResponse pptPathResponse = null;
@@ -210,6 +215,7 @@ public class ActivityService {
     Activity savedActivity = activityRepository.save(Activity.builder()
         .title(saveMaterialRequest.title())
         .age(saveMaterialRequest.age())
+        .category(saveMaterialRequest.category())
         .content(saveMaterialRequest.additionalContent())
         .materialType(getMaterialBitMask(saveMaterialRequest.ppt(),
             saveMaterialRequest.activitySheet(), saveMaterialRequest.cutout()))
@@ -217,7 +223,8 @@ public class ActivityService {
 
     if (saveMaterialRequest.ppt() != null) {
       Material savedPptMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
-          saveMaterialRequest.ppt()), TEMP_PPT_PATH, SAVE_PPT_PATH, savedActivity);
+              saveMaterialRequest.ppt()), TEMP_PPT_PATH, SAVE_PPT_PATH, savedActivity,
+          MaterialType.PPT);
       saveThumbnails(s3Util.getFileNameFromPresignedUrlWithNoExtension(
               saveMaterialRequest.ppt()), TEMP_PPT_THUMBNAIL_PATH, SAVE_PPT_THUMBNAIL_PATH,
           savedPptMaterial);
@@ -226,7 +233,7 @@ public class ActivityService {
     if (saveMaterialRequest.activitySheet() != null) {
       Material savedActivitySheetMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.activitySheet()), TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH,
-          savedActivity);
+          savedActivity, MaterialType.ACTIVITY_SHEET);
       saveThumbnail(
           s3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.activitySheet()),
           TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH, SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH,
@@ -235,7 +242,8 @@ public class ActivityService {
 
     if (saveMaterialRequest.cutout() != null) {
       Material savedCutoutMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
-          saveMaterialRequest.cutout()), TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedActivity);
+              saveMaterialRequest.cutout()), TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedActivity,
+          MaterialType.CUTOUT);
       saveThumbnail(s3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.cutout()),
           TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedCutoutMaterial);
     }
@@ -248,12 +256,13 @@ public class ActivityService {
   @Transactional
   public UpdatedPptResponse updatePpt(UpdatePptRequest updatePptRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    gemService.getRemainGem(member, Policy.UPDATE_PPT, GemUsageType.AI_USE);
     LlmPptResponse llmPptResponse = webClientUtil.post("/generate/materials/ppt",
         updatePptRequest, LlmPptResponse.class);
 
     if (llmPptResponse == null || llmPptResponse.fileName().isBlank() || llmPptResponse.filePath()
         .isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_PPT_RESULT);
+      throw new GeneratorException(EMPTY_PPT_RESULT);
     }
     CommentedPptResponse commentedPptResponse = new CommentedPptResponse(
         getPptThumbnailPaths(llmPptResponse), llmPptResponse.filePath()
@@ -267,13 +276,14 @@ public class ActivityService {
   public UpdatedActivitySheetResponse updateActivitySheet(
       UpdateActivitySheetRequest updateActivitySheetRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    gemService.getRemainGem(member, Policy.UPDATE_ACTIVITY_SHEET, GemUsageType.AI_USE);
     LlmActivitySheetResponse llmActivitySheetResponse = webClientUtil.post(
         "/generate/materials/activity-sheet",
         updateActivitySheetRequest, LlmActivitySheetResponse.class);
 
     if (llmActivitySheetResponse == null || llmActivitySheetResponse.fileName().isBlank()
         || llmActivitySheetResponse.filePath().isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_RESULT);
+      throw new GeneratorException(EMPTY_ACTIVITY_SHEET_RESULT);
     }
     CommentedActivitySheetResponse commentedActivitySheetResponse = new CommentedActivitySheetResponse(
         getActivitySheetThumbnailPath(llmActivitySheetResponse), llmActivitySheetResponse.filePath()
@@ -288,13 +298,14 @@ public class ActivityService {
   public UpdatedCutoutResponse updateCutout(
       UpdateCutoutRequest updateCutoutRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    gemService.getRemainGem(member, Policy.UPDATE_CUTOUT, GemUsageType.AI_USE);
     LlmCutoutResponse llmCutoutResponse = webClientUtil.post(
         "/generate/materials/cutout",
         updateCutoutRequest, LlmCutoutResponse.class);
 
     if (llmCutoutResponse == null || llmCutoutResponse.fileName().isBlank()
         || llmCutoutResponse.filePath().isBlank()) {
-      throw new GeneratorException(GeneratorErrorCode.EMPTY_CUTOUT_RESULT);
+      throw new GeneratorException(EMPTY_CUTOUT_RESULT);
     }
     CommentedCutoutResponse commentedCutoutResponse = new CommentedCutoutResponse(
         getCutoutThumbnailPath(llmCutoutResponse), llmCutoutResponse.filePath()
@@ -306,16 +317,17 @@ public class ActivityService {
   }
 
   protected Material saveMaterial(String fileName, String tempSavedFilePath,
-      String saveFilePath, Activity activity) {
+      String saveFilePath, Activity activity, MaterialType materialType) {
     if (s3Util.copyFile(fileName, tempSavedFilePath) != null) {
       return materialRepository.save(Material.builder()
           .originName(fileName)
           .fileName(fileName)
           .filePath(saveFilePath)
+          .type(materialType)
           .activity(activity)
           .build());
     } else {
-      return null;
+      throw new GeneratorException(NOT_EXIST_MATERIAL);
     }
   }
 
@@ -327,10 +339,11 @@ public class ActivityService {
           .originName(thumbnailName)
           .fileName(thumbnailName)
           .filePath(saveFilePath)
+          .sequence((short) 0)
           .material(material)
           .build());
     } else {
-      return null;
+      throw new GeneratorException(NOT_EXIST_THUMBNAIL);
     }
   }
 
@@ -344,9 +357,15 @@ public class ActivityService {
             .originName(thumbnailName)
             .fileName(thumbnailName)
             .filePath(saveFilePath)
+            .sequence((short) i)
             .material(material)
             .build();
         thumbnails.add(thumbnail);
+      } else {
+        if (i == 0) {
+          throw new GeneratorException(NOT_EXIST_THUMBNAIL);
+        }
+        break;
       }
     }
     return thumbnailRepository.saveAll(thumbnails);
