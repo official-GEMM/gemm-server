@@ -10,7 +10,7 @@ import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
 import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
-import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
+import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
@@ -42,13 +42,13 @@ public class GeneratorController {
 
   @Operation(summary = "활동 방법 생성", description = "활동 방법을 생성하는 API")
   @PostMapping("/guide")
-  public ResponseEntity<CommonResponse<GeneratedGuideResponse>> generateActivityGuide(
+  public ResponseEntity<CommonResponse<GenerateGuideResponse>> generateActivityGuide(
       @Valid @RequestBody GenerateGuideRequest generateGuideRequest
       //            @AuthenticationPrincipal CustomUser user
   ) {
-    GeneratedGuideResponse generatedGuideResponse = activityService.generateGuide(
+    GenerateGuideResponse generateGuideResponse = activityService.generateGuide(
         generateGuideRequest, 1L);
-    return ResponseEntity.ok(new CommonResponse<>(generatedGuideResponse));
+    return ResponseEntity.ok(new CommonResponse<>(generateGuideResponse));
   }
 
   @Operation(summary = "활동 방법 저장", description = "활동 방법을 내 저장소에 저장하는 API")

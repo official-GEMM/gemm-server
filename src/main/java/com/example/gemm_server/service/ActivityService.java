@@ -31,7 +31,7 @@ import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResp
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
-import com.example.gemm_server.dto.generator.response.GeneratedGuideResponse;
+import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmActivitySheetResponse;
@@ -76,7 +76,7 @@ public class ActivityService {
   private final ThumbnailRepository thumbnailRepository;
 
   @Transactional
-  public GeneratedGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
+  public GenerateGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
@@ -87,7 +87,7 @@ public class ActivityService {
     }
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
 
-    return new GeneratedGuideResponse(llmGuideResponse.content(), member.getGem());
+    return new GenerateGuideResponse(llmGuideResponse.content(), member.getGem());
   }
 
   @Transactional
