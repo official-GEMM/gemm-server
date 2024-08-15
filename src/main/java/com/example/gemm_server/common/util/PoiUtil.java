@@ -1,5 +1,10 @@
 package com.example.gemm_server.common.util;
 
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
+
+import com.example.gemm_server.common.code.error.GeneratorErrorCode;
+import com.example.gemm_server.common.constant.FilePath;
+import com.example.gemm_server.exception.GeneratorException;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import java.util.ArrayList;
@@ -18,11 +23,15 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 public class PoiUtil {
 
-  public static List<String> convertPptToPng(InputStream fileInputStream) {
-    List<String> imageFileNames = new ArrayList<>();
-    try {
-      XMLSlideShow ppt = new XMLSlideShow(fileInputStream);
+  private static final String PNG = "png";
+  private static final String PDF = "pdf";
+  private static final String TEMP_PDF_PATH = "temp/docx/pdf/";
+  private static final String TEMP_DOCX_THUMBNAIL_PATH = "temp/docx/thumbnail/";
 
+  public static List<String> convertPptToPng(InputStream fileInputStream) {
+    try {
+      List<String> imageFileNames = new ArrayList<>();
+      XMLSlideShow ppt = new XMLSlideShow(fileInputStream);
       Dimension pgsize = ppt.getPageSize();
       List<XSLFSlide> slides = ppt.getSlides();
       BufferedImage img = null;
@@ -35,20 +44,18 @@ public class PoiUtil {
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
 
         slide.draw(graphics);
-        String saveFileName = "temp/pptx/thumbnail/" + UUIDUtil.getRandomUUID() + ".png";
+        String saveFileName =
+            FilePath.TEMP_PPT_THUMBNAIL_PATH + UUIDUtil.getRandomUUID() + +'.' + PNG;
         FileOutputStream out = new FileOutputStream(saveFileName);
-        javax.imageio.ImageIO.write(img, "png", out);
+        javax.imageio.ImageIO.write(img, PNG, out);
         ppt.write(out);
         imageFileNames.add(saveFileName);
-
         out.close();
       }
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
+      return imageFileNames;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new GeneratorException(FAILED_TO_GENERATE_PPT_THUMBNAIL);
     }
-    return imageFileNames;
   }
 
   public static String convertDocxToPdf(InputStream file, String fileName) {
@@ -57,14 +64,12 @@ public class PoiUtil {
       PdfOptions options = PdfOptions.create();
 
       String filePath =
-          "temp/docx/pdf/" + fileName.substring(10, fileName.lastIndexOf('.')) + ".pdf";
+          TEMP_PDF_PATH + fileName.substring(10, fileName.lastIndexOf('.') + 1) + PDF;
       FileOutputStream out = new FileOutputStream(new File(filePath));
       PdfConverter.getInstance().convert(docx, out, options);
       return filePath;
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new GeneratorException(FAILED_TO_CONVERT_DOCX_TO_PDF);
     }
   }
 
@@ -75,11 +80,11 @@ public class PoiUtil {
       BufferedImage bufferedImage = pdfRenderer.renderImage(0);
 
       String newFilePath =
-          "temp/docx/thumbnail/" + filePath.substring(14, filePath.lastIndexOf('.')) + "0.png";
+          TEMP_DOCX_THUMBNAIL_PATH + filePath.substring(14, filePath.lastIndexOf('.')) + "0." + PNG;
       ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
       return newFilePath;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new GeneratorException(FAILED_TO_GENERATE_ACTIVITY_SHEET_THUMBNAIL);
     }
   }
 }

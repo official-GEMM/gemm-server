@@ -307,13 +307,16 @@ public class ActivityService {
 
   protected Material saveMaterial(String fileName, String tempSavedFilePath,
       String saveFilePath, Activity activity) {
-    s3Util.copyFile(fileName, tempSavedFilePath);
-    return materialRepository.save(Material.builder()
-        .originName(fileName)
-        .fileName(fileName)
-        .filePath(saveFilePath)
-        .activity(activity)
-        .build());
+    if (s3Util.copyFile(fileName, tempSavedFilePath) != null) {
+      return materialRepository.save(Material.builder()
+          .originName(fileName)
+          .fileName(fileName)
+          .filePath(saveFilePath)
+          .activity(activity)
+          .build());
+    } else {
+      return null;
+    }
   }
 
   protected Thumbnail saveThumbnail(String fileNameWithNoExtension, String tempSavedFilePath,
