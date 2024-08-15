@@ -59,10 +59,11 @@ public class Material extends Timestamped {
   private List<Thumbnail> thumbnails;
 
   @Builder
-  public Material(String originName, String fileName, String filePath, Activity activity) {
+  public Material(String originName, String fileName, String filePath, MaterialType type, Activity activity) {
     this.originName = originName;
     this.fileName = fileName;
     this.filePath = filePath;
+    this.type = type;
     this.activity = activity;
   }
 }
