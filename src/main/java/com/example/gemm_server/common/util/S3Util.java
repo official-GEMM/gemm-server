@@ -2,7 +2,6 @@ package com.example.gemm_server.common.util;
 
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -10,7 +9,6 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.example.gemm_server.common.code.error.GeneratorErrorCode;
 import com.example.gemm_server.exception.GeneratorException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,6 @@ package com.example.gemm_server.common.util;
 
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
 
-import com.example.gemm_server.common.code.error.GeneratorErrorCode;
 import com.example.gemm_server.common.constant.FilePath;
 import com.example.gemm_server.exception.GeneratorException;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
@@ -25,11 +24,10 @@ public class PoiUtil {
 
   private static final String PNG = "png";
   private static final String PDF = "pdf";
-  private static final String TEMP_PDF_PATH = "temp/docx/pdf/";
-  private static final String TEMP_DOCX_THUMBNAIL_PATH = "temp/docx/thumbnail/";
 
   public static List<String> convertPptToPng(InputStream fileInputStream) {
     try {
+      System.out.println("성공1");
       List<String> imageFileNames = new ArrayList<>();
       XMLSlideShow ppt = new XMLSlideShow(fileInputStream);
       Dimension pgsize = ppt.getPageSize();
@@ -37,6 +35,7 @@ public class PoiUtil {
       BufferedImage img = null;
 
       for (XSLFSlide slide : slides) {
+        System.out.println("성공2");
         img = new BufferedImage(pgsize.width, pgsize.height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = img.createGraphics();
 
@@ -44,9 +43,9 @@ public class PoiUtil {
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
 
         slide.draw(graphics);
-        String saveFileName =
-            FilePath.TEMP_PPT_THUMBNAIL_PATH + UUIDUtil.getRandomUUID() + +'.' + PNG;
+        String saveFileName = UUIDUtil.getRandomUUID() + '.' + PNG;
         FileOutputStream out = new FileOutputStream(saveFileName);
+        System.out.println("성공3");
         javax.imageio.ImageIO.write(img, PNG, out);
         ppt.write(out);
         imageFileNames.add(saveFileName);
@@ -63,8 +62,7 @@ public class PoiUtil {
       XWPFDocument docx = new XWPFDocument(file);
       PdfOptions options = PdfOptions.create();
 
-      String filePath =
-          TEMP_PDF_PATH + fileName.substring(10, fileName.lastIndexOf('.') + 1) + PDF;
+      String filePath = UUIDUtil.getRandomUUID() + '.' + PDF;
       FileOutputStream out = new FileOutputStream(new File(filePath));
       PdfConverter.getInstance().convert(docx, out, options);
       return filePath;
@@ -79,8 +77,7 @@ public class PoiUtil {
       PDFRenderer pdfRenderer = new PDFRenderer(document);
       BufferedImage bufferedImage = pdfRenderer.renderImage(0);
 
-      String newFilePath =
-          TEMP_DOCX_THUMBNAIL_PATH + filePath.substring(14, filePath.lastIndexOf('.')) + "0." + PNG;
+      String newFilePath = UUIDUtil.getRandomUUID() + "0." + PNG;
       ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
       return newFilePath;
     } catch (IOException e) {

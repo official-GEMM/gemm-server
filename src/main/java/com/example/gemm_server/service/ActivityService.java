@@ -397,7 +397,9 @@ public class ActivityService {
           llmActivitySheetResponse.fileName());
       String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
       return s3Util.getFileUrl(
-          s3Util.uploadFile(new File(pngFilePath), "temp.png", TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH));
+          s3Util.uploadFile(new File(pngFilePath), llmActivitySheetResponse.fileName()
+                  .substring(10, llmActivitySheetResponse.fileName().lastIndexOf('.') + 1) + "png",
+              TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH));
     } else {
       return null;
     }
