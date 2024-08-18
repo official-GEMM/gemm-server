@@ -28,6 +28,7 @@ public class S3Util {
   public String uploadFile(File file, String fileName, String savePath) {
     try {
       amazonS3.putObject(bucketName, savePath + fileName, file);
+      file.delete();
       return savePath + fileName;
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
