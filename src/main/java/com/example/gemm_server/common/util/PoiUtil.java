@@ -2,7 +2,6 @@ package com.example.gemm_server.common.util;
 
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
 
-import com.example.gemm_server.common.constant.FilePath;
 import com.example.gemm_server.exception.GeneratorException;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
@@ -26,16 +25,13 @@ public class PoiUtil {
   private static final String PDF = "pdf";
 
   public static List<String> convertPptToPng(InputStream fileInputStream) {
-    try {
-      System.out.println("성공1");
+    try (XMLSlideShow ppt = new XMLSlideShow(fileInputStream);) {
       List<String> imageFileNames = new ArrayList<>();
-      XMLSlideShow ppt = new XMLSlideShow(fileInputStream);
       Dimension pgsize = ppt.getPageSize();
       List<XSLFSlide> slides = ppt.getSlides();
       BufferedImage img = null;
 
       for (XSLFSlide slide : slides) {
-        System.out.println("성공2");
         img = new BufferedImage(pgsize.width, pgsize.height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = img.createGraphics();
 
@@ -44,12 +40,11 @@ public class PoiUtil {
 
         slide.draw(graphics);
         String saveFileName = UUIDUtil.getRandomUUID() + '.' + PNG;
-        FileOutputStream out = new FileOutputStream(saveFileName);
-        System.out.println("성공3");
-        javax.imageio.ImageIO.write(img, PNG, out);
-        ppt.write(out);
-        imageFileNames.add(saveFileName);
-        out.close();
+        try (FileOutputStream out = new FileOutputStream(saveFileName)) {
+          ImageIO.write(img, PNG, out);
+          ppt.write(out);
+          imageFileNames.add(saveFileName);
+        }
       }
       return imageFileNames;
     } catch (IOException e) {
@@ -58,13 +53,13 @@ public class PoiUtil {
   }
 
   public static String convertDocxToPdf(InputStream file, String fileName) {
-    try {
-      XWPFDocument docx = new XWPFDocument(file);
+    try (XWPFDocument docx = new XWPFDocument(file);) {
       PdfOptions options = PdfOptions.create();
 
       String filePath = UUIDUtil.getRandomUUID() + '.' + PDF;
-      FileOutputStream out = new FileOutputStream(new File(filePath));
-      PdfConverter.getInstance().convert(docx, out, options);
+      try (FileOutputStream out = new FileOutputStream(new File(filePath))) {
+        PdfConverter.getInstance().convert(docx, out, options);
+      }
       return filePath;
     } catch (IOException e) {
       throw new GeneratorException(FAILED_TO_CONVERT_DOCX_TO_PDF);
@@ -72,8 +67,7 @@ public class PoiUtil {
   }
 
   public static String convertPdfToPng(String filePath) {
-    try {
-      PDDocument document = PDDocument.load(new File(filePath));
+    try (PDDocument document = PDDocument.load(new File(filePath));) {
       PDFRenderer pdfRenderer = new PDFRenderer(document);
       BufferedImage bufferedImage = pdfRenderer.renderImage(0);
 
