@@ -52,10 +52,11 @@ public class Thumbnail extends Timestamped {
   private Material material;
 
   @Builder
-  public Thumbnail(String originName, String fileName, String filePath, Material material) {
+  public Thumbnail(String originName, String fileName, String filePath, Short sequence, Material material) {
     this.originName = originName;
     this.fileName = fileName;
     this.filePath = filePath;
+    this.sequence = sequence;
     this.material = material;
   }
 }
