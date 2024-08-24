@@ -32,13 +32,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     Map<String, Object> oAuth2UserAttributes = super.loadUser(userRequest).getAttributes();
     String registrationId = userRequest.getClientRegistration().getRegistrationId();
-    String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails()
-        .getUserInfoEndpoint().getUserNameAttributeName();
 
     OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(registrationId, oAuth2UserAttributes);
 
     Member member = getOrSave(oAuth2Attribute);
-    return new CustomOauth2User(member, oAuth2UserAttributes, userNameAttributeName);
+    return new CustomOauth2User(member, oAuth2UserAttributes);
   }
 
   private Member getOrSave(OAuth2Attribute oAuth2Attribute) {

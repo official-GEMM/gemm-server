@@ -11,8 +11,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 public record CustomOauth2User(
     Member member,
-    Map<String, Object> attributes,
-    String attributeKey) implements OAuth2User, UserDetails {
+    Map<String, Object> attributes) implements OAuth2User, UserDetails {
 
   @Override
   public String getName() {
