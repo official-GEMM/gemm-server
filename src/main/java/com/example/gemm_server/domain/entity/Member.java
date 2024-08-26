@@ -87,13 +87,11 @@ public class Member extends Timestamped {
   @JoinColumn(name = "profile_image_id")
   private ProfileImage profileImage;
 
-  public static Member createForSignUp(String name, String socialId, Provider provider,
-      LocalDate birth) {
+  public static Member createForSignUp(String name, String socialId, Provider provider) {
     return Member.builder()
         .name(name)
         .socialId(socialId)
         .provider(provider)
-        .birth(birth)
         .referralCode(UUIDUtil.createReferralCode())
         .gem(0)
         .role(Role.USER)
