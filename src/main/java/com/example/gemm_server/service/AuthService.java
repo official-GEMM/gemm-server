@@ -2,6 +2,9 @@ package com.example.gemm_server.service;
 
 import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_ALREADY_COMPLETED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.OWN_REFERRAL_CODE;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_ATTEMPT_EXCEED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_FOUND;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_MATCH;
 import static com.example.gemm_server.common.constant.Policy.ATTENDANCE_COMPENSATION;
 import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATION;
 
@@ -118,5 +121,23 @@ public class AuthService {
         verificationCode);
     this.phoneVerificationRepository.save(phoneVerification);
     return verificationCode;
+  }
+
+  public PhoneVerification getPhoneVerificationWithIncrementingAttemptCount(String phoneNumber) {
+    PhoneVerification phoneVerification = this.phoneVerificationRepository.findById(
+        phoneNumber).orElseThrow(() -> new MemberException(VERIFICATION_NOT_FOUND));
+
+    phoneVerification.incrementAttemptCount();
+    return this.phoneVerificationRepository.save(phoneVerification);
+  }
+
+  public void validatePhoneVerification(PhoneVerification phoneVerification,
+      String verificationCode) {
+    if (!phoneVerification.isAttemptCountValid()) {
+      throw new MemberException(VERIFICATION_ATTEMPT_EXCEED);
+    }
+    if (!phoneVerification.verify(verificationCode)) {
+      throw new MemberException(VERIFICATION_NOT_MATCH);
+    }
   }
 }

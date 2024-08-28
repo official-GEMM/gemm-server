@@ -5,6 +5,7 @@ import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMB
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.auth.MemberCompensation;
@@ -110,7 +111,6 @@ public class AuthController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
   @BearerAuth
   @Operation(summary = "휴대폰 인증번호 전송", description = "사용자의 휴대전화를 인증할 수 있는 코드를 전송하는 API")
   @PostMapping("/verify/phone")
@@ -126,7 +126,13 @@ public class AuthController {
   @Operation(summary = "휴대폰 인증번호 확인", description = "사용자의 휴대전화를 인증할 수 있는 코드를 확인하는 API")
   @PutMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> checkPhoneVerificationCode(
-      @Valid @RequestBody CheckPhoneVerificationCodeRequest request) {
+      @Valid @RequestBody CheckPhoneVerificationCodeRequest checkPhoneVerificationCodeRequest) {
+    String phoneNumber = checkPhoneVerificationCodeRequest.getPhoneNumber();
+    String verificationCode = checkPhoneVerificationCodeRequest.getVerificationCode();
+
+    PhoneVerification phoneVerification =
+        authService.getPhoneVerificationWithIncrementingAttemptCount(phoneNumber);
+    authService.validatePhoneVerification(phoneVerification, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 }
