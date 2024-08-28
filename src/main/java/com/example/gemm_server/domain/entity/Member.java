@@ -2,7 +2,6 @@ package com.example.gemm_server.domain.entity;
 
 import com.example.gemm_server.common.enums.Provider;
 import com.example.gemm_server.common.enums.Role;
-import com.example.gemm_server.common.util.UUIDUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -86,17 +85,6 @@ public class Member extends Timestamped {
   @OneToOne(targetEntity = ProfileImage.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "profile_image_id")
   private ProfileImage profileImage;
-
-  public static Member createForSignUp(String name, String socialId, Provider provider) {
-    return Member.builder()
-        .name(name)
-        .socialId(socialId)
-        .provider(provider)
-        .referralCode(UUIDUtil.createReferralCode())
-        .gem(0)
-        .role(Role.USER)
-        .build();
-  }
 
   public String getProfileImageUrl() {
     if (profileImage == null) {
