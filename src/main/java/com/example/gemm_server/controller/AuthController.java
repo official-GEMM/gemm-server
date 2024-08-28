@@ -115,7 +115,11 @@ public class AuthController {
   @Operation(summary = "휴대폰 인증번호 전송", description = "사용자의 휴대전화를 인증할 수 있는 코드를 전송하는 API")
   @PostMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> sendPhoneVerificationCode(
-      @Valid @RequestBody SendPhoneVerificationCodeRequest request) {
+      @Valid @RequestBody SendPhoneVerificationCodeRequest sendPhoneVerificationCodeRequest) {
+    String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
+    String verificationCode = authService.generateAndSaveVerificationCode(phoneNumber);
+
+    authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 
