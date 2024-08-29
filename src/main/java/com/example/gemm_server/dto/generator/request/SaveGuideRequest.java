@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record SaveGuideRequest(
     @Schema(description = "생성하고자 하는 주제")
@@ -19,7 +20,7 @@ public record SaveGuideRequest(
     @Schema(description = "생성 내용")
     @NotNull
     @Size(min = 1)
-    ContentRequest contents
+    List<ContentRequest> contents
 ) {
 
 }
