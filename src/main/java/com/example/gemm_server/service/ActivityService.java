@@ -31,6 +31,7 @@ import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
+import com.example.gemm_server.dto.generator.response.ContentResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
@@ -84,12 +85,13 @@ public class ActivityService {
     LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
         generateGuideRequest, LlmGuideResponse.class);
 
-    if (llmGuideResponse == null || llmGuideResponse.content().isBlank()) {
+    if (llmGuideResponse == null || llmGuideResponse.contents().isEmpty()) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
     }
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
 
-    return new GenerateGuideResponse(llmGuideResponse.content(), member.getGem());
+    return new GenerateGuideResponse(llmGuideResponse.contents().toArray(ContentResponse[]::new),
+        member.getGem());
   }
 
   @Transactional
@@ -100,7 +102,8 @@ public class ActivityService {
         .title(saveGuideRequest.title())
         .age(saveGuideRequest.age())
         .category(saveGuideRequest.category())
-        .content(saveGuideRequest.content())
+        // Todo: 플레인 텍스트 or 형식화된 텍스트로 저장
+        .content(saveGuideRequest.contents().get(0).content())
         .materialType((short) 0)
         .build());
     Generation savedGeneration = generationRepository.save(
@@ -116,12 +119,13 @@ public class ActivityService {
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
         UpdateGuideRequest, LlmGuideResponse.class);
 
-    if (llmGuideResponse == null || llmGuideResponse.content().isBlank()) {
+    if (llmGuideResponse == null || llmGuideResponse.contents().isEmpty()) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
     }
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
 
-    return new UpdatedGuideResponse(llmGuideResponse.content(), member.getGem());
+    return new UpdatedGuideResponse(llmGuideResponse.contents().toArray(ContentResponse[]::new),
+        member.getGem());
   }
 
   @Transactional
@@ -147,7 +151,8 @@ public class ActivityService {
         linkMaterialGuideRequest.title(),
         linkMaterialGuideRequest.age(),
         linkMaterialGuideRequest.category(),
-        linkMaterialGuideRequest.content(),
+        // Todo: 플레인 텍스트 or 형식화된 텍스트로 저장
+        linkMaterialGuideRequest.contents().get(0).content(),
         llmDesignedMaterialResponse.ppt(),
         llmDesignedMaterialResponse.activitySheet(),
         llmDesignedMaterialResponse.cutout()
