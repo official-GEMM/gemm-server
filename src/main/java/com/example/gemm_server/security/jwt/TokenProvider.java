@@ -63,7 +63,6 @@ public class TokenProvider {
     return generateToken(authentication, accessTokenExpireTime);
   }
 
-  // 1. refresh token 발급
   public String generateRefreshToken(Authentication authentication) {
     String refreshToken = generateToken(authentication, refreshTokenExpireTime);
     tokenService.updateRefreshToken(Long.parseLong(authentication.getName()), refreshToken);
