@@ -58,7 +58,7 @@ public class Member extends Timestamped {
   @Column(name = "nickname", length = 10, unique = true)
   private String nickname;
 
-  @Column(name = "phone_number", length = 15)
+  @Column(name = "phone_number", length = 15, unique = true)
   private String phoneNumber;
 
   @Column(name = "manage_age")
