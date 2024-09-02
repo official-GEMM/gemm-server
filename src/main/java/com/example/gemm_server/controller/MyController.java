@@ -19,6 +19,7 @@ import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
+import com.example.gemm_server.service.AuthService;
 import com.example.gemm_server.service.MemberService;
 import com.example.gemm_server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyController {
 
   private final MemberService memberService;
+  private final AuthService authService;
   private final NotificationService notificationService;
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
@@ -64,6 +66,7 @@ public class MyController {
       @Valid @RequestBody UpdateMyInformationRequest updateMyInformationRequest,
       @AuthenticationPrincipal CustomUser user
   ) {
+    authService.validatePhoneNumberForUpdate(updateMyInformationRequest.getPhoneNumber());
     Member member = memberService.updateMyInformation(user.getId(), updateMyInformationRequest);
     UpdateMyInformationResponse response = new UpdateMyInformationResponse(member);
     return ResponseEntity.ok(new CommonResponse<>(response));
