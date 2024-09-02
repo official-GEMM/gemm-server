@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum Format {
   TITLE("제목", "# "),
   ELEMENT("요소", "- "),
-  DESCRIPTION("설명", "");
+  TEXT("설명", "");
 
   private final String description;
   private final String prefix;
@@ -23,7 +23,7 @@ public enum Format {
     if (content.startsWith(ELEMENT.prefix)) {
       return ELEMENT;
     }
-    return DESCRIPTION;
+    return TEXT;
   }
 
   public String removePrefix(String content) {
