@@ -2,6 +2,7 @@ package com.example.gemm_server.controller;
 
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_LOGOUT;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
+import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHONE_VERIFICATION;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
@@ -133,6 +134,6 @@ public class AuthController {
     PhoneVerification phoneVerification =
         authService.getPhoneVerificationWithIncrementingAttemptCount(phoneNumber);
     authService.validatePhoneVerification(phoneVerification, verificationCode);
-    return ResponseEntity.ok(new EmptyDataResponse());
+    return ResponseEntity.ok(new EmptyDataResponse(PHONE_VERIFICATION));
   }
 }
