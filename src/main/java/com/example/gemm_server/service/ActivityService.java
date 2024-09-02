@@ -85,13 +85,12 @@ public class ActivityService {
     LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
         generateGuideRequest, LlmGuideResponse.class);
 
-    if (llmGuideResponse == null || llmGuideResponse.contents().isEmpty()) {
+    if (llmGuideResponse == null || llmGuideResponse.contents().length == 0) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
     }
     gemService.saveChangesOfGemWithMember(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
 
-    return new GenerateGuideResponse(llmGuideResponse.contents().toArray(ContentResponse[]::new),
-        member.getGem());
+    return new GenerateGuideResponse(llmGuideResponse.contents(), member.getGem());
   }
 
   @Transactional
@@ -102,8 +101,7 @@ public class ActivityService {
         .title(saveGuideRequest.title())
         .age(saveGuideRequest.age())
         .category(saveGuideRequest.category())
-        // Todo: 플레인 텍스트 or 형식화된 텍스트로 저장
-        .content(saveGuideRequest.contents().get(0).content())
+        .content(saveGuideRequest.content())
         .materialType((short) 0)
         .build());
     Generation savedGeneration = generationRepository.save(
@@ -119,13 +117,12 @@ public class ActivityService {
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
         UpdateGuideRequest, LlmGuideResponse.class);
 
-    if (llmGuideResponse == null || llmGuideResponse.contents().isEmpty()) {
+    if (llmGuideResponse == null || llmGuideResponse.contents().length == 0) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
     }
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
 
-    return new UpdatedGuideResponse(llmGuideResponse.contents().toArray(ContentResponse[]::new),
-        member.getGem());
+    return new UpdatedGuideResponse(llmGuideResponse.contents(), member.getGem());
   }
 
   @Transactional
@@ -151,8 +148,8 @@ public class ActivityService {
         linkMaterialGuideRequest.title(),
         linkMaterialGuideRequest.age(),
         linkMaterialGuideRequest.category(),
-        // Todo: 플레인 텍스트 or 형식화된 텍스트로 저장
-        linkMaterialGuideRequest.contents().get(0).content(),
+        // Todo: 형식화된 텍스트 파싱 및 객체 변환
+        null,
         llmDesignedMaterialResponse.ppt(),
         llmDesignedMaterialResponse.activitySheet(),
         llmDesignedMaterialResponse.cutout()
@@ -221,7 +218,7 @@ public class ActivityService {
         .title(saveMaterialRequest.title())
         .age(saveMaterialRequest.age())
         .category(saveMaterialRequest.category())
-        .content(saveMaterialRequest.additionalContent())
+        .content(saveMaterialRequest.content())
         .materialType(getMaterialBitMask(saveMaterialRequest.ppt(),
             saveMaterialRequest.activitySheet(), saveMaterialRequest.cutout()))
         .build());
