@@ -46,6 +46,10 @@ public class MemberService {
     return memberRepository.existsByNickname(nickname);
   }
 
+  public boolean isPhoneNumberDuplicated(String phoneNumber) {
+    return this.memberRepository.findOneByPhoneNumber(phoneNumber).isPresent();
+  }
+
   @Transactional
   public Member updateMyInformation(Long memberId, UpdateMyInformationRequest memberInfo) {
     Member member = findMemberByMemberIdOrThrow(memberId);

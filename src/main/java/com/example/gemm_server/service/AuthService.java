@@ -2,6 +2,8 @@ package com.example.gemm_server.service;
 
 import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_ALREADY_COMPLETED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.OWN_REFERRAL_CODE;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.PHONE_NUMBER_DUPLICATED;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.PHONE_NUMBER_NOT_VALIDATED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_ATTEMPT_EXCEED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_MATCH;
@@ -22,6 +24,7 @@ import com.example.gemm_server.dto.auth.MemberCompensation;
 import com.example.gemm_server.exception.MemberException;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
@@ -92,6 +95,21 @@ public class AuthService {
         GemUsageType.COMPENSATION);
 
     notificationService.publishReferralNotification(refereeMember, referrerMember);
+  }
+
+  public void validatePhoneNumberForUpdate(String phoneNumber) {
+    if (!isPhoneNumberValidated(phoneNumber)) {
+      throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
+    }
+    if (memberService.isPhoneNumberDuplicated(phoneNumber)) {
+      throw new MemberException(PHONE_NUMBER_DUPLICATED);
+    }
+  }
+
+  protected boolean isPhoneNumberValidated(String phoneNumber) {
+    Optional<PhoneVerification> phoneVerification = this.phoneVerificationRepository.findById(
+        phoneNumber);
+    return phoneVerification.isPresent() && phoneVerification.get().isVerified();
   }
 
   private void validateForReferral(Member referrerMember, Member refereeMember) {
