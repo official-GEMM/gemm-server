@@ -131,7 +131,7 @@ public class AuthService {
     return this.phoneVerificationRepository.save(phoneVerification);
   }
 
-  public void validatePhoneVerification(PhoneVerification phoneVerification,
+  public PhoneVerification validatePhoneVerification(PhoneVerification phoneVerification,
       String verificationCode) {
     if (!phoneVerification.isAttemptCountValid()) {
       throw new MemberException(VERIFICATION_ATTEMPT_EXCEED);
@@ -139,5 +139,7 @@ public class AuthService {
     if (!phoneVerification.verify(verificationCode)) {
       throw new MemberException(VERIFICATION_NOT_MATCH);
     }
+    phoneVerification.setVerified(true);
+    return this.phoneVerificationRepository.save(phoneVerification);
   }
 }

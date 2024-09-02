@@ -2,6 +2,7 @@ package com.example.gemm_server.domain.entity.redis;
 
 import com.example.gemm_server.common.constant.Policy;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -13,11 +14,14 @@ public class PhoneVerification {
   private String phoneNumber;
   private String verificationCode;
   private int attemptCount;
+  @Setter
+  private boolean verified;
 
   public PhoneVerification(String phoneNumber, String verificationCode) {
     this.phoneNumber = phoneNumber;
     this.verificationCode = verificationCode;
     this.attemptCount = 0;
+    this.verified = false;
   }
 
   public int incrementAttemptCount() {
