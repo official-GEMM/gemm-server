@@ -8,12 +8,14 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record UpdateGuideRequest(
-        @Schema(description = "수정할 내용")
-        @NotBlank
-        String content,
-        @Schema(description = "수정에 적용할 코멘트")
-        @NotNull
-        @Size(min = 1)
-        List<CommentGuideRequest> comments
+    @Schema(description = "수정할 내용")
+    @NotNull
+    @Size(min = 1)
+    List<ContentRequest> contents,
+    @Schema(description = "수정에 적용할 코멘트")
+    @NotNull
+    @Size(min = 1)
+    List<CommentGuideRequest> comments
 ) {
+
 }

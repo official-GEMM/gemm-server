@@ -1,0 +1,27 @@
+version: '3'
+services:
+  gemm-server:
+    build: ./
+    image: gemm-server:latest
+    container_name: gemm-server
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - gemm
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    expose:
+      - "6379"
+    volumes:
+      - /home/ubuntu/redis_data:/data
+    networks:
+      - gemm
+
+networks:
+  gemm:
+    driver: bridge
