@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Schema(description = "활동 상세 응답", requiredProperties = {"title", "materials", "age", "category",
-    "content"})
+    "contents"})
 public class ActivityDetailResponse {
 
   @Schema(description = "제목")
