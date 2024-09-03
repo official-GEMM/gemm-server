@@ -22,6 +22,8 @@ import com.example.gemm_server.dto.common.response.ContentResponse;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
+import com.example.gemm_server.dto.generator.request.LlmLinkMaterialGuideRequest;
+import com.example.gemm_server.dto.generator.request.LlmUpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveMaterialRequest;
 import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
@@ -105,11 +107,16 @@ public class ActivityService {
   }
 
   @Transactional
-  public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
+  public UpdatedGuideResponse updateGuide(UpdateGuideRequest updateGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
+    LlmUpdateGuideRequest llmUpdateGuideRequest = new LlmUpdateGuideRequest(
+        Arrays.stream(updateGuideRequest.content().split("\n")).map(ContentResponse::new)
+            .toArray(ContentResponse[]::new),
+        updateGuideRequest.comments()
+    );
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
-        UpdateGuideRequest, LlmGuideResponse.class);
+        llmUpdateGuideRequest, LlmGuideResponse.class);
 
     if (llmGuideResponse == null || llmGuideResponse.contents().length == 0) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
@@ -122,9 +129,15 @@ public class ActivityService {
   @Transactional
   public LinkedMaterialGuideResponse linkGuideToMaterial(
       LinkMaterialGuideRequest linkMaterialGuideRequest) {
+    LlmLinkMaterialGuideRequest llmLinkMaterialGuideRequest = new LlmLinkMaterialGuideRequest(
+        linkMaterialGuideRequest.title(), linkMaterialGuideRequest.age(),
+        linkMaterialGuideRequest.category(),
+        Arrays.stream(linkMaterialGuideRequest.content().split("\n")).map(ContentResponse::new)
+            .toArray(ContentResponse[]::new)
+    );
     LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
         "/generate/guide/sync",
-        linkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
+        llmLinkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
 
     if (llmDesignedMaterialResponse == null || llmDesignedMaterialResponse.ppt().length < 1 ||
         Arrays.stream(llmDesignedMaterialResponse.ppt())
