@@ -1,6 +1,7 @@
 package com.example.gemm_server.dto.generator.response;
 
 import com.example.gemm_server.common.enums.Category;
+import com.example.gemm_server.dto.common.response.ContentResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "연동된 활동 자료 설계 응답", requiredProperties = {"title", "age", "category",
@@ -15,7 +16,7 @@ public record LinkedMaterialGuideResponse(
     @Schema(description = "교육하고자 하는 활동 방식")
     Category category,
 
-    @Schema(description = "생성한 내용")
+    @Schema(description = "내용과 형식")
     ContentResponse[] contents,
 
     @Schema(description = "생성한 PPT 설계 내용")

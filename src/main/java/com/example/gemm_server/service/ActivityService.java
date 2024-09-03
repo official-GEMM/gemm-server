@@ -31,7 +31,6 @@ import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
-import com.example.gemm_server.dto.generator.response.ContentResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
