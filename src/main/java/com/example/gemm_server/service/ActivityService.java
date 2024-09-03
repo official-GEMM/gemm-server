@@ -96,13 +96,7 @@ public class ActivityService {
   public SavedGuideResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    Activity savedActivity = activityRepository.save(Activity.builder()
-        .title(saveGuideRequest.title())
-        .age(saveGuideRequest.age())
-        .category(saveGuideRequest.category())
-        .content(saveGuideRequest.content())
-        .materialType((short) 0)
-        .build());
+    Activity savedActivity = activityRepository.save(saveGuideRequest.toEntity());
     Generation savedGeneration = generationRepository.save(
         Generation.builder().activity(savedActivity).owner(member).build());
 

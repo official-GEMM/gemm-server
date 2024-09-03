@@ -3,8 +3,10 @@ package com.example.gemm_server.dto.common.response;
 import com.example.gemm_server.common.enums.Format;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(force = true)
 @Schema(description = "활동 응답", requiredProperties = {"content", "format"})
 public class ContentResponse {
 
