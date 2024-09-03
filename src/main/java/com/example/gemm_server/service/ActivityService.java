@@ -18,6 +18,7 @@ import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
 import com.example.gemm_server.domain.repository.ThumbnailRepository;
+import com.example.gemm_server.dto.common.response.ContentResponse;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
@@ -141,8 +142,8 @@ public class ActivityService {
         linkMaterialGuideRequest.title(),
         linkMaterialGuideRequest.age(),
         linkMaterialGuideRequest.category(),
-        // Todo: 형식화된 텍스트 파싱 및 객체 변환
-        null,
+        Arrays.stream(linkMaterialGuideRequest.content().split("\n")).map(ContentResponse::new)
+            .toArray(ContentResponse[]::new),
         llmDesignedMaterialResponse.ppt(),
         llmDesignedMaterialResponse.activitySheet(),
         llmDesignedMaterialResponse.cutout()
