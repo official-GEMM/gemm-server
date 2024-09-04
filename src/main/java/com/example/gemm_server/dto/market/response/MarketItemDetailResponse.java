@@ -10,8 +10,8 @@ import lombok.Getter;
 
 @Getter
 @Schema(description = "마켓 상품 상세 응답", requiredProperties = {"marketItemId", "title", "materials",
-    "age", "category", "content", "scrapCount", "isScrapped", "seller", "isMyMarketItem",
-    "isBought", "reviewAverageScore", "reviewCount", "price"})
+    "age", "category", "contents", "scrapCount", "isScrapped", "seller", "isMyMarketItem",
+    "isBought", "reviewAverageScore", "reviewCount", "price", "year", "month"})
 public class MarketItemDetailResponse extends ActivityDetailResponse {
 
   @Schema(description = "마켓 상품 아이디")
@@ -41,10 +41,10 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
   @Schema(description = "가격")
   private int price;
 
-  @Schema(description = "연도")
+  @Schema(description = "연도", nullable = true)
   private int year;
 
-  @Schema(description = "월")
+  @Schema(description = "월", nullable = true)
   private short month;
 
   public MarketItemDetailResponse() {

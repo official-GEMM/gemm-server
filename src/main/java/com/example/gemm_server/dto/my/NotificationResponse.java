@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 @Schema(description = "알림 응답", requiredProperties = {"notificationId", "senderNickname",
-    "profileImagePath", "message", "eventType", "createdAt"})
+    "profileImagePath", "message", "subjectId", "eventType", "createdAt"})
 public class NotificationResponse {
 
   @Schema(description = "알림 아이디")
@@ -24,7 +24,7 @@ public class NotificationResponse {
   @Schema(description = "알림 메세지")
   private String message;
 
-  @Schema(description = "알림 발생지")
+  @Schema(description = "알림 발생지", nullable = true)
   private Long subjectId;
 
   @Schema(description = "알림 발생 종류")
