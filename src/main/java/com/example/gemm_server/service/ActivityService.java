@@ -111,9 +111,7 @@ public class ActivityService {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
     LlmUpdateGuideRequest llmUpdateGuideRequest = new LlmUpdateGuideRequest(
-        Arrays.stream(updateGuideRequest.content().split("\n")).map(ContentResponse::new)
-            .toArray(ContentResponse[]::new),
-        updateGuideRequest.comments()
+        ContentResponse.of(updateGuideRequest.content()), updateGuideRequest.comments()
     );
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
         llmUpdateGuideRequest, LlmGuideResponse.class);
@@ -132,8 +130,7 @@ public class ActivityService {
     LlmLinkMaterialGuideRequest llmLinkMaterialGuideRequest = new LlmLinkMaterialGuideRequest(
         linkMaterialGuideRequest.title(), linkMaterialGuideRequest.age(),
         linkMaterialGuideRequest.category(),
-        Arrays.stream(linkMaterialGuideRequest.content().split("\n")).map(ContentResponse::new)
-            .toArray(ContentResponse[]::new)
+        ContentResponse.of(linkMaterialGuideRequest.content())
     );
     LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
         "/generate/guide/sync",
@@ -155,8 +152,7 @@ public class ActivityService {
         linkMaterialGuideRequest.title(),
         linkMaterialGuideRequest.age(),
         linkMaterialGuideRequest.category(),
-        Arrays.stream(linkMaterialGuideRequest.content().split("\n")).map(ContentResponse::new)
-            .toArray(ContentResponse[]::new),
+        ContentResponse.of(linkMaterialGuideRequest.content()),
         llmDesignedMaterialResponse.ppt(),
         llmDesignedMaterialResponse.activitySheet(),
         llmDesignedMaterialResponse.cutout()
