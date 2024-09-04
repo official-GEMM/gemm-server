@@ -19,14 +19,12 @@ import com.example.gemm_server.dto.storage.response.GetGeneratedGuideDetailRespo
 import com.example.gemm_server.dto.storage.response.GetGeneratedGuidesResponse;
 import com.example.gemm_server.dto.storage.response.GetPurchasedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetPurchasedActivityDetailResponse;
-import com.example.gemm_server.dto.storage.response.GetStorageResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.GenerationService;
 import com.example.gemm_server.service.MaterialService;
 import com.example.gemm_server.service.ThumbnailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -49,24 +47,6 @@ public class StorageController {
   private final GenerationService generationService;
   private final MaterialService materialService;
   private final ThumbnailService thumbnailService;
-
-  @Operation(summary = "내 저장소 조회", description = "사용자의 저장소를 조회하는 API")
-  @GetMapping()
-  public ResponseEntity<CommonResponse<GetStorageResponse>> getStorage(
-      @AuthenticationPrincipal CustomUser user
-  ) {
-    Page<Generation> guides = generationService.getGenerationsHasNoMaterialByMemberIdAndPage(
-        user.getId(), 0, Policy.STORAGE_LIMIT_SHORT);
-    Page<Generation> activities = generationService.getGenerationsHasMaterialByMemberIdAndPage(
-        user.getId(), 0, Policy.STORAGE_LIMIT_SHORT);
-    List<GenerationWithThumbnail> generationWithThumbnails =
-        thumbnailService.getMainThumbnailForEachGeneration(activities.getContent());
-    List<Object> purchases = new ArrayList<>(); // TODO: 구매한 활동 조회 구현하기
-
-    GetStorageResponse response =
-        new GetStorageResponse(guides.getContent(), generationWithThumbnails, purchases);
-    return ResponseEntity.ok(new CommonResponse<>(response));
-  }
 
   @Operation(summary = "생성한 활동 방법 리스트 조회", description = "사용자가 생성한 활동 방법 리스트를 조회하는 API")
   @GetMapping("/generate/guides")
