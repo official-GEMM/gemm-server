@@ -78,6 +78,10 @@ public class Member extends Timestamped {
   @Column(name = "last_login_at")
   private LocalDateTime lastLoginAt;
 
+  @Column(name = "is_registration_complete")
+  @ColumnDefault("0")
+  private Boolean isRegistrationCompleted;
+
   @Column(name = "role", nullable = false)
   @Enumerated(value = EnumType.STRING)
   @ColumnDefault("'USER'")
