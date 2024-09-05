@@ -2,9 +2,11 @@ package com.example.gemm_server.controller;
 
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_LOGOUT;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
+import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHONE_VERIFICATION;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.auth.MemberCompensation;
@@ -83,6 +85,7 @@ public class AuthController {
       @Valid @RequestBody PostNecessaryMemberDataRequest memberNecessaryData,
       @AuthenticationPrincipal CustomUser user
   ) {
+    authService.validatePhoneNumberForUpdate(user.getId(), memberNecessaryData.getPhoneNumber());
     String referralCode = memberNecessaryData.getReferralCode();
     if (referralCode != null) {
       authService.compensateMemberForReferralIfValid(user.getId(), referralCode);
@@ -110,19 +113,28 @@ public class AuthController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
   @BearerAuth
   @Operation(summary = "휴대폰 인증번호 전송", description = "사용자의 휴대전화를 인증할 수 있는 코드를 전송하는 API")
   @PostMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> sendPhoneVerificationCode(
-      @Valid @RequestBody SendPhoneVerificationCodeRequest request) {
+      @Valid @RequestBody SendPhoneVerificationCodeRequest sendPhoneVerificationCodeRequest) {
+    String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
+    String verificationCode = authService.generateAndSaveVerificationCode(phoneNumber);
+
+    authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 
   @Operation(summary = "휴대폰 인증번호 확인", description = "사용자의 휴대전화를 인증할 수 있는 코드를 확인하는 API")
   @PutMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> checkPhoneVerificationCode(
-      @Valid @RequestBody CheckPhoneVerificationCodeRequest request) {
-    return ResponseEntity.ok(new EmptyDataResponse());
+      @Valid @RequestBody CheckPhoneVerificationCodeRequest checkPhoneVerificationCodeRequest) {
+    String phoneNumber = checkPhoneVerificationCodeRequest.getPhoneNumber();
+    String verificationCode = checkPhoneVerificationCodeRequest.getVerificationCode();
+
+    PhoneVerification phoneVerification =
+        authService.getPhoneVerificationWithIncrementingAttemptCount(phoneNumber);
+    authService.validatePhoneVerification(phoneVerification, verificationCode);
+    return ResponseEntity.ok(new EmptyDataResponse(PHONE_VERIFICATION));
   }
 }

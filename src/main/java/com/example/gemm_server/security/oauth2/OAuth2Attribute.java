@@ -1,6 +1,8 @@
 package com.example.gemm_server.security.oauth2;
 
 import com.example.gemm_server.common.enums.Provider;
+import com.example.gemm_server.common.enums.Role;
+import com.example.gemm_server.common.util.UUIDUtil;
 import com.example.gemm_server.domain.entity.Member;
 import java.time.LocalDate;
 import java.util.Map;
@@ -58,6 +60,13 @@ public record OAuth2Attribute(String name, String socialId, Provider provider, S
   }
 
   public Member toEntity() {
-    return Member.createForSignUp(name, socialId, provider);
+    return Member.builder()
+        .name(name)
+        .socialId(socialId)
+        .provider(provider)
+        .referralCode(UUIDUtil.generateCharacterUUID(8))
+        .gem(0)
+        .role(Role.USER)
+        .build();
   }
 }
