@@ -4,6 +4,8 @@ import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
 import com.example.gemm_server.dto.common.response.MemberResponse;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import lombok.Getter;
@@ -11,7 +13,7 @@ import lombok.Getter;
 @Getter
 @Schema(description = "마켓 상품 상세 응답", requiredProperties = {"marketItemId", "title", "materials",
     "age", "category", "contents", "scrapCount", "isScrapped", "seller", "isMyMarketItem",
-    "isBought", "reviewAverageScore", "reviewCount", "price", "year", "month"})
+    "isBought", "reviewAverageScore", "reviewCount", "price"})
 public class MarketItemDetailResponse extends ActivityDetailResponse {
 
   @Schema(description = "마켓 상품 아이디")
@@ -41,10 +43,12 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
   @Schema(description = "가격")
   private int price;
 
-  @Schema(description = "연도", nullable = true)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @Schema(description = "연도")
   private int year;
 
-  @Schema(description = "월", nullable = true)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @Schema(description = "월")
   private short month;
 
   public MarketItemDetailResponse() {

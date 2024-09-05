@@ -3,13 +3,15 @@ package com.example.gemm_server.dto.my;
 import com.example.gemm_server.common.enums.EventType;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
 @Schema(description = "알림 응답", requiredProperties = {"notificationId", "senderNickname",
-    "profileImagePath", "message", "subjectId", "eventType", "createdAt"})
+    "profileImagePath", "message", "eventType", "createdAt"})
 public class NotificationResponse {
 
   @Schema(description = "알림 아이디")
@@ -24,7 +26,8 @@ public class NotificationResponse {
   @Schema(description = "알림 메세지")
   private String message;
 
-  @Schema(description = "알림 발생지", nullable = true)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @Schema(description = "알림 발생지")
   private Long subjectId;
 
   @Schema(description = "알림 발생 종류")
