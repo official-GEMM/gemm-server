@@ -66,7 +66,8 @@ public class MyController {
       @Valid @RequestBody UpdateMyInformationRequest updateMyInformationRequest,
       @AuthenticationPrincipal CustomUser user
   ) {
-    authService.validatePhoneNumberForUpdate(updateMyInformationRequest.getPhoneNumber());
+    authService.validatePhoneNumberForUpdate(user.getId(),
+        updateMyInformationRequest.getPhoneNumber());
     Member member = memberService.updateMyInformation(user.getId(), updateMyInformationRequest);
     UpdateMyInformationResponse response = new UpdateMyInformationResponse(member);
     return ResponseEntity.ok(new CommonResponse<>(response));

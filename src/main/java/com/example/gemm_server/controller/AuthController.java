@@ -85,7 +85,7 @@ public class AuthController {
       @Valid @RequestBody PostNecessaryMemberDataRequest memberNecessaryData,
       @AuthenticationPrincipal CustomUser user
   ) {
-    authService.validatePhoneNumberForUpdate(memberNecessaryData.getPhoneNumber());
+    authService.validatePhoneNumberForUpdate(user.getId(), memberNecessaryData.getPhoneNumber());
     String referralCode = memberNecessaryData.getReferralCode();
     if (referralCode != null) {
       authService.compensateMemberForReferralIfValid(user.getId(), referralCode);

@@ -97,11 +97,11 @@ public class AuthService {
     notificationService.publishReferralNotification(refereeMember, referrerMember);
   }
 
-  public void validatePhoneNumberForUpdate(String phoneNumber) {
+  public void validatePhoneNumberForUpdate(Long memberId, String phoneNumber) {
     if (!isPhoneNumberValidated(phoneNumber)) {
       throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
     }
-    if (memberService.isPhoneNumberDuplicated(phoneNumber)) {
+    if (memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
       throw new MemberException(PHONE_NUMBER_DUPLICATED);
     }
   }
