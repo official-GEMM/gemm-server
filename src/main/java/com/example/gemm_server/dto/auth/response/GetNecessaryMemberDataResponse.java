@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
+@Schema(description = "필수 정보 응답", requiredProperties = {"isCompleted", "isReferralCompensable"})
 public class GetNecessaryMemberDataResponse {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
