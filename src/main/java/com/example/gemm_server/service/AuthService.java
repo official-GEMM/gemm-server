@@ -129,7 +129,7 @@ public class AuthService {
     Message message = new Message();
     message.setFrom(fromNumber);
     message.setTo(to.replaceAll("-", "")); // 발신번호 및 수신번호 형식: 01012345678
-    message.setText("[GEMM] 아래의 인증번호를 입력해주세요\n" + verificationCode);
+    message.setText("[GEMM] 인증번호 [" + verificationCode + "]를 입력해주세요.");
     return this.messageService.sendOne(new SingleMessageSendingRequest(message));
   }
 
