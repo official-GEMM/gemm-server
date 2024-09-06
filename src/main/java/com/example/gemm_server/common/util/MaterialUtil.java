@@ -43,4 +43,18 @@ public class MaterialUtil {
     }
     return materialTypes;
   }
+
+  public static short getMaterialBitMask(String pptUrl, String activitySheetUrl, String cutoutUrl) {
+    short materialBit = 0;
+    if (pptUrl != null && !pptUrl.isBlank()) {
+      materialBit += (short) 4;
+    }
+    if (activitySheetUrl != null && !activitySheetUrl.isBlank()) {
+      materialBit += (short) 2;
+    }
+    if (cutoutUrl != null && !cutoutUrl.isBlank()) {
+      materialBit += (short) 1;
+    }
+    return materialBit;
+  }
 }

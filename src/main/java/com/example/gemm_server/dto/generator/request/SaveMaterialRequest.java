@@ -1,6 +1,8 @@
 package com.example.gemm_server.dto.generator.request;
 
 import com.example.gemm_server.common.enums.Category;
+import com.example.gemm_server.common.util.MaterialUtil;
+import com.example.gemm_server.domain.entity.Activity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -31,4 +33,14 @@ public record SaveMaterialRequest(
     String cutout
 ) {
 
+  public Activity toEntity() {
+    return Activity.builder()
+        .title(title())
+        .age(age())
+        .category(category())
+        .content(content())
+        .materialType(MaterialUtil.getMaterialBitMask(ppt(),
+            activitySheet(), cutout()))
+        .build();
+  }
 }

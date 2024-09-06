@@ -148,14 +148,8 @@ public class ActivityService {
       throw new GeneratorException(EMPTY_CUTOUT_DESIGN_RESULT);
     }
 
-    return new LinkedMaterialGuideResponse(
-        linkMaterialGuideRequest.title(),
-        linkMaterialGuideRequest.age(),
-        linkMaterialGuideRequest.category(),
-        ContentResponse.of(linkMaterialGuideRequest.content()),
-        llmDesignedMaterialResponse.ppt(),
-        llmDesignedMaterialResponse.activitySheet(),
-        llmDesignedMaterialResponse.cutout()
+    return LinkedMaterialGuideResponse.getLinkedMaterialGuideResponse(
+        linkMaterialGuideRequest, llmDesignedMaterialResponse
     );
   }
 
@@ -217,14 +211,7 @@ public class ActivityService {
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    Activity savedActivity = activityRepository.save(Activity.builder()
-        .title(saveMaterialRequest.title())
-        .age(saveMaterialRequest.age())
-        .category(saveMaterialRequest.category())
-        .content(saveMaterialRequest.content())
-        .materialType(getMaterialBitMask(saveMaterialRequest.ppt(),
-            saveMaterialRequest.activitySheet(), saveMaterialRequest.cutout()))
-        .build());
+    Activity savedActivity = activityRepository.save(saveMaterialRequest.toEntity());
 
     if (saveMaterialRequest.ppt() != null) {
       Material savedPptMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
@@ -416,19 +403,5 @@ public class ActivityService {
     } else {
       return null;
     }
-  }
-
-  protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
-    short materialBit = 0;
-    if (ppt != null && !ppt.isBlank()) {
-      materialBit += (short) 4;
-    }
-    if (activitySheet != null && !activitySheet.isBlank()) {
-      materialBit += (short) 2;
-    }
-    if (cutout != null && !cutout.isBlank()) {
-      materialBit += (short) 1;
-    }
-    return materialBit;
   }
 }

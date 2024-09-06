@@ -2,6 +2,7 @@ package com.example.gemm_server.dto.generator.response;
 
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.dto.common.response.ContentResponse;
+import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "연동된 활동 자료 설계 응답", requiredProperties = {"title", "age", "category",
@@ -29,4 +30,17 @@ public record LinkedMaterialGuideResponse(
     String cutout
 ) {
 
+  public static LinkedMaterialGuideResponse getLinkedMaterialGuideResponse(
+      LinkMaterialGuideRequest linkMaterialGuideRequest,
+      LlmDesignedMaterialResponse llmDesignedMaterialResponse) {
+    return new LinkedMaterialGuideResponse(
+        linkMaterialGuideRequest.title(),
+        linkMaterialGuideRequest.age(),
+        linkMaterialGuideRequest.category(),
+        ContentResponse.of(linkMaterialGuideRequest.content()),
+        llmDesignedMaterialResponse.ppt(),
+        llmDesignedMaterialResponse.activitySheet(),
+        llmDesignedMaterialResponse.cutout()
+    );
+  }
 }
