@@ -6,6 +6,7 @@ import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHON
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
@@ -15,6 +16,7 @@ import com.example.gemm_server.dto.auth.request.CheckPhoneVerificationCodeReques
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.auth.request.SendPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.response.CheckNicknameDuplicationResponse;
+import com.example.gemm_server.dto.auth.response.GetNecessaryMemberDataResponse;
 import com.example.gemm_server.dto.auth.response.LoginResponse;
 import com.example.gemm_server.dto.auth.response.TokenResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
@@ -76,6 +78,17 @@ public class AuthController {
     String token = tokenProvider.resolveToken(request);
     authService.logout(user.getId(), token);
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_LOGOUT));
+  }
+
+  @BearerAuth
+  @Operation(summary = "필수 정보 조회", description = "입력받아야 하는 필수 정보를 가져오는 API")
+  @GetMapping("/profile")
+  public ResponseEntity<CommonResponse<GetNecessaryMemberDataResponse>> getNecessaryMemberInformation(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    GetNecessaryMemberDataResponse response = new GetNecessaryMemberDataResponse(member);
+    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   @BearerAuth

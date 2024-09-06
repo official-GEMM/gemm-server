@@ -113,7 +113,7 @@ public class AuthService {
   }
 
   private void validateForReferral(Member referrerMember, Member refereeMember) {
-    if (referrerMember.isDataCompleted()) {
+    if (referrerMember.getIsRegistrationCompleted()) {
       throw new MemberException(MEMBER_ALREADY_COMPLETED);
     }
 

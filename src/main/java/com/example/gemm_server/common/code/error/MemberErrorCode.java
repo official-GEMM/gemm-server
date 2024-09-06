@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 public enum MemberErrorCode implements ErrorCode {
 
   MEMBER_DELETED(HttpStatus.BAD_REQUEST, "탈퇴된 사용자입니다."),
-  MEMBER_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 필수 정보의 제공이 완료된 사용자입니다."),
+  MEMBER_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 필수 정보의 입력을 한번 이상 진행한 사용자입니다."),
   OWN_REFERRAL_CODE(HttpStatus.BAD_REQUEST, "자신을 추천인으로 등록할 수 없습니다."),
   VERIFICATION_ATTEMPT_EXCEED(HttpStatus.BAD_REQUEST, "인증 시도 가능한 횟수를 초과하였습니다. 인증코드를 재발급 받아주세요."),
   VERIFICATION_NOT_MATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),

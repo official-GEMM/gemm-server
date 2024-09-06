@@ -40,6 +40,7 @@ public class MemberService {
     member.setNickname(memberInfo.getNickname());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     member.setManageAge(memberInfo.getManageAge());
+    member.setIsRegistrationCompleted(true);
     return member;
   }
 
