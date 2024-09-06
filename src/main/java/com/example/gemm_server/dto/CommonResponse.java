@@ -6,6 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Schema(description = "공통 응답", requiredProperties = {"code", "message"})
 public class CommonResponse<T> {
 
   @Schema(description = "Http 응답 코드")
