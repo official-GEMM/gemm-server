@@ -63,8 +63,7 @@ public class TokenProvider {
     return generateToken(authentication, accessTokenExpireTime);
   }
 
-  // 1. refresh token 발급
-  public String generateRefreshToken(Authentication authentication) {
+  public String generateRefreshTokenAndSave(Authentication authentication) {
     String refreshToken = generateToken(authentication, refreshTokenExpireTime);
     tokenService.updateRefreshToken(Long.parseLong(authentication.getName()), refreshToken);
     return refreshToken;
@@ -113,7 +112,7 @@ public class TokenProvider {
       if (validateToken(token) && token.equals(existRefreshToken)) {
         Authentication authentication = getAuthentication(token);
         String accessToken = generateAccessToken(authentication);
-        String refreshToken = generateRefreshToken(authentication);
+        String refreshToken = generateRefreshTokenAndSave(authentication);
         return new TokenResponse(accessToken, refreshToken);
       }
     }
