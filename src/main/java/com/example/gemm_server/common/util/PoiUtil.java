@@ -41,10 +41,10 @@ public class PoiUtil {
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
 
         slide.draw(graphics);
+        graphics.dispose();
         String saveFileName = UUIDUtil.getRandomUUID() + '.' + PNG;
         try (FileOutputStream out = new FileOutputStream(saveFileName)) {
           ImageIO.write(img, PNG, out);
-          ppt.write(out);
           imageFileNames.add(saveFileName);
         }
       }
@@ -74,8 +74,7 @@ public class PoiUtil {
 
   public static String convertPdfToPng(String filePath) {
     try (PDDocument document = PDDocument.load(new File(filePath));) {
-      PDFRenderer pdfRenderer = new PDFRenderer(document);
-      BufferedImage bufferedImage = pdfRenderer.renderImage(0);
+      BufferedImage bufferedImage = new PDFRenderer(document).renderImage(0);
 
       String newFilePath = UUIDUtil.getRandomUUID() + "0." + PNG;
       ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
