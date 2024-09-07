@@ -18,15 +18,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
   private final TokenProvider tokenProvider;
-  private final CookieUtil cookieUtil;
-
   private static final String URI = "/auth/login";
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
     String refreshToken = tokenProvider.generateRefreshTokenAndSave(authentication);
-    ResponseCookie refreshTokenCookie = cookieUtil.createForRefreshToken(refreshToken);
+    ResponseCookie refreshTokenCookie = CookieUtil.createForRefreshToken(refreshToken);
 
     response.addHeader("Set-Cookie", refreshTokenCookie.toString());
     String redirectUrl = UriComponentsBuilder.fromUriString(URI).toUriString();

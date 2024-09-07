@@ -50,7 +50,6 @@ public class AuthController {
   private final AuthService authService;
   private final TokenProvider tokenProvider;
   private final MemberService memberService;
-  private final CookieUtil cookieUtil;
 
   @Value("${login.redirect.url}")
   private String loginRedirectUrl;
@@ -104,7 +103,7 @@ public class AuthController {
       @CookieValue(value = "refreshToken") Cookie refreshTokenCookie,
       HttpServletResponse response) {
     Token tokens = tokenProvider.reissue(refreshTokenCookie.getValue());
-    ResponseCookie newRefreshTokenCookie = cookieUtil.createForRefreshToken(
+    ResponseCookie newRefreshTokenCookie = CookieUtil.createForRefreshToken(
         tokens.getRefreshToken());
 
     response.addHeader("Set-Cookie", newRefreshTokenCookie.toString());
