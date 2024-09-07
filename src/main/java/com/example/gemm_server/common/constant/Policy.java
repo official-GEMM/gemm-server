@@ -20,4 +20,7 @@ public class Policy {
   // 페이지 당 요소 개수
   public static final int STORAGE_LIMIT_SHORT = 4;
   public static final int STORAGE_LIMIT_LONG = 8;
+
+  // 휴대전화 인증 시도 가능 횟수
+  public static final int VERIFICATION_LIMIT = 5;
 }

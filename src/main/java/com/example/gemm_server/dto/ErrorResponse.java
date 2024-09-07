@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 
 @Getter
 @Setter
+@Schema(description = "에러 응답", requiredProperties = {"code", "message"})
 public class ErrorResponse {
 
   @Schema(description = "Http 응답 코드")

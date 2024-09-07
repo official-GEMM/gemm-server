@@ -16,11 +16,11 @@ public class GetHeaderResponse {
   private String profileImagePath;
 
   @Schema(description = "미확인 알림 존재 여부")
-  private Boolean hasNotification;
+  private Boolean hasUnreadNotification;
 
-  public GetHeaderResponse(Member member, boolean hasNotification) {
+  public GetHeaderResponse(Member member, boolean hasUnreadNotification) {
     this.gem = member.getGem();
     this.profileImagePath = member.getProfileImageUrl();
-    this.hasNotification = hasNotification;
+    this.hasUnreadNotification = hasUnreadNotification;
   }
 }

@@ -16,6 +16,8 @@ public class GetMyPurchasesResponse {
   private PageInformationResponse pageInfo;
 
   @Getter
+  @Schema(description = "구매 정보", requiredProperties = {"dealId", "marketItemId", "title",
+      "thumbnailPath", "buyAt", "price"})
   private static class Purchase {
 
     @Schema(description = "거래 아이디")

@@ -1,8 +1,7 @@
 package com.example.gemm_server.dto.generator.response;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.example.gemm_server.dto.common.response.ContentResponse;
 
-@Schema(description = "llm 활동 방법 응답", requiredProperties = {"contents"})
 public record LlmGuideResponse(
     ContentResponse[] contents
 ) {

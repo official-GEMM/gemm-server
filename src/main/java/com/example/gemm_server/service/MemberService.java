@@ -9,6 +9,7 @@ import com.example.gemm_server.domain.repository.MemberRepository;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.exception.MemberException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +40,17 @@ public class MemberService {
     member.setNickname(memberInfo.getNickname());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     member.setManageAge(memberInfo.getManageAge());
+    member.setIsRegistrationCompleted(true);
     return member;
   }
 
   public boolean isNicknameExists(String nickname) {
     return memberRepository.existsByNickname(nickname);
+  }
+
+  public boolean isPhoneNumberDuplicated(Long memberId, String phoneNumber) {
+    Optional<Member> member = this.memberRepository.findOneByPhoneNumber(phoneNumber);
+    return member.isPresent() && !member.get().getId().equals(memberId);
   }
 
   @Transactional

@@ -2,10 +2,13 @@ package com.example.gemm_server.controller;
 
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_LOGOUT;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
+import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHONE_VERIFICATION;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.util.CookieUtil;
+import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.auth.Token;
@@ -15,6 +18,7 @@ import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.auth.request.SendPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.response.CheckNicknameDuplicationResponse;
 import com.example.gemm_server.dto.auth.response.ReissueResponse;
+import com.example.gemm_server.dto.auth.response.GetNecessaryMemberDataResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
@@ -83,12 +87,24 @@ public class AuthController {
   }
 
   @BearerAuth
+  @Operation(summary = "필수 정보 조회", description = "입력받아야 하는 필수 정보를 가져오는 API")
+  @GetMapping("/profile")
+  public ResponseEntity<CommonResponse<GetNecessaryMemberDataResponse>> getNecessaryMemberInformation(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    GetNecessaryMemberDataResponse response = new GetNecessaryMemberDataResponse(member);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  @BearerAuth
   @Operation(summary = "필수 정보 입력", description = "필수 정보를 입력하지 않은 사용자의 정보를 업데이트하는 API")
   @PostMapping("/profile")
   public ResponseEntity<EmptyDataResponse> updateNecessaryMemberInformation(
       @Valid @RequestBody PostNecessaryMemberDataRequest memberNecessaryData,
       @AuthenticationPrincipal CustomUser user
   ) {
+    authService.validatePhoneNumberForUpdate(user.getId(), memberNecessaryData.getPhoneNumber());
     String referralCode = memberNecessaryData.getReferralCode();
     if (referralCode != null) {
       authService.compensateMemberForReferralIfValid(user.getId(), referralCode);
@@ -122,19 +138,28 @@ public class AuthController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
   @BearerAuth
   @Operation(summary = "휴대폰 인증번호 전송", description = "사용자의 휴대전화를 인증할 수 있는 코드를 전송하는 API")
   @PostMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> sendPhoneVerificationCode(
-      @Valid @RequestBody SendPhoneVerificationCodeRequest request) {
+      @Valid @RequestBody SendPhoneVerificationCodeRequest sendPhoneVerificationCodeRequest) {
+    String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
+    String verificationCode = authService.generateAndSaveVerificationCode(phoneNumber);
+
+    authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 
   @Operation(summary = "휴대폰 인증번호 확인", description = "사용자의 휴대전화를 인증할 수 있는 코드를 확인하는 API")
   @PutMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> checkPhoneVerificationCode(
-      @Valid @RequestBody CheckPhoneVerificationCodeRequest request) {
-    return ResponseEntity.ok(new EmptyDataResponse());
+      @Valid @RequestBody CheckPhoneVerificationCodeRequest checkPhoneVerificationCodeRequest) {
+    String phoneNumber = checkPhoneVerificationCodeRequest.getPhoneNumber();
+    String verificationCode = checkPhoneVerificationCodeRequest.getVerificationCode();
+
+    PhoneVerification phoneVerification =
+        authService.getPhoneVerificationWithIncrementingAttemptCount(phoneNumber);
+    authService.validatePhoneVerification(phoneVerification, verificationCode);
+    return ResponseEntity.ok(new EmptyDataResponse(PHONE_VERIFICATION));
   }
 }

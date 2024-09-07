@@ -3,6 +3,8 @@ package com.example.gemm_server.dto.my;
 import com.example.gemm_server.common.enums.EventType;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -24,6 +26,7 @@ public class NotificationResponse {
   @Schema(description = "알림 메세지")
   private String message;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "알림 발생지")
   private Long subjectId;
 

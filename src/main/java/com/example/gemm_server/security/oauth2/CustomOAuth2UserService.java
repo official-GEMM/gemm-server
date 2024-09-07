@@ -43,12 +43,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     Member member = memberRepository.findOneBySocialIdAndProviderIncludingDeleted(
             oAuth2Attribute.socialId(),
             oAuth2Attribute.provider().toString())
-        .orElseGet(() -> joinMemberWithJoinCompensation(oAuth2Attribute.toEntity()));
+        .orElseGet(() -> saveMemberWithJoinCompensation(oAuth2Attribute.toEntity()));
     validateMember(member);
     return member;
   }
 
-  private Member joinMemberWithJoinCompensation(Member notYetJoinedMember) {
+  private Member saveMemberWithJoinCompensation(Member notYetJoinedMember) {
     Member joinedMember = memberRepository.save(notYetJoinedMember);
     gemService.saveChangesOfGemWithMember(joinedMember, JOIN_COMPENSATION,
         GemUsageType.COMPENSATION);

@@ -18,9 +18,12 @@ import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
 import com.example.gemm_server.domain.repository.ThumbnailRepository;
+import com.example.gemm_server.dto.common.response.ContentResponse;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
 import com.example.gemm_server.dto.generator.request.LinkMaterialGuideRequest;
+import com.example.gemm_server.dto.generator.request.LlmLinkMaterialGuideRequest;
+import com.example.gemm_server.dto.generator.request.LlmUpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveGuideRequest;
 import com.example.gemm_server.dto.generator.request.SaveMaterialRequest;
 import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
@@ -31,7 +34,6 @@ import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
-import com.example.gemm_server.dto.generator.response.ContentResponse;
 import com.example.gemm_server.dto.generator.response.CutoutPathResponse;
 import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
@@ -97,13 +99,7 @@ public class ActivityService {
   public SavedGuideResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    Activity savedActivity = activityRepository.save(Activity.builder()
-        .title(saveGuideRequest.title())
-        .age(saveGuideRequest.age())
-        .category(saveGuideRequest.category())
-        .content(saveGuideRequest.content())
-        .materialType((short) 0)
-        .build());
+    Activity savedActivity = activityRepository.save(saveGuideRequest.toEntity());
     Generation savedGeneration = generationRepository.save(
         Generation.builder().activity(savedActivity).owner(member).build());
 
@@ -111,11 +107,14 @@ public class ActivityService {
   }
 
   @Transactional
-  public UpdatedGuideResponse updateGuide(UpdateGuideRequest UpdateGuideRequest, Long memberId) {
+  public UpdatedGuideResponse updateGuide(UpdateGuideRequest updateGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
+    LlmUpdateGuideRequest llmUpdateGuideRequest = new LlmUpdateGuideRequest(
+        ContentResponse.of(updateGuideRequest.content()), updateGuideRequest.comments()
+    );
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
-        UpdateGuideRequest, LlmGuideResponse.class);
+        llmUpdateGuideRequest, LlmGuideResponse.class);
 
     if (llmGuideResponse == null || llmGuideResponse.contents().length == 0) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
@@ -128,9 +127,14 @@ public class ActivityService {
   @Transactional
   public LinkedMaterialGuideResponse linkGuideToMaterial(
       LinkMaterialGuideRequest linkMaterialGuideRequest) {
+    LlmLinkMaterialGuideRequest llmLinkMaterialGuideRequest = new LlmLinkMaterialGuideRequest(
+        linkMaterialGuideRequest.title(), linkMaterialGuideRequest.age(),
+        linkMaterialGuideRequest.category(),
+        ContentResponse.of(linkMaterialGuideRequest.content())
+    );
     LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
         "/generate/guide/sync",
-        linkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
+        llmLinkMaterialGuideRequest, LlmDesignedMaterialResponse.class);
 
     if (llmDesignedMaterialResponse == null || llmDesignedMaterialResponse.ppt().length < 1 ||
         Arrays.stream(llmDesignedMaterialResponse.ppt())
@@ -144,15 +148,8 @@ public class ActivityService {
       throw new GeneratorException(EMPTY_CUTOUT_DESIGN_RESULT);
     }
 
-    return new LinkedMaterialGuideResponse(
-        linkMaterialGuideRequest.title(),
-        linkMaterialGuideRequest.age(),
-        linkMaterialGuideRequest.category(),
-        // Todo: 형식화된 텍스트 파싱 및 객체 변환
-        null,
-        llmDesignedMaterialResponse.ppt(),
-        llmDesignedMaterialResponse.activitySheet(),
-        llmDesignedMaterialResponse.cutout()
+    return LinkedMaterialGuideResponse.getLinkedMaterialGuideResponse(
+        linkMaterialGuideRequest, llmDesignedMaterialResponse
     );
   }
 
@@ -214,14 +211,7 @@ public class ActivityService {
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
-    Activity savedActivity = activityRepository.save(Activity.builder()
-        .title(saveMaterialRequest.title())
-        .age(saveMaterialRequest.age())
-        .category(saveMaterialRequest.category())
-        .content(saveMaterialRequest.content())
-        .materialType(getMaterialBitMask(saveMaterialRequest.ppt(),
-            saveMaterialRequest.activitySheet(), saveMaterialRequest.cutout()))
-        .build());
+    Activity savedActivity = activityRepository.save(saveMaterialRequest.toEntity());
 
     if (saveMaterialRequest.ppt() != null) {
       Material savedPptMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
@@ -413,19 +403,5 @@ public class ActivityService {
     } else {
       return null;
     }
-  }
-
-  protected short getMaterialBitMask(String ppt, String activitySheet, String cutout) {
-    short materialBit = 0;
-    if (ppt != null && !ppt.isBlank()) {
-      materialBit += (short) 4;
-    }
-    if (activitySheet != null && !activitySheet.isBlank()) {
-      materialBit += (short) 2;
-    }
-    if (cutout != null && !cutout.isBlank()) {
-      materialBit += (short) 1;
-    }
-    return materialBit;
   }
 }
