@@ -103,7 +103,7 @@ public class AuthController {
     if (referralCode != null) {
       authService.compensateMemberForReferralIfValid(user.getId(), referralCode);
     }
-    memberService.updateNecessaryMemberData(user.getId(), memberNecessaryData);
+    memberService.updateNecessaryMemberDataIfValid(user.getId(), memberNecessaryData);
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_UPDATED));
   }
 

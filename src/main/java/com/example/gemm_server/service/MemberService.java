@@ -1,6 +1,7 @@
 package com.example.gemm_server.service;
 
 import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_NOT_FOUND;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.NICKNAME_DUPLICATED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL_NOT_FOUND;
 
 import com.example.gemm_server.common.util.DateUtil;
@@ -31,13 +32,17 @@ public class MemberService {
   }
 
   @Transactional
-  public Member updateNecessaryMemberData(Long memberId,
+  public Member updateNecessaryMemberDataIfValid(Long memberId,
       PostNecessaryMemberDataRequest memberInfo) {
     Member member = findMemberByMemberIdOrThrow(memberId);
+    String newNickname = memberInfo.getNickname();
+    if (isNicknameExists(newNickname) && !member.getNickname().equals(newNickname)) {
+      throw new MemberException(NICKNAME_DUPLICATED);
+    }
 
     member.setName(memberInfo.getName());
     member.setBirth(DateUtil.parseYearMonthDay(memberInfo.getBirth()));
-    member.setNickname(memberInfo.getNickname());
+    member.setNickname(newNickname);
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     member.setManageAge(memberInfo.getManageAge());
     member.setIsRegistrationCompleted(true);

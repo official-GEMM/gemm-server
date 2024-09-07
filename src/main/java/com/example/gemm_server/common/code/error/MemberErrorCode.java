@@ -23,6 +23,7 @@ public enum MemberErrorCode implements ErrorCode {
   REFERRAL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 추천인 코드입니다."),
   VERIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 인증 정보입니다."),
 
+  NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
   PHONE_NUMBER_DUPLICATED(HttpStatus.CONFLICT, "이미 가입된 전화번호입니다."),
 
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다. 서버 팀에 연락주세요!");
