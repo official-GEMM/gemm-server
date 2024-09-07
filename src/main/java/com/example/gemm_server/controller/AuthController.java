@@ -6,19 +6,19 @@ import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHON
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.common.util.CookieUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
-import com.example.gemm_server.dto.auth.MemberCompensation;
+import com.example.gemm_server.dto.auth.Token;
 import com.example.gemm_server.dto.auth.request.CheckNicknameDuplicationRequest;
 import com.example.gemm_server.dto.auth.request.CheckPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.auth.request.SendPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.response.CheckNicknameDuplicationResponse;
+import com.example.gemm_server.dto.auth.response.ReissueResponse;
 import com.example.gemm_server.dto.auth.response.GetNecessaryMemberDataResponse;
-import com.example.gemm_server.dto.auth.response.LoginResponse;
-import com.example.gemm_server.dto.auth.response.TokenResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
@@ -27,9 +27,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RequiredArgsConstructor
 @RestController()
@@ -51,21 +55,23 @@ public class AuthController {
   private final TokenProvider tokenProvider;
   private final MemberService memberService;
 
+  @Value("${login.redirect.url}")
+  private String loginRedirectUrl;
 
   @Operation(summary = "소셜 로그인", description = "소셜 로그인 처리 이후 redirect되는 API")
   @GetMapping("/login")
-  public ResponseEntity<CommonResponse<LoginResponse>> login(
-      @Param("accessToken") String accessToken,
-      @Param("refreshToken") String refreshToken
-  ) {
-    Long userId = tokenProvider.getUserIdFromToken(accessToken);
-    MemberCompensation memberCompensation = authService.compensateMemberForDailyAttendance(userId);
+  public void login(
+      @CookieValue(value = "refreshToken") Cookie refreshTokenCookie,
+      HttpServletResponse response
+  ) throws IOException {
+    String refreshToken = refreshTokenCookie.getValue();
+    Long userId = tokenProvider.getUserIdFromToken(refreshToken);
+    boolean isAttendanceCompensated = authService.compensateMemberForDailyAttendance(userId);
+    String redirectWithParams = UriComponentsBuilder.fromUriString(loginRedirectUrl)
+        .queryParam("isAttendanceCompensated", isAttendanceCompensated)
+        .toUriString();
 
-    boolean isDataCompleted = memberCompensation.member().isDataCompleted();
-    boolean isCompensated = memberCompensation.isCompensated();
-    LoginResponse loginResponse =
-        new LoginResponse(accessToken, refreshToken, isDataCompleted, isCompensated);
-    return ResponseEntity.ok(new CommonResponse<>(loginResponse));
+    response.sendRedirect(redirectWithParams);
   }
 
   @BearerAuth
@@ -109,10 +115,16 @@ public class AuthController {
 
   @Operation(summary = "토큰 갱신", description = "accessToken과 refreshToken을 재발급하는 API")
   @PatchMapping("/reissue")
-  public ResponseEntity<CommonResponse<TokenResponse>> reissueAccessToken(
-      @CookieValue(value = "refreshToken") Cookie refreshToken) {
-    TokenResponse tokens = tokenProvider.reissueAccessToken(refreshToken.getValue());
-    return ResponseEntity.ok(new CommonResponse<>(tokens));
+  public ResponseEntity<CommonResponse<ReissueResponse>> reissueAccessToken(
+      @CookieValue(value = "refreshToken") Cookie refreshTokenCookie,
+      HttpServletResponse response) {
+    Token tokens = tokenProvider.reissue(refreshTokenCookie.getValue());
+    ResponseCookie newRefreshTokenCookie = CookieUtil.createForRefreshToken(
+        tokens.getRefreshToken());
+
+    response.addHeader("Set-Cookie", newRefreshTokenCookie.toString());
+    ReissueResponse reissueResponse = new ReissueResponse(tokens.getAccessToken());
+    return ResponseEntity.ok(new CommonResponse<>(reissueResponse));
   }
 
   @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 여부를 확인하는 API")

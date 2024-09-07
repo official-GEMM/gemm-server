@@ -20,7 +20,6 @@ import com.example.gemm_server.domain.entity.redis.TokenBlackList;
 import com.example.gemm_server.domain.repository.redis.PhoneVerificationRepository;
 import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
 import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
-import com.example.gemm_server.dto.auth.MemberCompensation;
 import com.example.gemm_server.exception.MemberException;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -70,7 +69,7 @@ public class AuthService {
   }
 
   @Transactional
-  public MemberCompensation compensateMemberForDailyAttendance(Long memberId) {
+  public boolean compensateMemberForDailyAttendance(Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     boolean isCompensated = false;
     if (!DateUtil.isToday(member.getLastLoginAt())) {
@@ -80,7 +79,7 @@ public class AuthService {
       // TODO: 출석 보상 알림 생성
     }
     member.setLastLoginAt(LocalDateTime.now(TimeZone.DEFAULT));
-    return new MemberCompensation(isCompensated, member);
+    return isCompensated;
   }
 
   @Transactional

@@ -8,7 +8,7 @@ import static com.example.gemm_server.common.code.error.TokenErrorCode.UNMATCHED
 import static com.example.gemm_server.common.code.error.TokenErrorCode.UNSUPPORTED_JWT_TOKEN;
 
 import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
-import com.example.gemm_server.dto.auth.response.TokenResponse;
+import com.example.gemm_server.dto.auth.Token;
 import com.example.gemm_server.exception.TokenException;
 import com.example.gemm_server.service.TokenService;
 import io.jsonwebtoken.Claims;
@@ -63,7 +63,7 @@ public class TokenProvider {
     return generateToken(authentication, accessTokenExpireTime);
   }
 
-  public String generateRefreshToken(Authentication authentication) {
+  public String generateRefreshTokenAndSave(Authentication authentication) {
     String refreshToken = generateToken(authentication, refreshTokenExpireTime);
     tokenService.updateRefreshToken(Long.parseLong(authentication.getName()), refreshToken);
     return refreshToken;
@@ -104,7 +104,7 @@ public class TokenProvider {
         claims.get(AUTHORITIES_KEY).toString()));
   }
 
-  public TokenResponse reissueAccessToken(String token) {
+  public Token reissue(String token) {
     if (StringUtils.hasText(token)) {
       Long memberId = getUserIdFromToken(token);
       String existRefreshToken = tokenService.getRefreshToken(memberId);
@@ -112,8 +112,8 @@ public class TokenProvider {
       if (validateToken(token) && token.equals(existRefreshToken)) {
         Authentication authentication = getAuthentication(token);
         String accessToken = generateAccessToken(authentication);
-        String refreshToken = generateRefreshToken(authentication);
-        return new TokenResponse(accessToken, refreshToken);
+        String refreshToken = generateRefreshTokenAndSave(authentication);
+        return new Token(accessToken, refreshToken);
       }
     }
     throw new TokenException(UNMATCHED_REFRESH_TOKEN);
