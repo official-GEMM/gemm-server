@@ -8,14 +8,13 @@ import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.util.CookieUtil;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
-import com.example.gemm_server.dto.auth.MemberCompensation;
+import com.example.gemm_server.dto.auth.Token;
 import com.example.gemm_server.dto.auth.request.CheckNicknameDuplicationRequest;
 import com.example.gemm_server.dto.auth.request.CheckPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.auth.request.SendPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.response.CheckNicknameDuplicationResponse;
-import com.example.gemm_server.dto.auth.response.LoginResponse;
-import com.example.gemm_server.dto.auth.response.TokenResponse;
+import com.example.gemm_server.dto.auth.response.ReissueResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
@@ -101,10 +100,16 @@ public class AuthController {
 
   @Operation(summary = "토큰 갱신", description = "accessToken과 refreshToken을 재발급하는 API")
   @PatchMapping("/reissue")
-  public ResponseEntity<CommonResponse<TokenResponse>> reissueAccessToken(
-      @CookieValue(value = "refreshToken") Cookie refreshToken) {
-    TokenResponse tokens = tokenProvider.reissueAccessToken(refreshToken.getValue());
-    return ResponseEntity.ok(new CommonResponse<>(tokens));
+  public ResponseEntity<CommonResponse<ReissueResponse>> reissueAccessToken(
+      @CookieValue(value = "refreshToken") Cookie refreshTokenCookie,
+      HttpServletResponse response) {
+    Token tokens = tokenProvider.reissue(refreshTokenCookie.getValue());
+    ResponseCookie newRefreshTokenCookie = cookieUtil.createForRefreshToken(
+        tokens.getRefreshToken());
+
+    response.addHeader("Set-Cookie", newRefreshTokenCookie.toString());
+    ReissueResponse reissueResponse = new ReissueResponse(tokens.getAccessToken());
+    return ResponseEntity.ok(new CommonResponse<>(reissueResponse));
   }
 
   @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 여부를 확인하는 API")
