@@ -7,6 +7,7 @@ import static com.example.gemm_server.common.code.error.MemberErrorCode.PHONE_NU
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_ATTEMPT_EXCEED;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_MATCH;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_RESEND_DURATION;
 import static com.example.gemm_server.common.constant.Policy.ATTENDANCE_COMPENSATION;
 import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATION;
 
@@ -132,12 +133,19 @@ public class AuthService {
     return this.messageService.sendOne(new SingleMessageSendingRequest(message));
   }
 
-  public String generateAndSaveVerificationCode(String phoneNumber) {
-    String verificationCode = RandomUtil.getRandomNumber(4);
-    PhoneVerification phoneVerification = new PhoneVerification(phoneNumber,
-        verificationCode);
-    this.phoneVerificationRepository.save(phoneVerification);
-    return verificationCode;
+  public String generateVerificationCodeIfValid(String phoneNumber) {
+    if (this.phoneVerificationRepository.existsById(phoneNumber)) {
+      throw new MemberException(VERIFICATION_RESEND_DURATION);
+    }
+    return RandomUtil.getRandomNumber(4);
+  }
+
+  public PhoneVerification saveVerificationCode(String phoneNumber, String verificationCode) {
+    if (this.phoneVerificationRepository.existsById(phoneNumber)) {
+      throw new MemberException(VERIFICATION_RESEND_DURATION);
+    }
+    PhoneVerification phoneVerification = new PhoneVerification(phoneNumber, verificationCode);
+    return this.phoneVerificationRepository.save(phoneVerification);
   }
 
   public PhoneVerification getPhoneVerificationWithIncrementingAttemptCount(String phoneNumber) {
