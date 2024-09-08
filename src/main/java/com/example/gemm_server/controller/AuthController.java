@@ -17,8 +17,8 @@ import com.example.gemm_server.dto.auth.request.CheckPhoneVerificationCodeReques
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.auth.request.SendPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.response.CheckNicknameDuplicationResponse;
-import com.example.gemm_server.dto.auth.response.ReissueResponse;
 import com.example.gemm_server.dto.auth.response.GetNecessaryMemberDataResponse;
+import com.example.gemm_server.dto.auth.response.ReissueResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.security.jwt.TokenProvider;
 import com.example.gemm_server.service.AuthService;
@@ -144,9 +144,10 @@ public class AuthController {
   public ResponseEntity<EmptyDataResponse> sendPhoneVerificationCode(
       @Valid @RequestBody SendPhoneVerificationCodeRequest sendPhoneVerificationCodeRequest) {
     String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
-    String verificationCode = authService.generateAndSaveVerificationCode(phoneNumber);
-
+    String verificationCode = authService.generateVerificationCodeIfValid(phoneNumber);
+    
     authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
+    authService.saveVerificationCode(phoneNumber, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 

@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 @Getter
-@RedisHash(value = "phoneVerificationCode", timeToLive = 300) // 5분
+@RedisHash(value = "phoneVerificationCode", timeToLive = 180) // 3분
 public class PhoneVerification {
 
   @Id
