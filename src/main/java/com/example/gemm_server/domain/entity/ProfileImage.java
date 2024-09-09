@@ -30,14 +30,14 @@ public class ProfileImage extends Timestamped {
   private Long id;
 
   @ColumnDescription("원본 파일 이름")
-  @Column(name = "origin_name", nullable = false)
+  @Column(name = "origin_name", nullable = false) // 최대 255바이트
   private String originName;
 
   @ColumnDescription("현재 파일 이름")
-  @Column(name = "file_name", nullable = false)
+  @Column(name = "file_name", nullable = false) // 최대 255바이트
   private String fileName;
 
   @ColumnDescription("파일 경로")
-  @Column(name = "file_path", nullable = false)
+  @Column(name = "file_path", nullable = false) // 최대 255바이트
   private String filePath;
 }

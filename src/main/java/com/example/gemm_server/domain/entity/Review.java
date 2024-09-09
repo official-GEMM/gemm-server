@@ -36,7 +36,7 @@ public class Review extends Timestamped {
   private Float score;
 
   @ColumnDescription("리뷰 내용")
-  @Column(name = "content", nullable = false, length = 600) // 입력값 최대 200자
+  @Column(name = "content", nullable = false, length = 600) // 최대 200자
   private String content;
 
   @ColumnDescription("블라인드 처리 일시")

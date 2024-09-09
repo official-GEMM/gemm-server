@@ -39,7 +39,7 @@ public class Notification extends Timestamped {
   private Long id;
 
   @ColumnDescription("메세지")
-  @Column(name = "message", nullable = false)
+  @Column(name = "message", nullable = false, length = 180) // 최대 60자
   private String message;
 
   @ColumnDescription("알림 종류")
