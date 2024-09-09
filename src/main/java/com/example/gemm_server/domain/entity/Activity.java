@@ -32,7 +32,7 @@ public class Activity extends Timestamped {
   private Long id;
 
   @ColumnDescription("제목")
-  @Column(name = "title", length = 30, nullable = false)
+  @Column(name = "title", length = 60, nullable = false) // 최대 20자
   private String title;
 
   @ColumnDescription("타겟 연령")
@@ -49,7 +49,7 @@ public class Activity extends Timestamped {
   private Short materialType;
 
   @ColumnDescription("활동 내용")
-  @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+  @Column(name = "content", columnDefinition = "TEXT", nullable = false) // 최대 2000자
   private String content;
 
   @Builder

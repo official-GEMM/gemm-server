@@ -59,11 +59,11 @@ public class Member extends Timestamped {
   private String referralCode;
 
   @ColumnDescription("실명")
-  @Column(name = "name", length = 30, nullable = false)
+  @Column(name = "name", length = 90, nullable = false) // 최대 30자
   private String name;
 
   @ColumnDescription("별명")
-  @Column(name = "nickname", length = 10, unique = true)
+  @Column(name = "nickname", length = 36, unique = true) // 최대 12자
   private String nickname;
 
   @ColumnDescription("전화번호")
