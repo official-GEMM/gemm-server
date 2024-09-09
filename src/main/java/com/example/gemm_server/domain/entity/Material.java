@@ -1,5 +1,6 @@
 package com.example.gemm_server.domain.entity;
 
+import com.example.gemm_server.common.annotation.entity.ColumnDescription;
 import com.example.gemm_server.common.enums.MaterialType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,33 +34,41 @@ import org.hibernate.annotations.SQLRestriction;
 public class Material extends Timestamped {
 
   @Id
+  @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", unique = true, nullable = false)
   private Long id;
 
+  @ColumnDescription("원본 파일 이름")
   @Column(name = "origin_name", nullable = false)
   private String originName;
 
+  @ColumnDescription("현재 파일 이름")
   @Column(name = "file_name", nullable = false)
   private String fileName;
 
+  @ColumnDescription("파일 경로")
   @Column(name = "file_path", nullable = false)
   private String filePath;
 
+  @ColumnDescription("자료의 종류")
   @Enumerated(value = EnumType.STRING)
   @Column(name = "type", nullable = false)
   private MaterialType type;
 
-  @ManyToOne(targetEntity = Activity.class, fetch = FetchType.LAZY)
+  @ColumnDescription("활동 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
 
+  @ColumnDescription("썸네일 리스트")
   @OrderBy("sequence ASC")
   @OneToMany(mappedBy = "material")
   private List<Thumbnail> thumbnails;
 
   @Builder
-  public Material(String originName, String fileName, String filePath, MaterialType type, Activity activity) {
+  public Material(String originName, String fileName, String filePath, MaterialType type,
+      Activity activity) {
     this.originName = originName;
     this.fileName = fileName;
     this.filePath = filePath;

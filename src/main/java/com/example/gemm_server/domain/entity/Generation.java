@@ -1,5 +1,6 @@
 package com.example.gemm_server.domain.entity;
 
+import com.example.gemm_server.common.annotation.entity.ColumnDescription;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,14 +27,17 @@ import org.hibernate.annotations.SQLRestriction;
 public class Generation extends Timestamped {
 
   @Id
+  @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
 
+  @ColumnDescription("소유자 아이디")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "owner_id", nullable = false)
   private Member owner;
 
+  @ColumnDescription("활동 아이디")
   @OneToOne
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
