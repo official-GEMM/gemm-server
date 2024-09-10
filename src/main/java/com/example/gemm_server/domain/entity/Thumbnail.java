@@ -1,5 +1,6 @@
 package com.example.gemm_server.domain.entity;
 
+import com.example.gemm_server.common.annotation.entity.ColumnDescription;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,29 +31,36 @@ import org.hibernate.annotations.SQLRestriction;
 public class Thumbnail extends Timestamped {
 
   @Id
+  @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", unique = true, nullable = false)
+  @Column(name = "id")
   private Long id;
 
-  @Column(name = "origin_name", nullable = false)
+  @ColumnDescription("원본 파일 이름")
+  @Column(name = "origin_name", nullable = false) // 최대 255바이트
   private String originName;
 
-  @Column(name = "file_name", nullable = false)
+  @ColumnDescription("현재 파일 이름")
+  @Column(name = "file_name", nullable = false) // 최대 255바이트
   private String fileName;
 
-  @Column(name = "file_path", nullable = false)
+  @ColumnDescription("파일 경로")
+  @Column(name = "file_path", nullable = false) // 최대 255바이트
   private String filePath;
 
+  @ColumnDescription("순서")
   @Column(name = "sequence", nullable = false)
   @ColumnDefault("0")
   private Short sequence;
 
-  @ManyToOne(targetEntity = Material.class, fetch = FetchType.LAZY)
+  @ColumnDescription("자료 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "material_id", nullable = false)
   private Material material;
 
   @Builder
-  public Thumbnail(String originName, String fileName, String filePath, Short sequence, Material material) {
+  public Thumbnail(String originName, String fileName, String filePath, Short sequence,
+      Material material) {
     this.originName = originName;
     this.fileName = fileName;
     this.filePath = filePath;

@@ -9,22 +9,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@SQLDelete(sql = "UPDATE generation SET deleted_at = CURRENT_TIMESTAMP where id = ?")
+@SQLDelete(sql = "UPDATE deal SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "generation")
-public class Generation extends Timestamped {
+@Table(name = "deal")
+public class Deal extends Timestamped {
 
   @Id
   @ColumnDescription("아이디")
@@ -32,19 +31,23 @@ public class Generation extends Timestamped {
   @Column(name = "id")
   private Long id;
 
-  @ColumnDescription("소유자 아이디")
+  @ColumnDescription("가격")
+  @Column(name = "price", nullable = false)
+  @ColumnDefault("0")
+  private Integer price;
+
+  @ColumnDescription("구매자 아이디")
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner_id", nullable = false)
-  private Member owner;
+  @JoinColumn(name = "buyer_id", nullable = false)
+  private Member buyer;
+
+  @ColumnDescription("판매자 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "seller_id", nullable = false)
+  private Member seller;
 
   @ColumnDescription("활동 아이디")
-  @OneToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
-
-  @Builder
-  public Generation(Member owner, Activity activity) {
-    this.owner = owner;
-    this.activity = activity;
-  }
 }

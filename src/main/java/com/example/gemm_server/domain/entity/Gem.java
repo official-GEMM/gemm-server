@@ -1,5 +1,6 @@
 package com.example.gemm_server.domain.entity;
 
+import com.example.gemm_server.common.annotation.entity.ColumnDescription;
 import com.example.gemm_server.common.enums.GemUsageType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,19 +34,23 @@ import org.hibernate.annotations.SQLRestriction;
 public class Gem extends Timestamped {
 
   @Id
+  @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", unique = true, nullable = false)
+  @Column(name = "id")
   private Long id;
 
+  @ColumnDescription("재화량")
   @Column(name = "amount", nullable = false)
   @ColumnDefault("0")
   private Integer amount;
 
+  @ColumnDescription("사용 구분")
   @Column(name = "usage_type", nullable = false)
   @Enumerated(value = EnumType.STRING)
   private GemUsageType usageType;
 
-  @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
+  @ColumnDescription("사용자 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 

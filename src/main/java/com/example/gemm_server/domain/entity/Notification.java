@@ -1,5 +1,6 @@
 package com.example.gemm_server.domain.entity;
 
+import com.example.gemm_server.common.annotation.entity.ColumnDescription;
 import com.example.gemm_server.common.constant.TimeZone;
 import com.example.gemm_server.common.enums.EventType;
 import jakarta.persistence.Column;
@@ -32,29 +33,36 @@ import org.hibernate.annotations.SQLRestriction;
 public class Notification extends Timestamped {
 
   @Id
+  @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", unique = true, nullable = false)
+  @Column(name = "id")
   private Long id;
 
-  @Column(name = "message", updatable = false, nullable = false)
+  @ColumnDescription("메세지")
+  @Column(name = "message", nullable = false, length = 180) // 최대 60자
   private String message;
 
+  @ColumnDescription("알림 종류")
   @Enumerated(value = EnumType.STRING)
-  @Column(name = "event_type", updatable = false, nullable = false)
+  @Column(name = "event_type", nullable = false)
   private EventType eventType;
 
+  @ColumnDescription("열람 여부")
   @Column(name = "is_opened", nullable = false)
   @ColumnDefault("0")
   private boolean isOpened;
 
-  @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
+  @ColumnDescription("알림 수신자 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "receiver_id", nullable = false)
   private Member receiver;
 
-  @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
-  @JoinColumn(name = "sender_id", nullable = true)
+  @ColumnDescription("알림 송신자 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "sender_id")
   private Member sender;
 
+  @ColumnDescription("알림 대상의 아이디")
   @Column(name = "subject_id")
   private Long subjectId;
 

@@ -9,10 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -20,11 +19,11 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@SQLDelete(sql = "UPDATE generation SET deleted_at = CURRENT_TIMESTAMP where id = ?")
+@SQLDelete(sql = "UPDATE review SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "generation")
-public class Generation extends Timestamped {
+@Table(name = "review")
+public class Review extends Timestamped {
 
   @Id
   @ColumnDescription("아이디")
@@ -32,19 +31,25 @@ public class Generation extends Timestamped {
   @Column(name = "id")
   private Long id;
 
-  @ColumnDescription("소유자 아이디")
+  @ColumnDescription("점수")
+  @Column(name = "score", nullable = false)
+  private Float score;
+
+  @ColumnDescription("리뷰 내용")
+  @Column(name = "content", nullable = false, length = 600) // 최대 200자
+  private String content;
+
+  @ColumnDescription("블라인드 처리 일시")
+  @Column(name = "banned_at")
+  private LocalDateTime bannedAt;
+
+  @ColumnDescription("작성자 아이디")
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner_id", nullable = false)
-  private Member owner;
+  @JoinColumn(name = "member_id", nullable = false)
+  private Member member;
 
-  @ColumnDescription("활동 아이디")
-  @OneToOne
-  @JoinColumn(name = "activity_id", nullable = false)
-  private Activity activity;
-
-  @Builder
-  public Generation(Member owner, Activity activity) {
-    this.owner = owner;
-    this.activity = activity;
-  }
+  @ColumnDescription("마켓 아이템 아이디")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "market_item_id", nullable = false)
+  private MarketItem marketItem;
 }
