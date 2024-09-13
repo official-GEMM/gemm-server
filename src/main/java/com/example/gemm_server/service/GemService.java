@@ -1,12 +1,15 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.GemErrorCode.GEM_TO_BE_POSITIVE;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.MEMBER_HAS_NEGATIVE_GEM;
+
 import com.example.gemm_server.common.code.error.GemErrorCode;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.domain.entity.Gem;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.repository.GemRepository;
 import com.example.gemm_server.exception.GemException;
-import java.util.List;
+import com.example.gemm_server.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +28,17 @@ public class GemService {
     return saveGem(amount, usageType, member.getId());
   }
 
-  public int getRemainGem(Member member, int amount, GemUsageType usageType) {
-    if (member.getGem() + usageType.getSignedAmount(amount) < 0) {
+  public int getRemainGem(Member member, int usageAmount, GemUsageType usageType) {
+    if (usageAmount < 0) {
+      throw new GemException(GEM_TO_BE_POSITIVE);
+    }
+    if (member.getGem() < 0) {
+      throw new MemberException(MEMBER_HAS_NEGATIVE_GEM);
+    }
+    if (member.getGem() + usageType.getSignedAmount(usageAmount) < 0) {
       throw new GemException(GemErrorCode.NOT_ENOUGH_GEM);
     }
-    return member.getGem() + usageType.getSignedAmount(amount);
+    return member.getGem() + usageType.getSignedAmount(usageAmount);
   }
 
   private Gem saveGem(int amount, GemUsageType usageType, Long memberId) {

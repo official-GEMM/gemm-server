@@ -1,7 +1,9 @@
 package com.example.gemm_server.controller;
 
+import com.example.gemm_server.common.annotation.auth.AuthorizeOwner;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.enums.ReviewOrder;
+import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
@@ -105,6 +107,7 @@ public class MarketController {
   }
 
   @BearerAuth
+  @AuthorizeOwner(MarketItem.class)
   @Operation(summary = "상품 수정", description = "마켓에 상품을 수정하는 API")
   @PutMapping("/{marketItemId}")
   public ResponseEntity<CommonResponse<MarketItemIdResponse>> updateMarketItem(
@@ -116,6 +119,7 @@ public class MarketController {
   }
 
   @BearerAuth
+  @AuthorizeOwner(MarketItem.class)
   @Operation(summary = "상품 삭제", description = "마켓의 상품을 삭제하는 API")
   @DeleteMapping("/{marketItemId}")
   public ResponseEntity<EmptyDataResponse> deleteMarketItem(
