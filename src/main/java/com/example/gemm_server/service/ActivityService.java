@@ -129,8 +129,7 @@ public class ActivityService {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
     LlmUpdateGuideRequest llmUpdateGuideRequest = new LlmUpdateGuideRequest(
-        ContentResponse.of(updateGuideRequest.content()), updateGuideRequest.comments()
-    );
+        updateGuideRequest.contents(), updateGuideRequest.comments());
     LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
         llmUpdateGuideRequest, LlmGuideResponse.class);
 
