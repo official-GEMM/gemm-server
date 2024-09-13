@@ -1,6 +1,9 @@
 package com.example.gemm_server.common.util;
 
-import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.FAILED_TO_COPY_FILE;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.FAILED_TO_DOWNLOAD_FILE;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.FAILED_TO_GENERATE_PRESIGNED_URL;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.FAILED_TO_UPLOAD_FILE;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.SdkClientException;
@@ -10,12 +13,13 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.example.gemm_server.exception.GeneratorException;
+import jakarta.annotation.PostConstruct;
+import java.io.File;
+import java.io.InputStream;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.io.*;
 
 @Component
 @RequiredArgsConstructor
@@ -25,9 +29,18 @@ public class S3Util {
   @Value("${cloud.aws.s3.bucket.name}")
   private String bucketName;
 
-  public String uploadFile(File file, String fileName, String savePath) {
+  private static AmazonS3 staticAmazonS3;
+  private static String staticBucketName;
+
+  @PostConstruct
+  public void init() {
+    staticAmazonS3 = this.amazonS3;
+    staticBucketName = this.bucketName;
+  }
+
+  public static String uploadFile(File file, String fileName, String savePath) {
     try {
-      amazonS3.putObject(bucketName, savePath + fileName, file);
+      staticAmazonS3.putObject(staticBucketName, savePath + fileName, file);
       file.delete();
       return savePath + fileName;
     } catch (SdkClientException e) {
@@ -35,20 +48,21 @@ public class S3Util {
     }
   }
 
-  public InputStream downloadFile(String fileName) {
+  public static InputStream downloadFile(String fileName) {
     try {
-      S3Object s3Object = amazonS3.getObject(bucketName, fileName);
+      S3Object s3Object = staticAmazonS3.getObject(staticBucketName, fileName);
       return s3Object.getObjectContent();
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_DOWNLOAD_FILE);
     }
   }
 
-  public String copyFile(String fileName, String filePath) {
+  public static String copyFile(String fileName, String filePath) {
     try {
-      if (amazonS3.doesObjectExist(bucketName, filePath + fileName)) {
+      if (staticAmazonS3.doesObjectExist(staticBucketName, filePath + fileName)) {
         String savePath = filePath.substring(5) + fileName;
-        amazonS3.copyObject(bucketName, filePath + fileName, bucketName, savePath);
+        staticAmazonS3.copyObject(staticBucketName, filePath + fileName, staticBucketName,
+            savePath);
         return savePath;
       } else {
         return null;
@@ -58,10 +72,10 @@ public class S3Util {
     }
   }
 
-  public String getFileUrl(String fileName) {
+  public static String getFileUrl(String fileName) {
     try {
       GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
-          bucketName, fileName)
+          staticBucketName, fileName)
           .withMethod(HttpMethod.GET)
           .withExpiration(DateUtil.getExpirationDate(1000 * 60 * 2L));
       presignedUrlRequest.addRequestParameter(
@@ -69,25 +83,25 @@ public class S3Util {
           CannedAccessControlList.PublicRead.toString()
       );
 
-      return amazonS3.generatePresignedUrl(presignedUrlRequest).toString();
+      return staticAmazonS3.generatePresignedUrl(presignedUrlRequest).toString();
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_GENERATE_PRESIGNED_URL);
     }
   }
 
-  public String getUUIDFileName(String fileName) {
+  public static String getUUIDFileName(String fileName) {
     return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
   }
 
-  public String getFileNameFromPresignedUrl(String presignedUrl) {
+  public static String getFileNameFromPresignedUrl(String presignedUrl) {
     return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('?'));
   }
 
-  public String getFileNameFromPresignedUrlWithNoExtension(String presignedUrl) {
+  public static String getFileNameFromPresignedUrlWithNoExtension(String presignedUrl) {
     return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('.'));
   }
 
-  protected String getFileExtension(String fileName) {
+  protected static String getFileExtension(String fileName) {
     return fileName.substring(fileName.lastIndexOf("."));
   }
 }
