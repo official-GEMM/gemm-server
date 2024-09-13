@@ -1,7 +1,26 @@
 package com.example.gemm_server.service;
 
-import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
-import static com.example.gemm_server.common.constant.FilePath.*;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_DESIGN_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_CUTOUT_DESIGN_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_CUTOUT_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_GUIDE_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_MATERIAL_GENERATE_REQUEST;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_MATERIAL_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_DESIGN_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_MATERIAL;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_THUMBNAIL;
+import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_PATH;
+import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH;
+import static com.example.gemm_server.common.constant.FilePath.SAVE_CUTOUT_PATH;
+import static com.example.gemm_server.common.constant.FilePath.SAVE_PPT_PATH;
+import static com.example.gemm_server.common.constant.FilePath.SAVE_PPT_THUMBNAIL_PATH;
+import static com.example.gemm_server.common.constant.FilePath.TEMP_ACTIVITY_SHEET_PATH;
+import static com.example.gemm_server.common.constant.FilePath.TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH;
+import static com.example.gemm_server.common.constant.FilePath.TEMP_CUTOUT_PATH;
+import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_PATH;
+import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_THUMBNAIL_PATH;
 
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.GemUsageType;
@@ -71,7 +90,6 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
 
   private final WebClientUtil webClientUtil;
-  private final S3Util s3Util;
   private final GemService gemService;
   private final MemberService memberService;
   private final ActivityRepository activityRepository;
@@ -214,29 +232,29 @@ public class ActivityService {
     Activity savedActivity = activityRepository.save(saveMaterialRequest.toEntity());
 
     if (saveMaterialRequest.ppt() != null) {
-      Material savedPptMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
+      Material savedPptMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.ppt()), TEMP_PPT_PATH, SAVE_PPT_PATH, savedActivity,
           MaterialType.PPT);
-      saveThumbnails(s3Util.getFileNameFromPresignedUrlWithNoExtension(
+      saveThumbnails(S3Util.getFileNameFromPresignedUrlWithNoExtension(
               saveMaterialRequest.ppt()), TEMP_PPT_THUMBNAIL_PATH, SAVE_PPT_THUMBNAIL_PATH,
           savedPptMaterial);
     }
 
     if (saveMaterialRequest.activitySheet() != null) {
-      Material savedActivitySheetMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
+      Material savedActivitySheetMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.activitySheet()), TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH,
           savedActivity, MaterialType.ACTIVITY_SHEET);
       saveThumbnail(
-          s3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.activitySheet()),
+          S3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.activitySheet()),
           TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH, SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH,
           savedActivitySheetMaterial);
     }
 
     if (saveMaterialRequest.cutout() != null) {
-      Material savedCutoutMaterial = saveMaterial(s3Util.getFileNameFromPresignedUrl(
+      Material savedCutoutMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.cutout()), TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedActivity,
           MaterialType.CUTOUT);
-      saveThumbnail(s3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.cutout()),
+      saveThumbnail(S3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.cutout()),
           TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedCutoutMaterial);
     }
 
@@ -310,7 +328,7 @@ public class ActivityService {
 
   protected Material saveMaterial(String fileName, String tempSavedFilePath,
       String saveFilePath, Activity activity, MaterialType materialType) {
-    if (s3Util.copyFile(fileName, tempSavedFilePath) != null) {
+    if (S3Util.copyFile(fileName, tempSavedFilePath) != null) {
       return materialRepository.save(Material.builder()
           .originName(fileName)
           .fileName(fileName)
@@ -326,7 +344,7 @@ public class ActivityService {
   protected Thumbnail saveThumbnail(String fileNameWithNoExtension, String tempSavedFilePath,
       String saveFilePath, Material material) {
     String thumbnailName = fileNameWithNoExtension + ".png";
-    if (s3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
+    if (S3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
       return thumbnailRepository.save(Thumbnail.builder()
           .originName(thumbnailName)
           .fileName(thumbnailName)
@@ -344,7 +362,7 @@ public class ActivityService {
     List<Thumbnail> thumbnails = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
       String thumbnailName = fileNameWithNoExtension + i + ".png";
-      if (s3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
+      if (S3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
         Thumbnail thumbnail = Thumbnail.builder()
             .originName(thumbnailName)
             .fileName(thumbnailName)
@@ -366,12 +384,12 @@ public class ActivityService {
   protected String[] getPptThumbnailPaths(LlmPptResponse llmPptResponse) {
     if (llmPptResponse != null) {
       List<String> imagePaths = PoiUtil.convertPptToPng(
-          s3Util.downloadFile(llmPptResponse.fileName()));
+          S3Util.downloadFile(llmPptResponse.fileName()));
       String[] thumbnailPaths = new String[imagePaths.size()];
       for (int i = 0; i < imagePaths.size(); i++) {
         File file = new File(imagePaths.get(i));
-        thumbnailPaths[i] = s3Util.getFileUrl(
-            s3Util.uploadFile(file,
+        thumbnailPaths[i] = S3Util.getFileUrl(
+            S3Util.uploadFile(file,
                 llmPptResponse.fileName().substring(10, llmPptResponse.fileName().lastIndexOf('.'))
                     + i + ".png", TEMP_PPT_THUMBNAIL_PATH));
       }
@@ -385,11 +403,11 @@ public class ActivityService {
       LlmActivitySheetResponse llmActivitySheetResponse) {
     if (llmActivitySheetResponse != null) {
       String docxFilePath = PoiUtil.convertDocxToPdf(
-          s3Util.downloadFile(llmActivitySheetResponse.fileName()),
+          S3Util.downloadFile(llmActivitySheetResponse.fileName()),
           llmActivitySheetResponse.fileName());
       String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
-      return s3Util.getFileUrl(
-          s3Util.uploadFile(new File(pngFilePath), llmActivitySheetResponse.fileName()
+      return S3Util.getFileUrl(
+          S3Util.uploadFile(new File(pngFilePath), llmActivitySheetResponse.fileName()
                   .substring(10, llmActivitySheetResponse.fileName().lastIndexOf('.') + 1) + "png",
               TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH));
     } else {

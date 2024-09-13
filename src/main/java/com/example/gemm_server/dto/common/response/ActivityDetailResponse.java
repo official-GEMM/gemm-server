@@ -4,7 +4,6 @@ import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.domain.entity.Material;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 
@@ -33,9 +32,7 @@ public class ActivityDetailResponse {
     this.materials = materials.stream().map(MaterialResponse::new).toArray(MaterialResponse[]::new);
     this.age = activity.getAge();
     this.category = activity.getCategory();
-    this.contents = Arrays.stream(activity.getContent().split("\n"))
-        .map(ContentResponse::new)
-        .toArray(ContentResponse[]::new);
+    this.contents = ContentResponse.of(activity.getContent());
   }
 
 }

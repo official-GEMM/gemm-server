@@ -3,7 +3,6 @@ package com.example.gemm_server.dto.common.response;
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.domain.entity.Activity;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Arrays;
 import lombok.Getter;
 
 @Getter
@@ -26,8 +25,6 @@ public class GuideResponse {
     this.title = activity.getTitle();
     this.age = activity.getAge();
     this.category = activity.getCategory();
-    this.contents = Arrays.stream(activity.getContent().split("\n"))
-        .map(ContentResponse::new)
-        .toArray(ContentResponse[]::new);
+    this.contents = ContentResponse.of(activity.getContent());
   }
 }
