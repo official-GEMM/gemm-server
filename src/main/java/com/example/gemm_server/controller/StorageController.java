@@ -3,9 +3,10 @@ package com.example.gemm_server.controller;
 import static com.example.gemm_server.common.code.success.GenerationSuccessCode.ACTIVITY_GENERATION_DELETED;
 import static com.example.gemm_server.common.code.success.GenerationSuccessCode.GUIDE_GENERATION_DELETED;
 
+import com.example.gemm_server.common.annotation.auth.AuthorizeOwner;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
-import com.example.gemm_server.common.annotation.belong.GenerationBelonging;
 import com.example.gemm_server.common.constant.Policy;
+import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.Generation;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.dto.CommonResponse;
@@ -81,7 +82,7 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  @GenerationBelonging()
+  @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 방법 상세", description = "사용자가 생성한 활동 방법 상세를 조회하는 API")
   @GetMapping("/generate/guides/{generationId}")
   public ResponseEntity<CommonResponse<GetGeneratedGuideDetailResponse>> getGeneratedGuideDetail(
@@ -93,7 +94,7 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  @GenerationBelonging()
+  @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 상세", description = "사용자가 생성한 활동 상세를 조회하는 API")
   @GetMapping("/generate/activities/{generationId}")
   public ResponseEntity<CommonResponse<GetGeneratedActivityDetailResponse>> getGeneratedActivityDetail(
@@ -108,7 +109,7 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  @GenerationBelonging()
+  @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 방법 삭제", description = "사용자가 생성한 활동 방법을 삭제하는 API")
   @DeleteMapping("/generate/guides/{generationId}")
   public ResponseEntity<EmptyDataResponse> deleteGeneratedGuide(
@@ -118,7 +119,7 @@ public class StorageController {
     return ResponseEntity.ok(new EmptyDataResponse(GUIDE_GENERATION_DELETED));
   }
 
-  @GenerationBelonging()
+  @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 삭제", description = "사용자가 생성한 활동을 삭제하는 API")
   @DeleteMapping("/generate/activities/{generationId}")
   public ResponseEntity<EmptyDataResponse> deleteGeneratedActivity(
@@ -129,9 +130,11 @@ public class StorageController {
   }
 
   // 미완성 API
+  @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/activities/{generationId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadGeneratedActivityMaterial(
+      @AuthenticationPrincipal CustomUser user,
       @PathVariable("generationId") Long generationId
   ) {
     DownloadMaterialResponse response = new DownloadMaterialResponse();
@@ -147,6 +150,7 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @AuthorizeOwner(Deal.class)
   @Operation(summary = "구매한 활동 상세", description = "사용자가 구매한 활동 상세를 조회하는 API")
   @GetMapping("/generate/purchases/{dealId}")
   public ResponseEntity<CommonResponse<GetPurchasedActivityDetailResponse>> getPurchasedActivityDetail(
@@ -156,6 +160,7 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @AuthorizeOwner(Deal.class)
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(

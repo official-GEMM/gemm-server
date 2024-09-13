@@ -1,4 +1,4 @@
-package com.example.gemm_server.common.annotation.belong;
+package com.example.gemm_server.common.annotation.auth;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(value = {ElementType.METHOD})
 @Retention(value = RetentionPolicy.RUNTIME)
-public @interface GenerationBelonging {
+public @interface AuthorizeOwner {
 
+  Class<?> value();
 }
