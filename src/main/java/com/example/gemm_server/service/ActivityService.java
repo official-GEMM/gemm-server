@@ -146,8 +146,7 @@ public class ActivityService {
       LinkMaterialGuideRequest linkMaterialGuideRequest) {
     LlmLinkMaterialGuideRequest llmLinkMaterialGuideRequest = new LlmLinkMaterialGuideRequest(
         linkMaterialGuideRequest.title(), linkMaterialGuideRequest.age(),
-        linkMaterialGuideRequest.category(),
-        ContentResponse.of(linkMaterialGuideRequest.content())
+        linkMaterialGuideRequest.category(), linkMaterialGuideRequest.contents()
     );
     LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
         "/generate/guide/sync",

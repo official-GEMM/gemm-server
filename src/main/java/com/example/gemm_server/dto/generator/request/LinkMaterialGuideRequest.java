@@ -1,9 +1,12 @@
 package com.example.gemm_server.dto.generator.request;
 
 import com.example.gemm_server.common.enums.Category;
+import com.example.gemm_server.dto.common.response.ContentResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record LinkMaterialGuideRequest(
     @Schema(description = "생성하고자 하는 주제")
@@ -19,8 +22,9 @@ public record LinkMaterialGuideRequest(
     Category category,
 
     @Schema(description = "생성 내용")
-    @NotBlank
-    String content
+    @NotNull
+    @Size(min = 1)
+    List<ContentResponse> contents
 ) {
 
 }

@@ -18,7 +18,7 @@ public record LinkedMaterialGuideResponse(
     Category category,
 
     @Schema(description = "내용과 형식")
-    ContentResponse[] contents,
+    String content,
 
     @Schema(description = "생성한 PPT 설계 내용")
     String[] ppt,
@@ -37,7 +37,7 @@ public record LinkedMaterialGuideResponse(
         linkMaterialGuideRequest.title(),
         linkMaterialGuideRequest.age(),
         linkMaterialGuideRequest.category(),
-        ContentResponse.of(linkMaterialGuideRequest.content()),
+        ContentResponse.getCompleteFormatString(linkMaterialGuideRequest.contents()),
         llmDesignedMaterialResponse.ppt(),
         llmDesignedMaterialResponse.activitySheet(),
         llmDesignedMaterialResponse.cutout()
