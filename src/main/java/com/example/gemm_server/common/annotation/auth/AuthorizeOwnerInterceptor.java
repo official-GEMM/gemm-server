@@ -1,12 +1,22 @@
-package com.example.gemm_server.common.annotation.belong;
+package com.example.gemm_server.common.annotation.auth;
 
+import static com.example.gemm_server.common.code.error.DealErrorCode.DEAL_NOT_BELONGS_TO_MEMBER;
+import static com.example.gemm_server.common.code.error.DealErrorCode.DEAL_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.GenerationErrorCode.GENERATION_NOT_BELONGS_TO_MEMBER;
 import static com.example.gemm_server.common.code.error.GenerationErrorCode.GENERATION_NOT_FOUND;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_BELONGS_TO_MEMBER;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_FOUND;
 
+import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.Generation;
+import com.example.gemm_server.domain.entity.MarketItem;
+import com.example.gemm_server.domain.repository.DealRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
+import com.example.gemm_server.domain.repository.MarketItemRepository;
 import com.example.gemm_server.dto.ErrorResponse;
+import com.example.gemm_server.exception.DealException;
 import com.example.gemm_server.exception.GenerationException;
+import com.example.gemm_server.exception.MarketItemException;
 import com.example.gemm_server.security.jwt.CustomUser;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +32,12 @@ import org.springframework.web.servlet.HandlerMapping;
 
 @RequiredArgsConstructor
 @Component
-public class BelongingInterceptor implements HandlerInterceptor {
+public class AuthorizeOwnerInterceptor implements HandlerInterceptor {
 
   private final GenerationRepository generationRepository;
+  private final MarketItemRepository marketItemRepository;
+  private final DealRepository dealRepository;
+
   private HttpServletRequest request;
 
   @Override
@@ -33,38 +46,65 @@ public class BelongingInterceptor implements HandlerInterceptor {
       @NonNull HttpServletResponse response,
       @NonNull Object handler
   ) throws Exception {
+    this.request = request;
     if (!(handler instanceof HandlerMethod handlerMethod)) {
       return true;
     }
-    this.request = request;
+    AuthorizeOwner authorizeOwner = handlerMethod.getMethodAnnotation(AuthorizeOwner.class);
+    if (authorizeOwner == null) {
+      return true;
+    }
 
     try {
-      interceptGeneration(handlerMethod, request);
+      Long memberId = getLoggedInMemberId();
+      Class<?> entityClass = authorizeOwner.value();
+      if (entityClass == Generation.class) {
+        checkGenerationOwner(memberId);
+      }
+      if (entityClass == Deal.class) {
+        checkDealOwner(memberId);
+      }
+      if (entityClass == MarketItem.class) {
+        checkMarketItemOwner(memberId);
+      }
+
       return true;
-    } catch (GenerationException e) {
+    } catch (GenerationException | DealException | MarketItemException e) {
       ErrorResponse.setJsonResponse(response, e.getStatusCode(), e.getMessage());
-      return false;
     } catch (NumberFormatException e) {
       ErrorResponse.setJsonResponse(response, 400, e.getMessage());
-      return false;
     }
+    
+    return false;
   }
 
-  private void interceptGeneration(HandlerMethod handlerMethod, HttpServletRequest request) {
-
-    GenerationBelonging generationBelonging =
-        handlerMethod.getMethodAnnotation(GenerationBelonging.class);
-    if (generationBelonging == null) {
-      return;
-    }
-
-    Long memberId = getLoggedInMemberId();
+  private void checkGenerationOwner(Long memberId) {
     Long generationId = getIdFromUrl("generationId");
 
     Generation generation = generationRepository.findById(generationId)
         .orElseThrow(() -> new GenerationException(GENERATION_NOT_FOUND));
     if (!generation.getOwner().getId().equals(memberId)) {
       throw new GenerationException(GENERATION_NOT_BELONGS_TO_MEMBER);
+    }
+  }
+
+  private void checkDealOwner(Long memberId) {
+    Long dealId = getIdFromUrl("dealId");
+
+    Deal deal = dealRepository.findById(dealId)
+        .orElseThrow(() -> new DealException(DEAL_NOT_FOUND));
+    if (!deal.getBuyer().getId().equals(memberId)) {
+      throw new DealException(DEAL_NOT_BELONGS_TO_MEMBER);
+    }
+  }
+
+  private void checkMarketItemOwner(Long memberId) {
+    Long marketItemId = getIdFromUrl("marketItemId");
+
+    MarketItem marketItem = marketItemRepository.findById(marketItemId)
+        .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+    if (!marketItem.getOwner().getId().equals(memberId)) {
+      throw new MarketItemException(MARKET_ITEM_NOT_BELONGS_TO_MEMBER);
     }
   }
 
@@ -81,6 +121,7 @@ public class BelongingInterceptor implements HandlerInterceptor {
   }
 
   private Long getIdFromUrl(String name) {
+    @SuppressWarnings("unchecked")
     Map<String, String> pathVariables =
         (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
     return Long.parseLong(pathVariables.get(name));
