@@ -20,20 +20,21 @@ public class GenerationService {
   public Page<Generation> getGenerationsHasNoMaterialByMemberIdAndPage(Long memberId,
       int page, int limit) {
     Pageable pageable = PageRequest.of(page, limit);
-    return generationRepository.findByOwnerIdAndActivityMaterialTypeOrderByCreatedAtDesc(memberId,
+    return generationRepository.findWithActivityByOwnerIdAndActivityMaterialTypeOrderByCreatedAtDesc(
+        memberId,
         (short) 0, pageable);
   }
 
   public Page<Generation> getGenerationsHasMaterialByMemberIdAndPage(Long memberId,
       int page, int limit) {
     Pageable pageable = PageRequest.of(page, limit);
-    return generationRepository.findByOwnerIdAndActivityMaterialTypeNotOrderByCreatedAtDesc(
+    return generationRepository.findWithActivityByOwnerIdAndActivityMaterialTypeNotOrderByCreatedAtDesc(
         memberId,
         (short) 0, pageable);
   }
 
-  public Generation getGenerationOrThrow(Long generationId) {
-    return generationRepository.findById(generationId)
+  public Generation getGenerationWithActivityOrThrow(Long generationId) {
+    return generationRepository.findWithActivityById(generationId)
         .orElseThrow(() -> new GenerationException(GENERATION_NOT_FOUND));
   }
 

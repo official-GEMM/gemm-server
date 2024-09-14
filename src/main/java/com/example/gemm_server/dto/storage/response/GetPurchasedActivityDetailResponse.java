@@ -1,10 +1,10 @@
 package com.example.gemm_server.dto.storage.response;
 
-import com.example.gemm_server.common.enums.Category;
-import com.example.gemm_server.domain.entity.Activity;
+import com.example.gemm_server.domain.entity.Deal;
+import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -15,7 +15,8 @@ public class GetPurchasedActivityDetailResponse extends ActivityDetailResponse {
   @Schema(description = "생성물 아이디")
   private long dealId;
 
-  public GetPurchasedActivityDetailResponse() {
-    super(new Activity("", (short) 0, (short) 0, Category.ART_AREA, ""), new ArrayList<>());
+  public GetPurchasedActivityDetailResponse(Deal deal, List<Material> materials) {
+    super(deal.getActivity(), materials);
+    this.dealId = deal.getId();
   }
 }
