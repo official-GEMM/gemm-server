@@ -13,6 +13,7 @@ import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
+import com.example.gemm_server.dto.storage.DealWithThumbnail;
 import com.example.gemm_server.dto.storage.GenerationWithThumbnail;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivityDetailResponse;
@@ -21,6 +22,7 @@ import com.example.gemm_server.dto.storage.response.GetGeneratedGuidesResponse;
 import com.example.gemm_server.dto.storage.response.GetPurchasedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetPurchasedActivityDetailResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
+import com.example.gemm_server.service.DealService;
 import com.example.gemm_server.service.GenerationService;
 import com.example.gemm_server.service.MaterialService;
 import com.example.gemm_server.service.ThumbnailService;
@@ -48,6 +50,7 @@ public class StorageController {
   private final GenerationService generationService;
   private final MaterialService materialService;
   private final ThumbnailService thumbnailService;
+  private final DealService dealService;
 
   @Operation(summary = "생성한 활동 방법 리스트 조회", description = "사용자가 생성한 활동 방법 리스트를 조회하는 API")
   @GetMapping("/generate/guides")
@@ -129,6 +132,23 @@ public class StorageController {
     return ResponseEntity.ok(new EmptyDataResponse(ACTIVITY_GENERATION_DELETED));
   }
 
+  @Operation(summary = "구매한 활동 리스트 조회", description = "사용자가 구매한 활동 리스트를 조회하는 API")
+  @GetMapping("/generate/purchases")
+  public ResponseEntity<CommonResponse<GetPurchasedActivitiesResponse>> getPurchasedActivities(
+      @AuthenticationPrincipal CustomUser user,
+      @Param("page") Integer page
+  ) {
+    Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page,
+        Policy.STORAGE_ACTIVITY_LIMIT);
+    PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
+
+    List<DealWithThumbnail> generationWithThumbnails =
+        thumbnailService.getMainThumbnailForEachDeal(deals.getContent());
+    GetPurchasedActivitiesResponse getPurchasedActivitiesResponse = new GetPurchasedActivitiesResponse(
+        generationWithThumbnails, pageInfo);
+    return ResponseEntity.ok(new CommonResponse<>(getPurchasedActivitiesResponse));
+  }
+
   // 미완성 API
   @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
@@ -139,15 +159,6 @@ public class StorageController {
   ) {
     DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
-  }
-
-  @Operation(summary = "구매한 활동 리스트 조회", description = "사용자가 구매한 활동 리스트를 조회하는 API")
-  @GetMapping("/generate/purchases")
-  public ResponseEntity<CommonResponse<GetPurchasedActivitiesResponse>> getPurchasedActivities(
-      @Param("page") Integer page
-  ) {
-    GetPurchasedActivitiesResponse response = new GetPurchasedActivitiesResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   @AuthorizeOwner(Deal.class)
