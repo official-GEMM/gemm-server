@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -26,7 +27,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     String refreshToken = tokenProvider.generateRefreshTokenAndSave(authentication);
     ResponseCookie refreshTokenCookie = CookieUtil.createForRefreshToken(refreshToken);
 
-    response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
     String redirectUrl = UriComponentsBuilder.fromUriString(URI).toUriString();
     response.sendRedirect(redirectUrl);
   }
