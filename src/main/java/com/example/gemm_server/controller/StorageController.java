@@ -152,6 +152,20 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(getPurchasedActivitiesResponse));
   }
 
+  @AuthorizeOwner(Deal.class)
+  @Operation(summary = "구매한 활동 상세", description = "사용자가 구매한 활동 상세를 조회하는 API")
+  @GetMapping("/generate/purchases/{dealId}")
+  public ResponseEntity<CommonResponse<GetPurchasedActivityDetailResponse>> getPurchasedActivityDetail(
+      @PathVariable("dealId") Long dealId
+  ) {
+    Deal deal = dealService.getDealWithActivityOrThrow(dealId);
+    List<Material> materials = materialService.getMaterialsWithThumbnailByActivityId(
+        deal.getActivity().getId());
+    GetPurchasedActivityDetailResponse response = new GetPurchasedActivityDetailResponse(deal,
+        materials);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
   // 미완성 API
   @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
@@ -162,16 +176,6 @@ public class StorageController {
   ) {
     DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
-  }
-
-  @AuthorizeOwner(Deal.class)
-  @Operation(summary = "구매한 활동 상세", description = "사용자가 구매한 활동 상세를 조회하는 API")
-  @GetMapping("/generate/purchases/{dealId}")
-  public ResponseEntity<CommonResponse<GetPurchasedActivityDetailResponse>> getPurchasedActivityDetail(
-      @PathVariable("dealId") Long dealId
-  ) {
-    GetPurchasedActivityDetailResponse response = new GetPurchasedActivityDetailResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   @AuthorizeOwner(Deal.class)
