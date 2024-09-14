@@ -1,6 +1,7 @@
 package com.example.gemm_server.exception;
 
 import com.example.gemm_server.dto.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,20 @@ public class GlobalExceptionHandler {
     ex.getBindingResult().getAllErrors().forEach((error) -> {
       String fieldName = ((FieldError) error).getField();
       String errorMessage = error.getDefaultMessage();
+      errors.put(fieldName, errorMessage);
+    });
+    return new ResponseEntity<>(
+        new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errors.toString()),
+        HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+      ConstraintViolationException ex) {
+    Map<String, String> errors = new HashMap<>();
+    ex.getConstraintViolations().forEach(violation -> {
+      String fieldName = violation.getPropertyPath().toString();
+      String errorMessage = violation.getMessage();
       errors.put(fieldName, errorMessage);
     });
     return new ResponseEntity<>(

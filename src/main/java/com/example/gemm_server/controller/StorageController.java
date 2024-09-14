@@ -13,6 +13,7 @@ import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
+import com.example.gemm_server.dto.storage.DealWithThumbnail;
 import com.example.gemm_server.dto.storage.GenerationWithThumbnail;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivityDetailResponse;
@@ -21,24 +22,29 @@ import com.example.gemm_server.dto.storage.response.GetGeneratedGuidesResponse;
 import com.example.gemm_server.dto.storage.response.GetPurchasedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetPurchasedActivityDetailResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
+import com.example.gemm_server.service.DealService;
 import com.example.gemm_server.service.GenerationService;
 import com.example.gemm_server.service.MaterialService;
 import com.example.gemm_server.service.ThumbnailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @BearerAuth
+@Validated
 @RequiredArgsConstructor
 @RestController()
 @RequestMapping("/my/storage")
@@ -48,15 +54,16 @@ public class StorageController {
   private final GenerationService generationService;
   private final MaterialService materialService;
   private final ThumbnailService thumbnailService;
+  private final DealService dealService;
 
   @Operation(summary = "생성한 활동 방법 리스트 조회", description = "사용자가 생성한 활동 방법 리스트를 조회하는 API")
   @GetMapping("/generate/guides")
   public ResponseEntity<CommonResponse<GetGeneratedGuidesResponse>> getGeneratedGuides(
       @AuthenticationPrincipal CustomUser user,
-      @Param("page") Integer page
+      @RequestParam("page") @Min(1) Integer page
   ) {
     Page<Generation> guides = generationService.getGenerationsHasNoMaterialByMemberIdAndPage(
-        user.getId(), page, Policy.STORAGE_LIMIT_LONG);
+        user.getId(), page - 1, Policy.STORAGE_GUIDE_LIMIT);
     PageInfo pageInfo = new PageInfo(page, guides.getTotalPages());
 
     GetGeneratedGuidesResponse response =
@@ -68,10 +75,10 @@ public class StorageController {
   @GetMapping("/generate/activities")
   public ResponseEntity<CommonResponse<GetGeneratedActivitiesResponse>> getGeneratedActivities(
       @AuthenticationPrincipal CustomUser user,
-      @Param("page") Integer page
+      @RequestParam("page") @Min(1) Integer page
   ) {
     Page<Generation> activities = generationService.getGenerationsHasMaterialByMemberIdAndPage(
-        user.getId(), page, Policy.STORAGE_LIMIT_LONG);
+        user.getId(), page - 1, Policy.STORAGE_ACTIVITY_LIMIT);
     PageInfo pageInfo = new PageInfo(page, activities.getTotalPages());
 
     List<GenerationWithThumbnail> generationWithThumbnails =
@@ -129,6 +136,23 @@ public class StorageController {
     return ResponseEntity.ok(new EmptyDataResponse(ACTIVITY_GENERATION_DELETED));
   }
 
+  @Operation(summary = "구매한 활동 리스트 조회", description = "사용자가 구매한 활동 리스트를 조회하는 API")
+  @GetMapping("/generate/purchases")
+  public ResponseEntity<CommonResponse<GetPurchasedActivitiesResponse>> getPurchasedActivities(
+      @AuthenticationPrincipal CustomUser user,
+      @RequestParam("page") @Min(1) Integer page
+  ) {
+    Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page - 1,
+        Policy.STORAGE_ACTIVITY_LIMIT);
+    PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
+
+    List<DealWithThumbnail> generationWithThumbnails =
+        thumbnailService.getMainThumbnailForEachDeal(deals.getContent());
+    GetPurchasedActivitiesResponse getPurchasedActivitiesResponse = new GetPurchasedActivitiesResponse(
+        generationWithThumbnails, pageInfo);
+    return ResponseEntity.ok(new CommonResponse<>(getPurchasedActivitiesResponse));
+  }
+
   // 미완성 API
   @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
@@ -139,15 +163,6 @@ public class StorageController {
   ) {
     DownloadMaterialResponse response = new DownloadMaterialResponse();
     return ResponseEntity.ok(response);
-  }
-
-  @Operation(summary = "구매한 활동 리스트 조회", description = "사용자가 구매한 활동 리스트를 조회하는 API")
-  @GetMapping("/generate/purchases")
-  public ResponseEntity<CommonResponse<GetPurchasedActivitiesResponse>> getPurchasedActivities(
-      @Param("page") Integer page
-  ) {
-    GetPurchasedActivitiesResponse response = new GetPurchasedActivitiesResponse();
-    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   @AuthorizeOwner(Deal.class)

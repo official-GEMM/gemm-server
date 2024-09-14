@@ -22,10 +22,11 @@ import com.example.gemm_server.dto.market.response.MarketItemIdResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,8 +34,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RequiredArgsConstructor
 @RestController()
 @RequestMapping("/market")
@@ -150,8 +153,8 @@ public class MarketController {
   @GetMapping("/{marketItemId}/reviews")
   public ResponseEntity<CommonResponse<GetReviewsForMarketItemResponse>> getReviewsOfMarketItem(
       @PathParam("marketItemId") Long marketItemId,
-      @Param("order") ReviewOrder order,
-      @Param("page") Integer page
+      @RequestParam("order") ReviewOrder order,
+      @RequestParam("page") @Min(1) Integer page
   ) {
     GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -171,7 +174,7 @@ public class MarketController {
   @Operation(summary = "판매자의 상품 조회", description = "판매자가 마켓에 올린 상품 리스트를 최신순으로 조회하는 API")
   @GetMapping("/seller/{memberId}")
   public ResponseEntity<CommonResponse<GetMarketItemsOfSellerResponse>> getMarketItemsOfSeller(
-      @Param("page") Integer page,
+      @RequestParam("page") @Min(1) Integer page,
       @PathParam("memberId") Long memberId
   ) {
     GetMarketItemsOfSellerResponse response = new GetMarketItemsOfSellerResponse();
@@ -182,7 +185,7 @@ public class MarketController {
   @Operation(summary = "나의 상품 조회", description = "내가 마켓에 올린 상품 리스트를 최신순으로 조회하는 API")
   @GetMapping("/my")
   public ResponseEntity<CommonResponse<GetMarketItemsResponse>> getMyMarketItems(
-      @Param("page") Integer page
+      @RequestParam("page") @Min(1) Integer page
   ) {
     GetMarketItemsResponse response = new GetMarketItemsResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));

@@ -25,21 +25,25 @@ import com.example.gemm_server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @BearerAuth
+@Validated
 @RequiredArgsConstructor
 @RestController()
 @RequestMapping("/my")
@@ -141,7 +145,7 @@ public class MyController {
   @Operation(summary = "내 스크랩 조회", description = "사용자의 스크랩 리스트를 가져오는 API")
   @GetMapping("/scraps")
   public ResponseEntity<CommonResponse<GetMyScrapsResponse>> getMyScraps(
-      @Param("page") Integer page
+      @RequestParam("page") @Min(1) Integer page
   ) {
     GetMyScrapsResponse response = new GetMyScrapsResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -150,9 +154,9 @@ public class MyController {
   @Operation(summary = "내 구매 내역 조회", description = "사용자의 마켓 상품 구매 내역을 가져오는 API")
   @GetMapping("/history/purchases")
   public ResponseEntity<CommonResponse<GetMyPurchasesResponse>> getMyPurchases(
-      @Param("page") Integer page,
-      @Param("year") Integer year,
-      @Param("month") Short month
+      @RequestParam("page") @Min(1) Integer page,
+      @RequestParam("year") Integer year,
+      @RequestParam("month") @Min(1) @Max(12) Short month
   ) {
     GetMyPurchasesResponse response = new GetMyPurchasesResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -161,9 +165,9 @@ public class MyController {
   @Operation(summary = "내 판매 내역 조회", description = "사용자의 마켓 상품 판매 내역을 가져오는 API")
   @GetMapping("/history/sales")
   public ResponseEntity<CommonResponse<GetMySalesResponse>> getMySales(
-      @Param("page") Integer page,
-      @Param("year") Integer year,
-      @Param("month") Short month
+      @RequestParam("page") @Min(1) Integer page,
+      @RequestParam("year") Integer year,
+      @RequestParam("month") @Min(1) @Max(12) Short month
   ) {
     GetMySalesResponse response = new GetMySalesResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
