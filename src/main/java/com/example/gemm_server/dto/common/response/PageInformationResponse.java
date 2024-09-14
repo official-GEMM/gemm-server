@@ -15,7 +15,7 @@ public class PageInformationResponse {
   private int totalPages;
 
   public PageInformationResponse(PageInfo pageInfo) {
-    this.currentPage = pageInfo.currentPage();
+    this.currentPage = pageInfo.currentPage() + 1;
     this.totalPages = pageInfo.totalPage();
   }
 }
