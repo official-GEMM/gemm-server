@@ -59,7 +59,7 @@ public class StorageController {
       @Param("page") Integer page
   ) {
     Page<Generation> guides = generationService.getGenerationsHasNoMaterialByMemberIdAndPage(
-        user.getId(), page, Policy.STORAGE_GUIDE_LIMIT);
+        user.getId(), page - 1, Policy.STORAGE_GUIDE_LIMIT);
     PageInfo pageInfo = new PageInfo(page, guides.getTotalPages());
 
     GetGeneratedGuidesResponse response =
@@ -74,7 +74,7 @@ public class StorageController {
       @Param("page") Integer page
   ) {
     Page<Generation> activities = generationService.getGenerationsHasMaterialByMemberIdAndPage(
-        user.getId(), page, Policy.STORAGE_ACTIVITY_LIMIT);
+        user.getId(), page - 1, Policy.STORAGE_ACTIVITY_LIMIT);
     PageInfo pageInfo = new PageInfo(page, activities.getTotalPages());
 
     List<GenerationWithThumbnail> generationWithThumbnails =
@@ -138,7 +138,7 @@ public class StorageController {
       @AuthenticationPrincipal CustomUser user,
       @Param("page") Integer page
   ) {
-    Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page,
+    Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page - 1,
         Policy.STORAGE_ACTIVITY_LIMIT);
     PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
 
