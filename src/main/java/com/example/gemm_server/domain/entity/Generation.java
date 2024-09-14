@@ -38,7 +38,7 @@ public class Generation extends Timestamped {
   private Member owner;
 
   @ColumnDescription("활동 아이디")
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
 

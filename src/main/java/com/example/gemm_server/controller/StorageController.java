@@ -95,7 +95,7 @@ public class StorageController {
   public ResponseEntity<CommonResponse<GetGeneratedGuideDetailResponse>> getGeneratedGuideDetail(
       @PathVariable("generationId") Long generationId
   ) {
-    Generation generation = generationService.getGenerationOrThrow(generationId);
+    Generation generation = generationService.getGenerationWithActivityOrThrow(generationId);
 
     GetGeneratedGuideDetailResponse response = new GetGeneratedGuideDetailResponse(generation);
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -107,7 +107,7 @@ public class StorageController {
   public ResponseEntity<CommonResponse<GetGeneratedActivityDetailResponse>> getGeneratedActivityDetail(
       @PathVariable("generationId") Long generationId
   ) {
-    Generation generation = generationService.getGenerationOrThrow(generationId);
+    Generation generation = generationService.getGenerationWithActivityOrThrow(generationId);
     List<Material> materials = materialService.getMaterialsWithThumbnailByActivityId(
         generation.getActivity().getId());
     GetGeneratedActivityDetailResponse response = new GetGeneratedActivityDetailResponse(
