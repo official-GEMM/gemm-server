@@ -108,9 +108,8 @@ public class StorageController {
       @PathVariable("generationId") Long generationId
   ) {
     Generation generation = generationService.getGenerationOrThrow(generationId);
-
-    List<Material> materials = materialService.getMaterialsWithThumbnailByGenerationId(
-        generationId);
+    List<Material> materials = materialService.getMaterialsWithThumbnailByActivityId(
+        generation.getActivity().getId());
     GetGeneratedActivityDetailResponse response = new GetGeneratedActivityDetailResponse(
         generation, materials);
     return ResponseEntity.ok(new CommonResponse<>(response));
