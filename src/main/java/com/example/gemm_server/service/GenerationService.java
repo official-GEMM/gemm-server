@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,18 +21,18 @@ public class GenerationService {
 
   public Page<Generation> getGenerationsHasNoMaterialByMemberIdAndPage(Long memberId,
       int page, int limit) {
-    Pageable pageable = PageRequest.of(page, limit);
-    return generationRepository.findWithActivityByOwnerIdAndActivityMaterialTypeOrderByCreatedAtDesc(
-        memberId,
-        (short) 0, pageable);
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Pageable pageable = PageRequest.of(page, limit, sort);
+    return generationRepository.findWithActivityByOwnerIdAndActivityMaterialType(
+        memberId, (short) 0, pageable);
   }
 
   public Page<Generation> getGenerationsHasMaterialByMemberIdAndPage(Long memberId,
       int page, int limit) {
-    Pageable pageable = PageRequest.of(page, limit);
-    return generationRepository.findWithActivityByOwnerIdAndActivityMaterialTypeNotOrderByCreatedAtDesc(
-        memberId,
-        (short) 0, pageable);
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Pageable pageable = PageRequest.of(page, limit, sort);
+    return generationRepository.findWithActivityByOwnerIdAndActivityMaterialTypeNot(
+        memberId, (short) 0, pageable);
   }
 
   public Generation getGenerationWithActivityOrThrow(Long generationId) {

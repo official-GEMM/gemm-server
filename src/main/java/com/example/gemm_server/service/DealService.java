@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,9 +19,10 @@ public class DealService {
 
   private final DealRepository dealRepository;
 
-  public Page<Deal> getDealsByMemberIdAndPage(Long memberId, int page, int limit) {
-    Pageable pageable = PageRequest.of(page, limit);
-    return dealRepository.findWithActivityByBuyerIdOrderByCreatedAtDesc(memberId, pageable);
+  public Page<Deal> getDealsByMemberIdAndPage(Long memberId, int pageNumber, int pageSize) {
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+    return dealRepository.findWithActivityByBuyerId(memberId, pageable);
   }
 
   public Deal getDealWithActivityOrThrow(Long dealId) {
