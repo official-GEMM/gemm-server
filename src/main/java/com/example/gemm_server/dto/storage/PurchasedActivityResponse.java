@@ -12,8 +12,8 @@ public class PurchasedActivityResponse extends ActivityResponse {
   @Schema(description = "내용")
   private long dealId;
 
-  public PurchasedActivityResponse(DealWithThumbnail dealWithThumbnail) {
-    super(dealWithThumbnail.getDeal().getActivity(), dealWithThumbnail.getThumbnailPath());
-    this.dealId = dealWithThumbnail.getDeal().getId();
+  public PurchasedActivityResponse(DealBundle dealBundle) {
+    super(dealBundle.getDeal().getActivity(), dealBundle.getThumbnailPath());
+    this.dealId = dealBundle.getDeal().getId();
   }
 }

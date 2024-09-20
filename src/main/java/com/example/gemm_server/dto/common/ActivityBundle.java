@@ -1,16 +1,16 @@
-package com.example.gemm_server.dto.storage;
+package com.example.gemm_server.dto.common;
 
 import com.example.gemm_server.common.util.S3Util;
-import com.example.gemm_server.domain.entity.Deal;
+import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.domain.entity.Thumbnail;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DealWithThumbnail {
+public class ActivityBundle {
 
-  private Deal deal;
+  private Activity activity;
   private Thumbnail thumbnail;
 
   public String getThumbnailPath() {
