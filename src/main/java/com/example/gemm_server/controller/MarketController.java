@@ -1,13 +1,18 @@
 package com.example.gemm_server.controller;
 
+import static com.example.gemm_server.common.constant.Policy.MAIN_MOST_SCRAPPED_PAGE_SIZE;
+import static com.example.gemm_server.common.constant.Policy.MAIN_RECOMMENDED_PAGE_SIZE;
+
 import com.example.gemm_server.common.annotation.auth.AuthorizeOwner;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.enums.ReviewOrder;
+import com.example.gemm_server.domain.entity.Banner;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
+import com.example.gemm_server.dto.market.MarketItemBundle;
 import com.example.gemm_server.dto.market.request.PostMarketItemRequest;
 import com.example.gemm_server.dto.market.request.PostReviewRequest;
 import com.example.gemm_server.dto.market.request.SearchQueryRequest;
@@ -19,13 +24,18 @@ import com.example.gemm_server.dto.market.response.GetOtherMarketItemsOfSellerRe
 import com.example.gemm_server.dto.market.response.GetReviewsForMarketItemResponse;
 import com.example.gemm_server.dto.market.response.MarketItemDetailResponse;
 import com.example.gemm_server.dto.market.response.MarketItemIdResponse;
+import com.example.gemm_server.security.jwt.CustomUser;
+import com.example.gemm_server.service.BannerService;
+import com.example.gemm_server.service.MarketItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.websocket.server.PathParam;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,11 +54,29 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Maret", description = "마켓 API")
 public class MarketController {
 
+  private final MarketItemService marketItemService;
+  private final BannerService bannerService;
+
   // 미완성 API
   @Operation(summary = "메인", description = "메인 페이지에 필요한 정보를 가져오는 API")
   @GetMapping("/main")
-  public ResponseEntity<CommonResponse<GetMainResponse>> getMain() {
-    GetMainResponse response = new GetMainResponse();
+  public ResponseEntity<CommonResponse<GetMainResponse>> getMain(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Long memberId = CustomUser.getId(user);
+    List<MarketItem> recommendedMarketItems = marketItemService.getMarketItemsOrderByRecommendation(
+        0, MAIN_RECOMMENDED_PAGE_SIZE).getContent();
+    List<MarketItem> mostScrappedMarketItems = marketItemService.getMarketItemsOrderByScrapCountDesc(
+        0, MAIN_MOST_SCRAPPED_PAGE_SIZE).getContent();
+
+    List<MarketItemBundle> recommendedMarketItemBundles =
+        marketItemService.convertToMarketItemBundle(recommendedMarketItems, memberId);
+    List<MarketItemBundle> mostScrappedMarketItemBundles =
+        marketItemService.convertToMarketItemBundle(mostScrappedMarketItems, memberId);
+
+    List<Banner> banners = bannerService.getBanners();
+    GetMainResponse response = new GetMainResponse(banners, recommendedMarketItemBundles,
+        mostScrappedMarketItemBundles);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
