@@ -13,8 +13,8 @@ import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
-import com.example.gemm_server.dto.storage.DealWithThumbnail;
-import com.example.gemm_server.dto.storage.GenerationWithThumbnail;
+import com.example.gemm_server.dto.storage.DealBundle;
+import com.example.gemm_server.dto.storage.GenerationBundle;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivitiesResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedActivityDetailResponse;
 import com.example.gemm_server.dto.storage.response.GetGeneratedGuideDetailResponse;
@@ -25,7 +25,6 @@ import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.DealService;
 import com.example.gemm_server.service.GenerationService;
 import com.example.gemm_server.service.MaterialService;
-import com.example.gemm_server.service.ThumbnailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
@@ -80,11 +79,11 @@ public class StorageController {
         user.getId(), page - 1, Policy.STORAGE_ACTIVITY_PAGE_SIZE);
     PageInfo pageInfo = new PageInfo(page, activities.getTotalPages());
 
-    List<GenerationWithThumbnail> generationWithThumbnails =
-        thumbnailService.getMainThumbnailForEachGeneration(activities.getContent());
+    List<GenerationBundle> generationBundles =
+        generationService.convertToGenerationBundle(activities.getContent());
 
     GetGeneratedActivitiesResponse response =
-        new GetGeneratedActivitiesResponse(generationWithThumbnails, pageInfo);
+        new GetGeneratedActivitiesResponse(generationBundles, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -144,8 +143,7 @@ public class StorageController {
         Policy.STORAGE_ACTIVITY_PAGE_SIZE);
     PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
 
-    List<DealWithThumbnail> generationWithThumbnails =
-        thumbnailService.getMainThumbnailForEachDeal(deals.getContent());
+    List<DealBundle> generationWithThumbnails = dealService.convertToDealBundle(deals.getContent());
     GetPurchasedActivitiesResponse getPurchasedActivitiesResponse = new GetPurchasedActivitiesResponse(
         generationWithThumbnails, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(getPurchasedActivitiesResponse));
