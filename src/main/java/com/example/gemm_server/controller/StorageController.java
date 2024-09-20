@@ -53,7 +53,6 @@ public class StorageController {
 
   private final GenerationService generationService;
   private final MaterialService materialService;
-  private final ThumbnailService thumbnailService;
   private final DealService dealService;
 
   @Operation(summary = "생성한 활동 방법 리스트 조회", description = "사용자가 생성한 활동 방법 리스트를 조회하는 API")
@@ -63,7 +62,7 @@ public class StorageController {
       @RequestParam("page") @Min(1) Integer page
   ) {
     Page<Generation> guides = generationService.getGenerationsHasNoMaterialByMemberIdAndPage(
-        user.getId(), page - 1, Policy.STORAGE_GUIDE_LIMIT);
+        user.getId(), page - 1, Policy.STORAGE_GUIDE_PAGE_SIZE);
     PageInfo pageInfo = new PageInfo(page, guides.getTotalPages());
 
     GetGeneratedGuidesResponse response =
@@ -78,7 +77,7 @@ public class StorageController {
       @RequestParam("page") @Min(1) Integer page
   ) {
     Page<Generation> activities = generationService.getGenerationsHasMaterialByMemberIdAndPage(
-        user.getId(), page - 1, Policy.STORAGE_ACTIVITY_LIMIT);
+        user.getId(), page - 1, Policy.STORAGE_ACTIVITY_PAGE_SIZE);
     PageInfo pageInfo = new PageInfo(page, activities.getTotalPages());
 
     List<GenerationWithThumbnail> generationWithThumbnails =
@@ -142,7 +141,7 @@ public class StorageController {
       @RequestParam("page") @Min(1) Integer page
   ) {
     Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page - 1,
-        Policy.STORAGE_ACTIVITY_LIMIT);
+        Policy.STORAGE_ACTIVITY_PAGE_SIZE);
     PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
 
     List<DealWithThumbnail> generationWithThumbnails =
