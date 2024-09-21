@@ -6,8 +6,11 @@ import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL
 
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.ProfileImage;
 import com.example.gemm_server.domain.repository.MemberRepository;
+import com.example.gemm_server.domain.repository.ProfileImageRepository;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
+import com.example.gemm_server.dto.common.MemberBundle;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.exception.MemberException;
 import java.util.Optional;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final MemberRepository memberRepository;
+  private final ProfileImageRepository profileImageRepository;
 
   public Member findMemberByMemberIdOrThrow(Long memberId) {
     return memberRepository.findOneById(memberId)
@@ -82,5 +86,10 @@ public class MemberService {
 
   public void deleteMember(Long memberId) {
     memberRepository.deleteById(memberId);
+  }
+
+  public MemberBundle convertToMemberBundle(Member member) {
+    ProfileImage profileImage = profileImageRepository.findByMemberId(member.getId());
+    return new MemberBundle(member, profileImage);
   }
 }
