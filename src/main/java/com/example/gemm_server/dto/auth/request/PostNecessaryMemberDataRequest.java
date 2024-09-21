@@ -2,6 +2,7 @@ package com.example.gemm_server.dto.auth.request;
 
 import com.example.gemm_server.common.constant.RegularExpression;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -26,6 +27,7 @@ public class PostNecessaryMemberDataRequest {
 
   @Schema(description = "관리 대상자의 연령")
   @NotNull
+  @Min(0)
   private Short manageAge;
 
   @Schema(description = "사용자 닉네임")

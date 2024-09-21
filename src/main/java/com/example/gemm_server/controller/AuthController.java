@@ -109,11 +109,15 @@ public class AuthController {
       @AuthenticationPrincipal CustomUser user
   ) {
     authService.validatePhoneNumberForUpdate(user.getId(), memberNecessaryData.getPhoneNumber());
+    memberService.validateNicknameForUpdate(user.getId(), memberNecessaryData.getNickname());
     String referralCode = memberNecessaryData.getReferralCode();
     if (referralCode != null) {
-      authService.compensateMemberForReferralIfValid(user.getId(), referralCode);
+      Member referrerMember = memberService.findMemberByMemberIdOrThrow(user.getId());
+      Member refereeMember = memberService.findMemberByReferralCodeOrThrow(referralCode);
+      authService.validateForReferral(referrerMember, refereeMember);
+      authService.compensateMemberForReferral(referrerMember, refereeMember);
     }
-    memberService.updateNecessaryMemberDataIfValid(user.getId(), memberNecessaryData);
+    memberService.updateNecessaryMemberData(user.getId(), memberNecessaryData);
     return ResponseEntity.ok(new EmptyDataResponse(MEMBER_UPDATED));
   }
 

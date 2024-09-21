@@ -36,17 +36,13 @@ public class MemberService {
   }
 
   @Transactional
-  public Member updateNecessaryMemberDataIfValid(Long memberId,
+  public Member updateNecessaryMemberData(Long memberId,
       PostNecessaryMemberDataRequest memberInfo) {
-    Member member = findMemberByMemberIdOrThrow(memberId);
-    String newNickname = memberInfo.getNickname();
-    if (isNicknameExists(newNickname) && !member.getNickname().equals(newNickname)) {
-      throw new MemberException(NICKNAME_DUPLICATED);
-    }
 
+    Member member = findMemberByMemberIdOrThrow(memberId);
     member.setName(memberInfo.getName());
     member.setBirth(DateUtil.parseYearMonthDay(memberInfo.getBirth()));
-    member.setNickname(newNickname);
+    member.setNickname(memberInfo.getNickname());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
     member.setManageAge(memberInfo.getManageAge());
     member.setIsRegistrationCompleted(true);
