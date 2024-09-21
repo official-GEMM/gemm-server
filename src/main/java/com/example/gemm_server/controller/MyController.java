@@ -12,7 +12,7 @@ import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
-import com.example.gemm_server.dto.my.response.GetMyInformationResponse;
+import com.example.gemm_server.dto.my.response.GetMemberInformationResponse;
 import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
@@ -58,11 +58,12 @@ public class MyController {
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
-  public ResponseEntity<CommonResponse<GetMyInformationResponse>> getMyInformation(
+  public ResponseEntity<CommonResponse<GetMemberInformationResponse>> getMyInformation(
       @AuthenticationPrincipal CustomUser user
   ) {
     Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
-    GetMyInformationResponse response = new GetMyInformationResponse(member);
+    MemberBundle memberBundle = memberService.convertToMemberBundle(member);
+    GetMemberInformationResponse response = new GetMemberInformationResponse(memberBundle);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

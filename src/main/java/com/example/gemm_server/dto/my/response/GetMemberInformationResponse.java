@@ -1,16 +1,14 @@
 package com.example.gemm_server.dto.my.response;
 
 import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.dto.common.MemberBundle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-@Schema(description = "내 정보 응답", requiredProperties = {"name", "manageAge", "phoneNumber",
-    "profileImagePath", "nickname", "referralCode", "gem"})
-public class GetMyInformationResponse {
-
-  @Schema(description = "사용자 이름")
-  private String name;
+@Schema(description = "내 정보 응답", requiredProperties = {"manageAge", "phoneNumber",
+    "profileImagePath", "nickname", "referralCode"})
+public class GetMemberInformationResponse {
 
   @Schema(description = "관리 대상 연령")
   private short manageAge;
@@ -27,16 +25,12 @@ public class GetMyInformationResponse {
   @Schema(description = "사용자 추천인 코드")
   private String referralCode;
 
-  @Schema(description = "젬")
-  private int gem;
-
-  public GetMyInformationResponse(Member member) {
-    this.name = member.getName();
+  public GetMemberInformationResponse(MemberBundle memberBundle) {
+    Member member = memberBundle.getMember();
     this.manageAge = member.getManageAge();
     this.phoneNumber = member.getPhoneNumber();
-    this.profileImagePath = member.getProfileImageUrl();
+    this.profileImagePath = memberBundle.getProfileImageUrl();
     this.nickname = member.getNickname();
     this.referralCode = member.getReferralCode();
-    this.gem = member.getGem();
   }
 }
