@@ -82,6 +82,7 @@ public class MyController {
       @Valid @RequestBody UpdateMyInformationRequest updateMyInformationRequest,
       @AuthenticationPrincipal CustomUser user
   ) {
+    memberService.validateNicknameForUpdate(user.getId(), updateMyInformationRequest.getNickname());
     authService.validatePhoneNumberForUpdate(user.getId(),
         updateMyInformationRequest.getPhoneNumber());
     Member member = memberService.updateMyInformation(user.getId(), updateMyInformationRequest);

@@ -71,9 +71,10 @@ public class MemberService {
   @Transactional
   public Member updateMyInformation(Long memberId, UpdateMyInformationRequest memberInfo) {
     Member member = findMemberByMemberIdOrThrow(memberId);
-
     member.setManageAge(memberInfo.getManageAge());
     member.setPhoneNumber(memberInfo.getPhoneNumber());
+    member.setNickname(memberInfo.getNickname());
+    member.setBirth(memberInfo.getBirth());
     return member;
   }
 
