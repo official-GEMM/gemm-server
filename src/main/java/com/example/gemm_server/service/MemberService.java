@@ -53,6 +53,12 @@ public class MemberService {
     return member;
   }
 
+  public void validateNicknameForUpdate(Long memberId, String nickname) {
+    if (memberRepository.existsByIdNotAndNickname(memberId, nickname)) {
+      throw new MemberException(NICKNAME_DUPLICATED);
+    }
+  }
+
   public boolean isNicknameExists(String nickname) {
     return memberRepository.existsByNickname(nickname);
   }
