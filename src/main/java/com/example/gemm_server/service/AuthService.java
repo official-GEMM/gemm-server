@@ -84,11 +84,7 @@ public class AuthService {
   }
 
   @Transactional
-  public void compensateMemberForReferralIfValid(Long referrerMemberId, String referralCode) {
-    Member referrerMember = memberService.findMemberByMemberIdOrThrow(referrerMemberId);
-    Member refereeMember = memberService.findMemberByReferralCodeOrThrow(referralCode);
-    validateForReferral(referrerMember, refereeMember);
-
+  public void compensateMemberForReferral(Member referrerMember, Member refereeMember) {
     gemService.saveChangesOfGemWithMember(referrerMember, REFERRAL_COMPENSATION,
         GemUsageType.COMPENSATION);
     gemService.saveChangesOfGemWithMember(refereeMember, REFERRAL_COMPENSATION,
@@ -98,6 +94,10 @@ public class AuthService {
   }
 
   public void validatePhoneNumberForUpdate(Long memberId, String phoneNumber) {
+    Member member = memberService.findMemberByMemberIdOrThrow(memberId);
+    if (phoneNumber.equals(member.getPhoneNumber())) {
+      return;
+    }
     if (!isPhoneNumberValidated(phoneNumber)) {
       throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
     }
@@ -112,7 +112,7 @@ public class AuthService {
     return phoneVerification.isPresent() && phoneVerification.get().isVerified();
   }
 
-  private void validateForReferral(Member referrerMember, Member refereeMember) {
+  public void validateForReferral(Member referrerMember, Member refereeMember) {
     if (referrerMember.getIsRegistrationCompleted()) {
       throw new MemberException(MEMBER_ALREADY_COMPLETED);
     }

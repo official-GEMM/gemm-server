@@ -9,7 +9,6 @@ import com.example.gemm_server.dto.common.MemberBundle;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.my.NotificationBundle;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
-import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
 import com.example.gemm_server.dto.my.response.GetMemberInformationResponse;
@@ -19,7 +18,6 @@ import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
 import com.example.gemm_server.dto.my.response.GetNotificationsByUserResponse;
 import com.example.gemm_server.dto.my.response.GetProfileResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
-import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.AuthService;
@@ -38,7 +36,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,6 +82,7 @@ public class MyController {
       @Valid @RequestBody UpdateMyInformationRequest updateMyInformationRequest,
       @AuthenticationPrincipal CustomUser user
   ) {
+    memberService.validateNicknameForUpdate(user.getId(), updateMyInformationRequest.getNickname());
     authService.validatePhoneNumberForUpdate(user.getId(),
         updateMyInformationRequest.getPhoneNumber());
     Member member = memberService.updateMyInformation(user.getId(), updateMyInformationRequest);
@@ -99,17 +97,6 @@ public class MyController {
   ) {
     memberService.withdrawMember(user.getId());
     return ResponseEntity.ok(new EmptyDataResponse());
-  }
-
-  @Operation(summary = "닉네임 변경", description = "사용자의 닉네임을 변경하는 API")
-  @PatchMapping(value = "/nickname")
-  public ResponseEntity<CommonResponse<UpdateMyNicknameResponse>> updateNickname(
-      @Valid @RequestBody UpdateMyNicknameRequest request,
-      @AuthenticationPrincipal CustomUser user
-  ) {
-    String nickname = memberService.updateNickname(user.getId(), request.getNickname());
-    UpdateMyNicknameResponse response = new UpdateMyNicknameResponse(nickname);
-    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   @Operation(summary = "내 보유 젬 조회", description = "사용자의 보유한 젬의 수를 조회하는 API")
