@@ -1,10 +1,9 @@
 package com.example.gemm_server.dto.my;
 
 import com.example.gemm_server.common.enums.EventType;
-import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
+import com.example.gemm_server.dto.common.MemberBundle;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -36,10 +35,11 @@ public class NotificationResponse {
   @Schema(description = "알림 생성일")
   private LocalDateTime createdAt;
 
-  public NotificationResponse(Notification notification) {
-    Member sender = notification.getSender();
+  public NotificationResponse(NotificationBundle notificationBundle) {
+    Notification notification = notificationBundle.getNotification();
+    MemberBundle sender = notificationBundle.getSender();
     this.notificationId = notification.getId();
-    this.senderNickname = sender.getNickname();
+    this.senderNickname = sender.getMember().getNickname();
     this.profileImagePath = sender.getProfileImageUrl();
     this.message = notification.getMessage();
     this.eventType = notification.getEventType();

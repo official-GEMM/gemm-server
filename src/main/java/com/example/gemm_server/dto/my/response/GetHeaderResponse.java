@@ -1,6 +1,6 @@
 package com.example.gemm_server.dto.my.response;
 
-import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.dto.common.MemberBundle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -18,9 +18,9 @@ public class GetHeaderResponse {
   @Schema(description = "미확인 알림 존재 여부")
   private Boolean hasUnreadNotification;
 
-  public GetHeaderResponse(Member member, boolean hasUnreadNotification) {
-    this.gem = member.getGem();
-    this.profileImagePath = member.getProfileImageUrl();
+  public GetHeaderResponse(MemberBundle memberBundle, boolean hasUnreadNotification) {
+    this.gem = memberBundle.getMember().getGem();
+    this.profileImagePath = memberBundle.getProfileImageUrl();
     this.hasUnreadNotification = hasUnreadNotification;
   }
 }

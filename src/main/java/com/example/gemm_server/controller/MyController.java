@@ -5,7 +5,9 @@ import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.common.MemberBundle;
 import com.example.gemm_server.dto.common.response.GemResponse;
+import com.example.gemm_server.dto.my.NotificationBundle;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
@@ -113,9 +115,10 @@ public class MyController {
       @AuthenticationPrincipal CustomUser user
   ) {
     Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    MemberBundle memberBundle = memberService.convertToMemberBundle(member);
     boolean hasUnreadNotification =
         notificationService.countOfUnopenedNotifications(user.getId()) > 0;
-    GetHeaderResponse response = new GetHeaderResponse(member, hasUnreadNotification);
+    GetHeaderResponse response = new GetHeaderResponse(memberBundle, hasUnreadNotification);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -127,8 +130,10 @@ public class MyController {
     List<Notification> notifications = notificationService.getRecentNotificationsByMember(
         user.getId());
     notificationService.markNotificationsAsOpened(notifications);
-    GetNotificationsByUserResponse notificationsResponse = new GetNotificationsByUserResponse(
+    List<NotificationBundle> notificationBundles = notificationService.convertToNotificationBundle(
         notifications);
+    GetNotificationsByUserResponse notificationsResponse = new GetNotificationsByUserResponse(
+        notificationBundles);
     return ResponseEntity.ok(new CommonResponse<>(notificationsResponse));
   }
 
