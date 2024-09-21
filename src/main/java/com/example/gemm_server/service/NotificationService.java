@@ -7,6 +7,8 @@ import com.example.gemm_server.common.enums.EventType;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.domain.repository.NotificationRepository;
+import com.example.gemm_server.dto.common.MemberBundle;
+import com.example.gemm_server.dto.my.NotificationBundle;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class NotificationService {
 
   private static final int DAYS_TO_EXPIRATION = 30;
   private final NotificationRepository notificationRepository;
+  private final MemberService memberService;
 
   public Notification publishReferralNotification(Member receiver, Member sender) {
     String message = NotificationMessage.chargeGemByReferral(Policy.REFERRAL_COMPENSATION);
@@ -52,5 +55,14 @@ public class NotificationService {
 
     return notificationRepository.countByReceiverIdAndOpenedAndCreatedAtDateAfter(memberId, false,
         dateBeforeExpiration);
+  }
+
+  public NotificationBundle convertToNotificationBundle(Notification notification) {
+    MemberBundle sender = memberService.convertToMemberBundle(notification.getSender());
+    return new NotificationBundle(notification, sender);
+  }
+
+  public List<NotificationBundle> convertToNotificationBundle(List<Notification> notifications) {
+    return notifications.stream().map(this::convertToNotificationBundle).toList();
   }
 }

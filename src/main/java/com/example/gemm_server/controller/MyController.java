@@ -5,16 +5,19 @@ import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.common.MemberBundle;
 import com.example.gemm_server.dto.common.response.GemResponse;
+import com.example.gemm_server.dto.my.NotificationBundle;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateMyNicknameRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
-import com.example.gemm_server.dto.my.response.GetMyInformationResponse;
+import com.example.gemm_server.dto.my.response.GetMemberInformationResponse;
 import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
 import com.example.gemm_server.dto.my.response.GetNotificationsByUserResponse;
+import com.example.gemm_server.dto.my.response.GetProfileResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
@@ -56,11 +59,23 @@ public class MyController {
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
-  public ResponseEntity<CommonResponse<GetMyInformationResponse>> getMyInformation(
+  public ResponseEntity<CommonResponse<GetMemberInformationResponse>> getMyInformation(
       @AuthenticationPrincipal CustomUser user
   ) {
     Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
-    GetMyInformationResponse response = new GetMyInformationResponse(member);
+    MemberBundle memberBundle = memberService.convertToMemberBundle(member);
+    GetMemberInformationResponse response = new GetMemberInformationResponse(memberBundle);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  @Operation(summary = "내 프로필 조회", description = "로그인한 사용자의 프로필을 가져오는 API")
+  @GetMapping("/profile")
+  public ResponseEntity<CommonResponse<GetProfileResponse>> getMyProfile(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    MemberBundle memberBundle = memberService.convertToMemberBundle(member);
+    GetProfileResponse response = new GetProfileResponse(memberBundle);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -113,9 +128,10 @@ public class MyController {
       @AuthenticationPrincipal CustomUser user
   ) {
     Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    MemberBundle memberBundle = memberService.convertToMemberBundle(member);
     boolean hasUnreadNotification =
         notificationService.countOfUnopenedNotifications(user.getId()) > 0;
-    GetHeaderResponse response = new GetHeaderResponse(member, hasUnreadNotification);
+    GetHeaderResponse response = new GetHeaderResponse(memberBundle, hasUnreadNotification);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -127,8 +143,10 @@ public class MyController {
     List<Notification> notifications = notificationService.getRecentNotificationsByMember(
         user.getId());
     notificationService.markNotificationsAsOpened(notifications);
-    GetNotificationsByUserResponse notificationsResponse = new GetNotificationsByUserResponse(
+    List<NotificationBundle> notificationBundles = notificationService.convertToNotificationBundle(
         notifications);
+    GetNotificationsByUserResponse notificationsResponse = new GetNotificationsByUserResponse(
+        notificationBundles);
     return ResponseEntity.ok(new CommonResponse<>(notificationsResponse));
   }
 

@@ -107,13 +107,6 @@ public class Member extends Timestamped {
   @JoinColumn(name = "profile_image_id")
   private ProfileImage profileImage;
 
-  public String getProfileImageUrl() {
-    if (profileImage == null) {
-      return null; // TODO: 기본 프로필 이미지 전송
-    }
-    return this.profileImage.getFilePath();
-  }
-
   public boolean isDataCompleted() {
     return name != null && phoneNumber != null && nickname != null && birth != null
         && manageAge != null;
