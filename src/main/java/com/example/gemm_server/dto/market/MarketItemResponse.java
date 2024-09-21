@@ -1,7 +1,6 @@
 package com.example.gemm_server.dto.market;
 
-import com.example.gemm_server.common.enums.Category;
-import com.example.gemm_server.domain.entity.Activity;
+import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.common.response.ActivityResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -30,8 +29,15 @@ public class MarketItemResponse extends ActivityResponse {
   @Schema(description = "내 스크랩 여부")
   private Boolean isScrapped;
 
-  public MarketItemResponse() {
-    super(new Activity("", (short) 0, (short) 0, Category.ART_AREA, ""), "");
+  public MarketItemResponse(MarketItemBundle marketItemBundle) {
+    super(marketItemBundle.getActivity(), marketItemBundle.getThumbnailPath());
+    MarketItem marketItem = marketItemBundle.getMarketItem();
+    this.marketItemId = marketItem.getId();
+    this.reviewAverageScore = marketItem.getAverageScore();
+    this.reviewCount = marketItem.getReviewCount();
+    this.price = marketItem.getPrice();
+    this.sellerNickname = marketItemBundle.getSeller().getNickname();
+    this.isScrapped = marketItemBundle.isScrapped();
   }
 
 }

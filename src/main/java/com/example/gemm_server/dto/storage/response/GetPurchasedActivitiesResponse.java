@@ -2,7 +2,7 @@ package com.example.gemm_server.dto.storage.response;
 
 import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.PageInformationResponse;
-import com.example.gemm_server.dto.storage.DealWithThumbnail;
+import com.example.gemm_server.dto.storage.DealBundle;
 import com.example.gemm_server.dto.storage.PurchasedActivityResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -18,7 +18,7 @@ public class GetPurchasedActivitiesResponse {
   @Schema(description = "페이지 정보")
   private PageInformationResponse pageInfo;
 
-  public GetPurchasedActivitiesResponse(List<DealWithThumbnail> deals, PageInfo pageInfo) {
+  public GetPurchasedActivitiesResponse(List<DealBundle> deals, PageInfo pageInfo) {
     this.activities = deals.stream().map(PurchasedActivityResponse::new)
         .toArray(PurchasedActivityResponse[]::new);
     this.pageInfo = new PageInformationResponse(pageInfo);

@@ -13,10 +13,10 @@ public interface GenerationRepository extends JpaRepository<Generation, Long> {
   Optional<Generation> findWithActivityById(Long generationId);
 
   @EntityGraph(attributePaths = {"activity"})
-  Page<Generation> findWithActivityByOwnerIdAndActivityMaterialTypeOrderByCreatedAtDesc(
+  Page<Generation> findWithActivityByOwnerIdAndActivityMaterialType(
       Long ownerId, Short materialType, Pageable pageable);
 
   @EntityGraph(attributePaths = {"activity"})
-  Page<Generation> findWithActivityByOwnerIdAndActivityMaterialTypeNotOrderByCreatedAtDesc(
+  Page<Generation> findWithActivityByOwnerIdAndActivityMaterialTypeNot(
       Long ownerId, Short materialType, Pageable pageable);
 }

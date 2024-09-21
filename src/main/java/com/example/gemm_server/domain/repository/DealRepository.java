@@ -13,5 +13,5 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
   Optional<Deal> findWithActivityById(Long dealId);
 
   @EntityGraph(attributePaths = {"activity"})
-  Page<Deal> findWithActivityByBuyerIdOrderByCreatedAtDesc(Long buyerId, Pageable pageable);
+  Page<Deal> findWithActivityByBuyerId(Long buyerId, Pageable pageable);
 }

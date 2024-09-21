@@ -12,9 +12,9 @@ public class GeneratedActivityResponse extends ActivityResponse {
   @Schema(description = "생성물 아이디")
   private long generationId;
 
-  public GeneratedActivityResponse(GenerationWithThumbnail generationWithThumbnail) {
-    super(generationWithThumbnail.getGeneration().getActivity(),
-        generationWithThumbnail.getThumbnailPath());
-    this.generationId = generationWithThumbnail.getGeneration().getId();
+  public GeneratedActivityResponse(GenerationBundle generationBundle) {
+    super(generationBundle.getGeneration().getActivity(),
+        generationBundle.getThumbnailPath());
+    this.generationId = generationBundle.getGeneration().getId();
   }
 }

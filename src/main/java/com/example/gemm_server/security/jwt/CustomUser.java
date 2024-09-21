@@ -14,4 +14,11 @@ public class CustomUser extends User {
     super(id, password, authorities);
     this.id = Long.parseLong(id);
   }
+
+  public static Long getId(CustomUser user) {
+    if (user != null) {
+      return user.getId();
+    }
+    return null;
+  }
 }
