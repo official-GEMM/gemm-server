@@ -17,6 +17,7 @@ import com.example.gemm_server.dto.my.response.GetMyPurchasesResponse;
 import com.example.gemm_server.dto.my.response.GetMySalesResponse;
 import com.example.gemm_server.dto.my.response.GetMyScrapsResponse;
 import com.example.gemm_server.dto.my.response.GetNotificationsByUserResponse;
+import com.example.gemm_server.dto.my.response.GetProfileResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyNicknameResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
@@ -64,6 +65,17 @@ public class MyController {
     Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
     MemberBundle memberBundle = memberService.convertToMemberBundle(member);
     GetMemberInformationResponse response = new GetMemberInformationResponse(memberBundle);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  @Operation(summary = "내 프로필 조회", description = "로그인한 사용자의 프로필을 가져오는 API")
+  @GetMapping("/profile")
+  public ResponseEntity<CommonResponse<GetProfileResponse>> getMyProfile(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    Member member = memberService.findMemberByMemberIdOrThrow(user.getId());
+    MemberBundle memberBundle = memberService.convertToMemberBundle(member);
+    GetProfileResponse response = new GetProfileResponse(memberBundle);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
