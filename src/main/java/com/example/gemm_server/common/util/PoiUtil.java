@@ -39,6 +39,7 @@ public class PoiUtil {
 
         graphics.setPaint(Color.white);
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
+        graphics.setFont(Font.getFont("Pretendard-Medium"));
 
         slide.draw(graphics);
         graphics.dispose();
@@ -59,7 +60,7 @@ public class PoiUtil {
       XWPFDocument document = new XWPFDocument(file);
       PdfOptions options = PdfOptions.create();
       options.fontProvider(
-          (familyName, encoding, size, style, color) -> FontFactory.getFont("NanumGothic.ttf",
+          (familyName, encoding, size, style, color) -> FontFactory.getFont("Pretendard-Medium.otf",
               BaseFont.IDENTITY_H, BaseFont.EMBEDDED, size, style, color));
 
       String filePath = fileName.substring(10, fileName.lastIndexOf('.') + 1) + PDF;
