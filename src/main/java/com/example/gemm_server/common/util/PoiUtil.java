@@ -31,7 +31,7 @@ public class PoiUtil {
       List<String> imageFileNames = new ArrayList<>();
       Dimension pgsize = ppt.getPageSize();
       List<XSLFSlide> slides = ppt.getSlides();
-      BufferedImage img = null;
+      BufferedImage img;
 
       for (XSLFSlide slide : slides) {
         img = new BufferedImage(pgsize.width, pgsize.height, BufferedImage.TYPE_INT_RGB);
