@@ -19,7 +19,7 @@ public class UpdateMyInformationResponse {
   @Schema(description = "관리 대상자의 연령")
   private String nickname;
 
-  @Schema(description = "전화번호")
+  @Schema(description = "생일")
   private LocalDate birth;
 
   public UpdateMyInformationResponse(Member member) {
