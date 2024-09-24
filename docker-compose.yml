@@ -7,6 +7,10 @@ services:
     restart: always
     ports:
       - "80:8080"
+      - "8080:8080"
+    volumes:
+      - /home/ubuntu/Pretendard-Medium.otf:/usr/share/fonts/Pretendard-Medium.otf
+      - /home/ubuntu/Pretendard-Medium.otf:/app/Pretendard-Medium.otf
     networks:
       - gemm
     depends_on:
