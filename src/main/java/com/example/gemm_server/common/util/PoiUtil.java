@@ -9,6 +9,7 @@ import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
@@ -21,6 +22,7 @@ import java.io.*;
 import java.util.List;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
+@Slf4j
 public class PoiUtil {
 
   private static final String PNG = "png";
@@ -74,14 +76,19 @@ public class PoiUtil {
   }
 
   public static String convertPdfToPng(String filePath) {
+    String newFilePath = null;
     try (PDDocument document = PDDocument.load(new File(filePath));) {
       BufferedImage bufferedImage = new PDFRenderer(document).renderImage(0);
 
-      String newFilePath = UUIDUtil.getRandomUUID() + "0." + PNG;
+      newFilePath = UUIDUtil.getRandomUUID() + "0." + PNG;
       ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
-      return newFilePath;
     } catch (IOException e) {
       throw new GeneratorException(FAILED_TO_GENERATE_ACTIVITY_SHEET_THUMBNAIL);
+    } finally {
+      if (!new File(filePath).delete()) {
+        log.warn("{} 파일 미삭제 경고", filePath);
+      }
+      return newFilePath;
     }
   }
 }
