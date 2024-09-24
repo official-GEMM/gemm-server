@@ -1,6 +1,5 @@
 package com.example.gemm_server.controller;
 
-import com.example.gemm_server.common.util.PoiUtil;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.generator.request.GenerateGuideRequest;
 import com.example.gemm_server.dto.generator.request.GenerateMaterialRequest;
@@ -24,12 +23,8 @@ import com.example.gemm_server.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,17 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class GeneratorController {
 
   private final ActivityService activityService;
-
-  @GetMapping("/test")
-  public Boolean test() {
-    try {
-//      PoiUtil.convertPptToPng(new FileInputStream(new File("test.pptx")));
-      PoiUtil.convertPdfToPng(PoiUtil.convertDocxToPdf(new FileInputStream(new File("abcdefghjitest.docx")), "abcdefghjitest.docx"));
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-    return true;
-  }
 
   @Operation(summary = "활동 방법 생성", description = "활동 방법을 생성하는 API")
   @PostMapping("/guide")
