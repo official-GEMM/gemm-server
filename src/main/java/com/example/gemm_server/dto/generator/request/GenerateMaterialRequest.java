@@ -1,11 +1,15 @@
 package com.example.gemm_server.dto.generator.request;
 
+import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public record GenerateMaterialRequest(
     @Schema(description = "생성하고자 하는 주제")
@@ -33,4 +37,14 @@ public record GenerateMaterialRequest(
     String cutout
 ) {
 
+  public boolean isEmptyMaterialRequest() {
+    return Stream.of(ppt(), activitySheet(), cutout()).allMatch(Objects::isNull);
+  }
+
+  public int getTotalUseGemAmount() {
+    return Stream.of(Optional.ofNullable(ppt()).map(p -> Policy.GENERATE_PPT),
+        Optional.ofNullable(activitySheet()).map(a -> Policy.GENERATE_ACTIVITY_SHEET),
+        Optional.ofNullable(cutout()).map(c -> Policy.GENERATE_CUTOUT)
+    ).filter(Optional::isPresent).mapToInt(Optional::get).sum();
+  }
 }

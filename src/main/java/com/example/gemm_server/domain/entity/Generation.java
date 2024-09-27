@@ -1,6 +1,7 @@
 package com.example.gemm_server.domain.entity;
 
 import com.example.gemm_server.common.annotation.entity.ColumnDescription;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -38,7 +39,7 @@ public class Generation extends Timestamped {
   private Member owner;
 
   @ColumnDescription("활동 아이디")
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
 
