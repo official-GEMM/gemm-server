@@ -215,7 +215,7 @@ public class ActivityService {
       Material savedPptMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.ppt()), TEMP_PPT_PATH, SAVE_PPT_PATH, savedActivity,
           MaterialType.PPT);
-      saveThumbnails(S3Util.getFileNameFromPresignedUrlWithNoExtension(
+      saveThumbnails(S3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.ppt()), TEMP_PPT_THUMBNAIL_PATH, SAVE_PPT_THUMBNAIL_PATH,
           savedPptMaterial);
     }
@@ -225,7 +225,7 @@ public class ActivityService {
               saveMaterialRequest.activitySheet()), TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH,
           savedActivity, MaterialType.ACTIVITY_SHEET);
       saveThumbnail(
-          S3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.activitySheet()),
+          S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.activitySheet()),
           TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH, SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH,
           savedActivitySheetMaterial);
     }
@@ -234,7 +234,7 @@ public class ActivityService {
       Material savedCutoutMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
               saveMaterialRequest.cutout()), TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedActivity,
           MaterialType.CUTOUT);
-      saveThumbnail(S3Util.getFileNameFromPresignedUrlWithNoExtension(saveMaterialRequest.cutout()),
+      saveThumbnail(S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.cutout()),
           TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedCutoutMaterial);
     }
 
