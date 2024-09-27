@@ -234,21 +234,21 @@ public class ActivityService {
     List<Thumbnail> thumbnails = new ArrayList<>();
     if (saveMaterialRequest.ppt() != null) {
       String pptFileName = S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.ppt());
-      Material savedPptMaterial = saveMaterial(pptFileName, TEMP_PPT_PATH, SAVE_PPT_PATH,
+      Material savedPptMaterial = uploadMaterialToS3(pptFileName, TEMP_PPT_PATH, SAVE_PPT_PATH,
           savedActivity, MaterialType.PPT);
       materials.add(savedPptMaterial);
-      thumbnails.addAll(saveThumbnailsToS3(pptFileName, TEMP_PPT_THUMBNAIL_PATH,
+      thumbnails.addAll(uploadThumbnailsToS3(pptFileName, TEMP_PPT_THUMBNAIL_PATH,
           SAVE_PPT_THUMBNAIL_PATH, savedPptMaterial));
     }
 
     if (saveMaterialRequest.activitySheet() != null) {
       String ActivitySheetFileName = S3Util.getFileNameFromPresignedUrl(
           saveMaterialRequest.activitySheet());
-      Material savedActivitySheetMaterial = saveMaterial(ActivitySheetFileName,
+      Material savedActivitySheetMaterial = uploadMaterialToS3(ActivitySheetFileName,
           TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH, savedActivity,
           MaterialType.ACTIVITY_SHEET);
       materials.add(savedActivitySheetMaterial);
-      thumbnails.add(saveThumbnailToS3(ActivitySheetFileName,
+      thumbnails.add(uploadThumbnailToS3(ActivitySheetFileName,
           TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH, SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH,
           savedActivitySheetMaterial));
     }
@@ -256,10 +256,10 @@ public class ActivityService {
     if (saveMaterialRequest.cutout() != null) {
       String cutoutFileName = S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.cutout());
       log.info(cutoutFileName);
-      Material savedCutoutMaterial = saveMaterial(cutoutFileName, TEMP_CUTOUT_PATH,
+      Material savedCutoutMaterial = uploadMaterialToS3(cutoutFileName, TEMP_CUTOUT_PATH,
           SAVE_CUTOUT_PATH, savedActivity, MaterialType.CUTOUT);
       materials.add(savedCutoutMaterial);
-      thumbnails.add(saveThumbnailToS3(cutoutFileName, TEMP_CUTOUT_PATH,
+      thumbnails.add(uploadThumbnailToS3(cutoutFileName, TEMP_CUTOUT_PATH,
           SAVE_CUTOUT_PATH, savedCutoutMaterial));
     }
     materialRepository.saveAll(materials);
@@ -324,21 +324,21 @@ public class ActivityService {
     return new UpdatedCutoutResponse(commentedCutoutResponse, member.getGem());
   }
 
-  protected Material saveMaterial(String fileName, String tempSavedFilePath,
+  protected Material uploadMaterialToS3(String fileName, String tempSavedFilePath,
       String saveFilePath, Activity activity, MaterialType materialType) {
     Optional.ofNullable(S3Util.copyFile(fileName, tempSavedFilePath)).orElseThrow(() ->
         new GeneratorException(NOT_EXIST_MATERIAL));
 
-    return materialRepository.save(Material.builder()
+    return Material.builder()
         .originName(fileName)
         .fileName(fileName)
         .filePath(saveFilePath)
         .type(materialType)
         .activity(activity)
-        .build());
+        .build();
   }
 
-  protected Thumbnail saveThumbnailToS3(String fileName, String tempSavedFilePath,
+  protected Thumbnail uploadThumbnailToS3(String fileName, String tempSavedFilePath,
       String saveFilePath, Material material) {
     String thumbnailName = S3Util.getFileNameWithNoExtension(fileName) + ".png";
     Optional.ofNullable(S3Util.copyFile(thumbnailName, tempSavedFilePath)).orElseThrow(() ->
@@ -353,7 +353,7 @@ public class ActivityService {
         .build();
   }
 
-  protected List<Thumbnail> saveThumbnailsToS3(String fileName, String tempSavedFilePath,
+  protected List<Thumbnail> uploadThumbnailsToS3(String fileName, String tempSavedFilePath,
       String saveFilePath, Material material) {
     List<Thumbnail> thumbnails = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
