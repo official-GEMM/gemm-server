@@ -77,6 +77,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -92,13 +93,28 @@ public class ActivityService {
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
 
+  @Value("${llm.server.guide-generate-url}")
+  private String guideGenerateUrl;
+  @Value("${llm.server.guide-update-url}")
+  private String guideUpdateUrl;
+  @Value("${llm.server.material-design-url}")
+  private String materialDesignUrl;
+  @Value("${llm.server.material-generate-url}")
+  private String materialGenerateUrl;
+  @Value("${llm.server.ppt-update-url}")
+  private String pptUpdateUrl;
+  @Value("${llm.server.activity-sheet-update-url}")
+  private String activitySheetUpdateUrl;
+  @Value("${llm.server.cutout-update-url}")
+  private String cutoutUpdateUrl;
+
   @Transactional
   public GenerateGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.GENERATE_GUIDE, GemUsageType.AI_USE);
-    LlmGuideResponse llmGuideResponse = webClientUtil.post("/generate/guide",
-        generateGuideRequest, LlmGuideResponse.class);
+    LlmGuideResponse llmGuideResponse = webClientUtil.post(guideGenerateUrl, generateGuideRequest,
+        LlmGuideResponse.class);
 
     if (llmGuideResponse == null || llmGuideResponse.contents().length == 0) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
@@ -124,8 +140,8 @@ public class ActivityService {
     gemService.getRemainGem(member, Policy.UPDATE_GUIDE, GemUsageType.AI_USE);
     LlmUpdateGuideRequest llmUpdateGuideRequest = new LlmUpdateGuideRequest(
         updateGuideRequest.contents(), updateGuideRequest.comments());
-    LlmGuideResponse llmGuideResponse = webClientUtil.put("/generate/guide/result",
-        llmUpdateGuideRequest, LlmGuideResponse.class);
+    LlmGuideResponse llmGuideResponse = webClientUtil.put(guideUpdateUrl, llmUpdateGuideRequest,
+        LlmGuideResponse.class);
 
     if (llmGuideResponse == null || llmGuideResponse.isEmptyContents()) {
       throw new GeneratorException(EMPTY_GUIDE_RESULT);
@@ -138,8 +154,7 @@ public class ActivityService {
   @Transactional
   public LinkedMaterialGuideResponse linkGuideToMaterial(
       LinkMaterialGuideRequest linkMaterialGuideRequest) {
-    LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(
-        "/generate/guide/sync",
+    LlmDesignedMaterialResponse llmDesignedMaterialResponse = webClientUtil.post(materialDesignUrl,
         LlmLinkMaterialGuideRequest.getLlmLinkMaterialGuideRequest(linkMaterialGuideRequest),
         LlmDesignedMaterialResponse.class);
 
@@ -169,7 +184,7 @@ public class ActivityService {
     }
     gemService.getRemainGem(member, generateMaterialRequest.getTotalUseGemAmount(),
         GemUsageType.AI_USE);
-    LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/materials",
+    LlmMaterialResponse llmMaterialResponse = webClientUtil.post(materialGenerateUrl,
         generateMaterialRequest, LlmMaterialResponse.class);
 
     if (llmMaterialResponse == null) {
@@ -257,8 +272,8 @@ public class ActivityService {
   public UpdatedPptResponse updatePpt(UpdatePptRequest updatePptRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_PPT, GemUsageType.AI_USE);
-    LlmPptResponse llmPptResponse = webClientUtil.post("/generate/materials/ppt",
-        updatePptRequest, LlmPptResponse.class);
+    LlmPptResponse llmPptResponse = webClientUtil.post(pptUpdateUrl, updatePptRequest,
+        LlmPptResponse.class);
 
     if (llmPptResponse == null || llmPptResponse.isEmptyFileValue()) {
       throw new GeneratorException(EMPTY_PPT_RESULT);
@@ -275,8 +290,7 @@ public class ActivityService {
       UpdateActivitySheetRequest updateActivitySheetRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_ACTIVITY_SHEET, GemUsageType.AI_USE);
-    LlmActivitySheetResponse llmActivitySheetResponse = webClientUtil.post(
-        "/generate/materials/activity-sheet",
+    LlmActivitySheetResponse llmActivitySheetResponse = webClientUtil.post(activitySheetUpdateUrl,
         updateActivitySheetRequest, LlmActivitySheetResponse.class);
 
     if (llmActivitySheetResponse == null || llmActivitySheetResponse.isEmptyFileValue()) {
@@ -296,8 +310,8 @@ public class ActivityService {
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     gemService.getRemainGem(member, Policy.UPDATE_CUTOUT, GemUsageType.AI_USE);
-    LlmCutoutResponse llmCutoutResponse = webClientUtil.post("/generate/materials/cutout",
-        updateCutoutRequest, LlmCutoutResponse.class);
+    LlmCutoutResponse llmCutoutResponse = webClientUtil.post(cutoutUpdateUrl, updateCutoutRequest,
+        LlmCutoutResponse.class);
 
     if (llmCutoutResponse == null || llmCutoutResponse.isEmptyFileValue()) {
       throw new GeneratorException(EMPTY_CUTOUT_RESULT);
@@ -339,8 +353,8 @@ public class ActivityService {
         .build();
   }
 
-  protected List<Thumbnail> saveThumbnailsToS3(String fileName,
-      String tempSavedFilePath, String saveFilePath, Material material) {
+  protected List<Thumbnail> saveThumbnailsToS3(String fileName, String tempSavedFilePath,
+      String saveFilePath, Material material) {
     List<Thumbnail> thumbnails = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
       String thumbnailName = S3Util.getFileNameWithNoExtension(fileName) + i + ".png";
