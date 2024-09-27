@@ -5,6 +5,7 @@ import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_CUTOUT_DESIGN_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_CUTOUT_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_GUIDE_RESULT;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_MATERIAL_DESIGN_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_MATERIAL_GENERATE_REQUEST;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_MATERIAL_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_DESIGN_RESULT;
@@ -33,7 +34,6 @@ import com.example.gemm_server.domain.entity.Generation;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Thumbnail;
-import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
 import com.example.gemm_server.domain.repository.ThumbnailRepository;
@@ -88,7 +88,6 @@ public class ActivityService {
   private final WebClientUtil webClientUtil;
   private final GemService gemService;
   private final MemberService memberService;
-  private final ActivityRepository activityRepository;
   private final GenerationRepository generationRepository;
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
@@ -144,7 +143,9 @@ public class ActivityService {
         LlmLinkMaterialGuideRequest.getLlmLinkMaterialGuideRequest(linkMaterialGuideRequest),
         LlmDesignedMaterialResponse.class);
 
-    if (llmDesignedMaterialResponse == null || llmDesignedMaterialResponse.isEmptyPptDesign()) {
+    Optional.ofNullable(llmDesignedMaterialResponse)
+        .orElseThrow(() -> new GeneratorException(EMPTY_MATERIAL_DESIGN_RESULT));
+    if (llmDesignedMaterialResponse.isEmptyPptDesign()) {
       throw new GeneratorException(EMPTY_PPT_DESIGN_RESULT);
     }
     if (llmDesignedMaterialResponse.isEmptyActivitySheetDesign()) {
@@ -166,7 +167,8 @@ public class ActivityService {
     if (generateMaterialRequest.isEmptyMaterialRequest()) {
       throw new GeneratorException(EMPTY_MATERIAL_GENERATE_REQUEST);
     }
-    gemService.getRemainGem(member, generateMaterialRequest.getTotalUseGemAmount(), GemUsageType.AI_USE);
+    gemService.getRemainGem(member, generateMaterialRequest.getTotalUseGemAmount(),
+        GemUsageType.AI_USE);
     LlmMaterialResponse llmMaterialResponse = webClientUtil.post("/generate/materials",
         generateMaterialRequest, LlmMaterialResponse.class);
 
@@ -209,37 +211,45 @@ public class ActivityService {
   public SavedMaterialResponse saveMaterials(SaveMaterialRequest saveMaterialRequest,
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-    Activity savedActivity = activityRepository.save(saveMaterialRequest.toEntity());
+    Activity savedActivity = saveMaterialRequest.toEntity();
+    Generation savedGeneration = generationRepository.save(
+        Generation.builder().activity(savedActivity).owner(member).build());
 
+    List<Material> materials = new ArrayList<>();
+    List<Thumbnail> thumbnails = new ArrayList<>();
     if (saveMaterialRequest.ppt() != null) {
-      Material savedPptMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
-              saveMaterialRequest.ppt()), TEMP_PPT_PATH, SAVE_PPT_PATH, savedActivity,
-          MaterialType.PPT);
-      saveThumbnails(S3Util.getFileNameFromPresignedUrl(
-              saveMaterialRequest.ppt()), TEMP_PPT_THUMBNAIL_PATH, SAVE_PPT_THUMBNAIL_PATH,
-          savedPptMaterial);
+      String pptFileName = S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.ppt());
+      Material savedPptMaterial = saveMaterial(pptFileName, TEMP_PPT_PATH, SAVE_PPT_PATH,
+          savedActivity, MaterialType.PPT);
+      materials.add(savedPptMaterial);
+      thumbnails.addAll(saveThumbnailsToS3(pptFileName, TEMP_PPT_THUMBNAIL_PATH,
+          SAVE_PPT_THUMBNAIL_PATH, savedPptMaterial));
     }
 
     if (saveMaterialRequest.activitySheet() != null) {
-      Material savedActivitySheetMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
-              saveMaterialRequest.activitySheet()), TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH,
-          savedActivity, MaterialType.ACTIVITY_SHEET);
-      saveThumbnail(
-          S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.activitySheet()),
+      String ActivitySheetFileName = S3Util.getFileNameFromPresignedUrl(
+          saveMaterialRequest.activitySheet());
+      Material savedActivitySheetMaterial = saveMaterial(ActivitySheetFileName,
+          TEMP_ACTIVITY_SHEET_PATH, SAVE_ACTIVITY_SHEET_PATH, savedActivity,
+          MaterialType.ACTIVITY_SHEET);
+      materials.add(savedActivitySheetMaterial);
+      thumbnails.add(saveThumbnailToS3(ActivitySheetFileName,
           TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH, SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH,
-          savedActivitySheetMaterial);
+          savedActivitySheetMaterial));
     }
 
     if (saveMaterialRequest.cutout() != null) {
-      Material savedCutoutMaterial = saveMaterial(S3Util.getFileNameFromPresignedUrl(
-              saveMaterialRequest.cutout()), TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedActivity,
-          MaterialType.CUTOUT);
-      saveThumbnail(S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.cutout()),
-          TEMP_CUTOUT_PATH, SAVE_CUTOUT_PATH, savedCutoutMaterial);
+      String cutoutFileName = S3Util.getFileNameFromPresignedUrl(saveMaterialRequest.cutout());
+      log.info(cutoutFileName);
+      Material savedCutoutMaterial = saveMaterial(cutoutFileName, TEMP_CUTOUT_PATH,
+          SAVE_CUTOUT_PATH, savedActivity, MaterialType.CUTOUT);
+      materials.add(savedCutoutMaterial);
+      thumbnails.add(saveThumbnailToS3(cutoutFileName, TEMP_CUTOUT_PATH,
+          SAVE_CUTOUT_PATH, savedCutoutMaterial));
     }
+    materialRepository.saveAll(materials);
+    thumbnailRepository.saveAll(thumbnails);
 
-    Generation savedGeneration = generationRepository.save(
-        Generation.builder().activity(savedActivity).owner(member).build());
     return new SavedMaterialResponse(savedGeneration.getId());
   }
 
@@ -314,26 +324,26 @@ public class ActivityService {
         .build());
   }
 
-  protected Thumbnail saveThumbnail(String fileNameWithNoExtension, String tempSavedFilePath,
+  protected Thumbnail saveThumbnailToS3(String fileName, String tempSavedFilePath,
       String saveFilePath, Material material) {
-    String thumbnailName = fileNameWithNoExtension + ".png";
+    String thumbnailName = S3Util.getFileNameWithNoExtension(fileName) + ".png";
     Optional.ofNullable(S3Util.copyFile(thumbnailName, tempSavedFilePath)).orElseThrow(() ->
         new GeneratorException(NOT_EXIST_THUMBNAIL));
 
-    return thumbnailRepository.save(Thumbnail.builder()
+    return Thumbnail.builder()
         .originName(thumbnailName)
         .fileName(thumbnailName)
         .filePath(saveFilePath)
         .sequence((short) 0)
         .material(material)
-        .build());
+        .build();
   }
 
-  protected List<Thumbnail> saveThumbnails(String fileNameWithNoExtension, String tempSavedFilePath,
-      String saveFilePath, Material material) {
+  protected List<Thumbnail> saveThumbnailsToS3(String fileName,
+      String tempSavedFilePath, String saveFilePath, Material material) {
     List<Thumbnail> thumbnails = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
-      String thumbnailName = fileNameWithNoExtension + i + ".png";
+      String thumbnailName = S3Util.getFileNameWithNoExtension(fileName) + i + ".png";
       if (S3Util.copyFile(thumbnailName, tempSavedFilePath) != null) {
         Thumbnail thumbnail = Thumbnail.builder()
             .originName(thumbnailName)
@@ -350,7 +360,7 @@ public class ActivityService {
         break;
       }
     }
-    return thumbnailRepository.saveAll(thumbnails);
+    return thumbnails;
   }
 
   protected String[] getPptThumbnailPaths(LlmPptResponse llmPptResponse) {

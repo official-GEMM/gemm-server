@@ -9,6 +9,7 @@ public enum GeneratorErrorCode implements ErrorCode {
   EMPTY_MATERIAL_GENERATE_REQUEST(HttpStatus.BAD_REQUEST, "최소한 1개 이상의 자료를 생성해야 합니다."),
 
   EMPTY_GUIDE_RESULT(HttpStatus.NOT_FOUND, "AI 활동 방법 생성 결과가 비어있습니다."),
+  EMPTY_MATERIAL_DESIGN_RESULT(HttpStatus.NOT_FOUND, "활동 자료 생성 결과가 비어있습니다."),
   EMPTY_PPT_DESIGN_RESULT(HttpStatus.NOT_FOUND, "PPT 설계 AI 생성 결과가 비어있습니다."),
   EMPTY_ACTIVITY_SHEET_DESIGN_RESULT(HttpStatus.NOT_FOUND, "활동지 설계 AI 생성 결과가 비어있습니다."),
   EMPTY_CUTOUT_DESIGN_RESULT(HttpStatus.NOT_FOUND, "컷도안 설계 AI 생성 결과가 비어있습니다."),
