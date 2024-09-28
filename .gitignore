@@ -39,3 +39,4 @@ out/
 ### Setting ###
 *.yml
 /temp/
+*.p12
