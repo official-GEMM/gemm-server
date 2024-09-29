@@ -58,6 +58,8 @@ public class AuthController {
 
   @Value("${login.redirect.url}")
   private String loginRedirectUrl;
+  @Value("${login.redirect.domain}")
+  private String loginRedirectDomain;
 
   @Operation(summary = "소셜 로그인", description = "소셜 로그인 처리 이후 redirect되는 API")
   @GetMapping("/login")
@@ -69,7 +71,8 @@ public class AuthController {
     Long userId = tokenProvider.getUserIdFromToken(refreshToken);
     boolean isAttendanceCompensated = authService.compensateMemberForDailyAttendance(userId);
 
-    ResponseCookie newRefreshTokenCookie = CookieUtil.createForRefreshToken(refreshToken);
+    ResponseCookie newRefreshTokenCookie = CookieUtil.createForRefreshToken(refreshToken,
+        loginRedirectDomain);
     response.addHeader(HttpHeaders.SET_COOKIE, newRefreshTokenCookie.toString());
     String redirectWithParams = UriComponentsBuilder.fromUriString(loginRedirectUrl)
         .queryParam("isAttendanceCompensated", isAttendanceCompensated)

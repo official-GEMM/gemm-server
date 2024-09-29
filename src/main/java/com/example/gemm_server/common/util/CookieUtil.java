@@ -16,4 +16,15 @@ public class CookieUtil {
         .sameSite("None")
         .build();
   }
+
+  public static ResponseCookie createForRefreshToken(String refreshToken, String domain) {
+    return ResponseCookie.from("refreshToken", refreshToken)
+        .httpOnly(true)
+        .secure(true)
+        .path("/")
+        .domain(domain)
+        .maxAge(Duration.ofDays(7))
+        .sameSite("None")
+        .build();
+  }
 }
