@@ -5,4 +5,7 @@ public record LlmPptResponse(
     String filePath
 ) {
 
+  public boolean isEmptyFileValue() {
+    return fileName().isBlank() || filePath().isBlank();
+  }
 }

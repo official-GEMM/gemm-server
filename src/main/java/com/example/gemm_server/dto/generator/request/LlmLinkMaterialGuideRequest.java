@@ -11,4 +11,11 @@ public record LlmLinkMaterialGuideRequest(
     List<ContentResponse> contents
 ) {
 
+  public static LlmLinkMaterialGuideRequest getLlmLinkMaterialGuideRequest(
+      LinkMaterialGuideRequest linkMaterialGuideRequest) {
+    return new LlmLinkMaterialGuideRequest(
+        linkMaterialGuideRequest.title(), linkMaterialGuideRequest.age(),
+        linkMaterialGuideRequest.category(), linkMaterialGuideRequest.contents()
+    );
+  }
 }

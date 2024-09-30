@@ -6,4 +6,7 @@ public record LlmGuideResponse(
     ContentResponse[] contents
 ) {
 
+  public boolean isEmptyContents() {
+    return this.contents.length == 0;
+  }
 }

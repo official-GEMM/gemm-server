@@ -89,16 +89,12 @@ public class S3Util {
     }
   }
 
-  public static String getUUIDFileName(String fileName) {
-    return UUID.randomUUID().toString() + "." + getFileExtension(fileName);
-  }
-
   public static String getFileNameFromPresignedUrl(String presignedUrl) {
     return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('?'));
   }
 
-  public static String getFileNameFromPresignedUrlWithNoExtension(String presignedUrl) {
-    return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('.'));
+  public static String getFileNameWithNoExtension(String fileName) {
+    return fileName.substring(0, fileName.indexOf('.'));
   }
 
   protected static String getFileExtension(String fileName) {
