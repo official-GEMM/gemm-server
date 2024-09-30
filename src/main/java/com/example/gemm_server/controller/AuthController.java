@@ -56,9 +56,9 @@ public class AuthController {
   private final TokenProvider tokenProvider;
   private final MemberService memberService;
 
-  @Value("${login.redirect.url}")
+  @Value("${authentication.url.login-redirect}")
   private String loginRedirectUrl;
-  @Value("${login.redirect.domain}")
+  @Value("${authentication.domain.cookie.refresh-token}")
   private String refreshTokenCookieDomain;
 
   @Operation(summary = "소셜 로그인", description = "소셜 로그인 처리 이후 redirect되는 API")
