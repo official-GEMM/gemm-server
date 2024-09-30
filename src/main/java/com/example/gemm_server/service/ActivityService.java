@@ -34,6 +34,7 @@ import com.example.gemm_server.domain.entity.Generation;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Thumbnail;
+import com.example.gemm_server.domain.repository.ActivityRepository;
 import com.example.gemm_server.domain.repository.GenerationRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
 import com.example.gemm_server.domain.repository.ThumbnailRepository;
@@ -92,6 +93,7 @@ public class ActivityService {
   private final GenerationRepository generationRepository;
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
+  private final ActivityRepository activityRepository;
 
   @Value("${llm.server.guide-generate-url}")
   private String guideGenerateUrl;
@@ -128,8 +130,9 @@ public class ActivityService {
   public SavedGuideResponse saveGuide(SaveGuideRequest saveGuideRequest, Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
 
+    Activity savedActivity = activityRepository.save(saveGuideRequest.toEntity());
     Generation savedGeneration = generationRepository.save(
-        Generation.builder().activity(saveGuideRequest.toEntity()).owner(member).build());
+        Generation.builder().activity(savedActivity).owner(member).build());
 
     return new SavedGuideResponse(savedGeneration.getId());
   }
@@ -226,7 +229,7 @@ public class ActivityService {
   public SavedMaterialResponse saveMaterials(SaveMaterialRequest saveMaterialRequest,
       Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
-    Activity savedActivity = saveMaterialRequest.toEntity();
+    Activity savedActivity = activityRepository.save(saveMaterialRequest.toEntity());
     Generation savedGeneration = generationRepository.save(
         Generation.builder().activity(savedActivity).owner(member).build());
 
