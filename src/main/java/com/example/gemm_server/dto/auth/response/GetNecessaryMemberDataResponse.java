@@ -3,6 +3,7 @@ package com.example.gemm_server.dto.auth.response;
 import com.example.gemm_server.domain.entity.Member;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import lombok.Getter;
 
 @Getter
@@ -15,7 +16,7 @@ public class GetNecessaryMemberDataResponse {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "사용자 생일")
-  private String birth;
+  private LocalDate birth;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "관리 대상자의 연령")
@@ -37,7 +38,7 @@ public class GetNecessaryMemberDataResponse {
 
   public GetNecessaryMemberDataResponse(Member member) {
     this.name = member.getName();
-    this.birth = member.getBirth().toString();
+    this.birth = member.getBirth();
     this.manageAge = member.getManageAge();
     this.nickname = member.getNickname();
     this.phoneNumber = member.getPhoneNumber();
