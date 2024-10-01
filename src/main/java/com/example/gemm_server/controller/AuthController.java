@@ -32,7 +32,6 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -71,13 +70,9 @@ public class AuthController {
     Long userId = tokenProvider.getUserIdFromToken(refreshToken);
     boolean isAttendanceCompensated = authService.compensateMemberForDailyAttendance(userId);
 
-    ResponseCookie newRefreshTokenCookie = CookieUtil.createForRefreshToken(refreshToken,
-        refreshTokenCookieDomain);
-    response.addHeader(HttpHeaders.SET_COOKIE, newRefreshTokenCookie.toString());
     String redirectWithParams = UriComponentsBuilder.fromUriString(loginRedirectUrl)
         .queryParam("isAttendanceCompensated", isAttendanceCompensated)
         .toUriString();
-
     response.sendRedirect(redirectWithParams);
   }
 
