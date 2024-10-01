@@ -2,17 +2,19 @@ package com.example.gemm_server.dto.my.response;
 
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.dto.common.MemberBundle;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import lombok.Getter;
 
 @Getter
-@Schema(description = "내 정보 응답", requiredProperties = {"manageAge", "phoneNumber",
-    "profileImagePath", "nickname", "birth"})
+@Schema(description = "내 정보 응답", requiredProperties = {"phoneNumber", "profileImagePath",
+    "nickname", "birth"})
 public class GetMemberInformationResponse {
 
   @Schema(description = "관리 대상 연령")
-  private short manageAge;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Short manageAge;
 
   @Schema(description = "전화번호")
   private String phoneNumber;
