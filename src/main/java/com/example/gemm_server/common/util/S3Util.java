@@ -16,7 +16,6 @@ import com.example.gemm_server.exception.GeneratorException;
 import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.InputStream;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,14 +27,18 @@ public class S3Util {
   private final AmazonS3 amazonS3;
   @Value("${cloud.aws.s3.bucket.name}")
   private String bucketName;
+  @Value("${cloud.aws.s3.bucket.expiration-time}")
+  private Long expirationTime;
 
   private static AmazonS3 staticAmazonS3;
   private static String staticBucketName;
+  private static Long staticExpirationTime;
 
   @PostConstruct
   public void init() {
     staticAmazonS3 = this.amazonS3;
     staticBucketName = this.bucketName;
+    staticExpirationTime = this.expirationTime;
   }
 
   public static String uploadFile(File file, String fileName, String savePath) {
@@ -77,7 +80,7 @@ public class S3Util {
       GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
           staticBucketName, fileName)
           .withMethod(HttpMethod.GET)
-          .withExpiration(DateUtil.getExpirationDate(1000 * 60 * 2L));
+          .withExpiration(DateUtil.getExpirationDate(staticExpirationTime));
       presignedUrlRequest.addRequestParameter(
           Headers.S3_CANNED_ACL,
           CannedAccessControlList.PublicRead.toString()
