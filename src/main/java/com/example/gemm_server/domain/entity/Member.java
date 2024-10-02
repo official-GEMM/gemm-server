@@ -92,7 +92,7 @@ public class Member extends Timestamped {
   private LocalDateTime lastLoginAt;
 
   @ColumnDescription("회원가입 절차 완료 여부")
-  @Column(name = "is_registration_complete")
+  @Column(name = "is_registration_complete", nullable = false)
   @ColumnDefault("0")
   private Boolean isRegistrationCompleted;
 
