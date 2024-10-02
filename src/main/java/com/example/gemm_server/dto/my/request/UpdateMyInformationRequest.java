@@ -30,7 +30,5 @@ public class UpdateMyInformationRequest {
   private String phoneNumber;
 
   @Schema(description = "사용자 생일")
-  @NotBlank
-  @Pattern(regexp = RegularExpression.DATE, message = "YYYY-MM-dd의 형식을 사용해주세요.")
   private LocalDate birth;
 }

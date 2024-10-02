@@ -21,8 +21,6 @@ public class PostNecessaryMemberDataRequest {
   private String name;
 
   @Schema(description = "사용자 생일")
-  @NotBlank
-  @Pattern(regexp = RegularExpression.DATE, message = "YYYY-MM-dd의 형식을 사용해주세요.")
   private String birth;
 
   @Schema(description = "관리 대상자의 연령")
