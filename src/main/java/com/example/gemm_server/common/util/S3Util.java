@@ -90,7 +90,8 @@ public class S3Util {
   }
 
   public static String getFileNameFromPresignedUrl(String presignedUrl) {
-    return presignedUrl.substring(presignedUrl.lastIndexOf('/') + 1, presignedUrl.indexOf('?'));
+    int queryIndex = presignedUrl.indexOf('?');
+    return presignedUrl.substring(presignedUrl.lastIndexOf('/', queryIndex) + 1, queryIndex);
   }
 
   public static String getFileNameWithNoExtension(String fileName) {

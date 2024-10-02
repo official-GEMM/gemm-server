@@ -388,7 +388,8 @@ public class ActivityService {
       for (int i = 0; i < imagePaths.size(); i++) {
         File file = new File(imagePaths.get(i));
         thumbnailPaths[i] = S3Util.getFileUrl(S3Util.uploadFile(file,
-            llmPptResponse.fileName().substring(10, llmPptResponse.fileName().lastIndexOf('.'))
+            llmPptResponse.fileName().substring(llmPptResponse.fileName().lastIndexOf('/') + 1,
+                llmPptResponse.fileName().lastIndexOf('.'))
                 + i + ".png", TEMP_PPT_THUMBNAIL_PATH));
       }
       return thumbnailPaths;
@@ -405,7 +406,8 @@ public class ActivityService {
       String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
       return S3Util.getFileUrl(
           S3Util.uploadFile(new File(pngFilePath), llmActivitySheetResponse.fileName()
-                  .substring(10, llmActivitySheetResponse.fileName().lastIndexOf('.') + 1) + "png",
+                  .substring(llmActivitySheetResponse.fileName().lastIndexOf('/'),
+                      llmActivitySheetResponse.fileName().lastIndexOf('.') + 1) + "png",
               TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH));
     }
     return null;
