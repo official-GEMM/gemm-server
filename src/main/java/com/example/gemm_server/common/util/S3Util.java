@@ -10,15 +10,20 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.example.gemm_server.exception.GeneratorException;
 import jakarta.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @RequiredArgsConstructor
@@ -48,6 +53,26 @@ public class S3Util {
       return saveDirectoryPath + fileName;
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
+    }
+  }
+
+  public static String uploadFile(MultipartFile multipartFile, String fileName,
+      String saveDirectoryPath) {
+    try {
+      ObjectMetadata metadata = new ObjectMetadata();
+      metadata.setContentLength(multipartFile.getSize());
+      metadata.setContentType(multipartFile.getContentType());
+
+      String s3Key = saveDirectoryPath + fileName;
+      PutObjectRequest putObjectRequest = new PutObjectRequest(staticBucketName, s3Key,
+          multipartFile.getInputStream(), metadata);
+      staticAmazonS3.putObject(putObjectRequest);
+
+      return s3Key;
+    } catch (SdkClientException e) {
+      throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,4 +45,12 @@ public class ProfileImage extends Timestamped {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")
   private Member member;
+
+  @Builder
+  public ProfileImage(String originName, String fileName, String directoryPath, Long memberId) {
+    this.originName = originName;
+    this.fileName = fileName;
+    this.directoryPath = directoryPath;
+    this.member = Member.builder().id(memberId).build();
+  }
 }
