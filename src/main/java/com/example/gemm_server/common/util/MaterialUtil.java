@@ -6,10 +6,11 @@ import java.util.List;
 
 public class MaterialUtil {
 
-  private static final int MATERIAL_TYPE_COUNT = 3;
-  private static final int PPT_INDEX = MATERIAL_TYPE_COUNT - 1;
-  private static final int ACTIVITY_SHEET_INDEX = MATERIAL_TYPE_COUNT - 2;
-  private static final int CUTOUT_INDEX = MATERIAL_TYPE_COUNT - 3;
+  private static final int MATERIAL_TYPE_MAX_INDEX = 2;
+
+  private static final int PPT_INDEX = MATERIAL_TYPE_MAX_INDEX - 2;
+  private static final int ACTIVITY_SHEET_INDEX = MATERIAL_TYPE_MAX_INDEX - 1;
+  private static final int CUTOUT_INDEX = MATERIAL_TYPE_MAX_INDEX;
 
   public static boolean hasPPT(Short materialType) {
     String binary = BinaryUtil.parseBinaryString(materialType);
