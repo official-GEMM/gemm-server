@@ -48,14 +48,19 @@ public class MaterialUtil {
   public static short getMaterialBitMask(String pptUrl, String activitySheetUrl, String cutoutUrl) {
     short materialBit = 0;
     if (pptUrl != null && !pptUrl.isBlank()) {
-      materialBit += (short) 4;
+      materialBit += getBitMaskForIndex(PPT_INDEX);
     }
     if (activitySheetUrl != null && !activitySheetUrl.isBlank()) {
-      materialBit += (short) 2;
+      materialBit += getBitMaskForIndex(ACTIVITY_SHEET_INDEX);
     }
     if (cutoutUrl != null && !cutoutUrl.isBlank()) {
-      materialBit += (short) 1;
+      materialBit += getBitMaskForIndex(CUTOUT_INDEX);
     }
     return materialBit;
+  }
+
+  private static short getBitMaskForIndex(int index) {
+    int exponent = MATERIAL_TYPE_MAX_INDEX - index;
+    return (short) (1 << exponent);
   }
 }
