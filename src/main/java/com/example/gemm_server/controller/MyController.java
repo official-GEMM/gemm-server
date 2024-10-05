@@ -3,6 +3,7 @@ package com.example.gemm_server.controller;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
+import com.example.gemm_server.domain.entity.ProfileImage;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.MemberBundle;
@@ -23,6 +24,7 @@ import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.AuthService;
 import com.example.gemm_server.service.MemberService;
 import com.example.gemm_server.service.NotificationService;
+import com.example.gemm_server.service.ProfileImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,6 +38,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +56,7 @@ public class MyController {
   private final MemberService memberService;
   private final AuthService authService;
   private final NotificationService notificationService;
+  private final ProfileImageService profileImageService;
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
@@ -137,16 +141,19 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(notificationsResponse));
   }
 
-  // 미완성 API
   @Operation(summary = "프로필 이미지 변경", description = "사용자의 프로필 이미지를 변경하는 API")
   @PutMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<UpdateProfileImageResponse>> getMyNotifications(
-      @Valid @RequestBody UpdateProfileImageRequest request
+      @Valid @ModelAttribute UpdateProfileImageRequest request,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    UpdateProfileImageResponse response = new UpdateProfileImageResponse();
+    profileImageService.deleteProfileImageIfExist(user.getId());
+    ProfileImage profileImage = profileImageService.save(user.getId(), request.getProfileImage());
+    UpdateProfileImageResponse response = new UpdateProfileImageResponse(profileImage);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  // 미완성 API
   @Operation(summary = "내 스크랩 조회", description = "사용자의 스크랩 리스트를 가져오는 API")
   @GetMapping("/scraps")
   public ResponseEntity<CommonResponse<GetMyScrapsResponse>> getMyScraps(
