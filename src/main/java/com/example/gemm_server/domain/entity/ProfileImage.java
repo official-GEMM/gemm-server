@@ -13,16 +13,12 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE profile_image SET deleted_at = CURRENT_TIMESTAMP where id = ?")
-@SQLRestriction("deleted_at is NULL")
 @Table(name = "profile_image")
 public class ProfileImage extends Timestamped {
 
