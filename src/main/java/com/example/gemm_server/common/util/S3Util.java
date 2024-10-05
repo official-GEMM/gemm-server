@@ -41,30 +41,30 @@ public class S3Util {
     staticExpirationTime = this.expirationTime;
   }
 
-  public static String uploadFile(File file, String fileName, String savePath) {
+  public static String uploadFile(File file, String fileName, String saveDirectoryPath) {
     try {
-      staticAmazonS3.putObject(staticBucketName, savePath + fileName, file);
+      staticAmazonS3.putObject(staticBucketName, saveDirectoryPath + fileName, file);
       file.delete();
-      return savePath + fileName;
+      return saveDirectoryPath + fileName;
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
     }
   }
 
-  public static InputStream downloadFile(String fileName) {
+  public static InputStream downloadFile(String filePath) {
     try {
-      S3Object s3Object = staticAmazonS3.getObject(staticBucketName, fileName);
+      S3Object s3Object = staticAmazonS3.getObject(staticBucketName, filePath);
       return s3Object.getObjectContent();
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_DOWNLOAD_FILE);
     }
   }
 
-  public static String copyFile(String fileName, String filePath) {
+  public static String copyFile(String fileName, String directoryPath) {
     try {
-      if (staticAmazonS3.doesObjectExist(staticBucketName, filePath + fileName)) {
-        String savePath = filePath.substring(5) + fileName;
-        staticAmazonS3.copyObject(staticBucketName, filePath + fileName, staticBucketName,
+      if (staticAmazonS3.doesObjectExist(staticBucketName, directoryPath + fileName)) {
+        String savePath = directoryPath.substring(5) + fileName;
+        staticAmazonS3.copyObject(staticBucketName, directoryPath + fileName, staticBucketName,
             savePath);
         return savePath;
       } else {
@@ -75,10 +75,10 @@ public class S3Util {
     }
   }
 
-  public static String getFileUrl(String fileName) {
+  public static String getFileUrl(String filePath) {
     try {
       GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
-          staticBucketName, fileName)
+          staticBucketName, filePath)
           .withMethod(HttpMethod.GET)
           .withExpiration(DateUtil.getExpirationDate(staticExpirationTime));
       presignedUrlRequest.addRequestParameter(
