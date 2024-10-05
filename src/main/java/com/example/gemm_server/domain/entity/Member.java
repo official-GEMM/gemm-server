@@ -7,12 +7,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -37,8 +34,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "member",
     uniqueConstraints = @UniqueConstraint(columnNames = {"social_id", "provider"}))
 public class Member extends Timestamped {
-
-
+  
   @Id
   @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -101,11 +97,6 @@ public class Member extends Timestamped {
   @Enumerated(value = EnumType.STRING)
   @ColumnDefault("'USER'")
   private Role role;
-
-  @ColumnDescription("프로필 이미지 아이디")
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "profile_image_id")
-  private ProfileImage profileImage;
 
   public boolean isDataCompleted() {
     return name != null && phoneNumber != null && nickname != null && birth != null
