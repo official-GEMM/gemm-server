@@ -91,17 +91,4 @@ public class S3Util {
       throw new GeneratorException(FAILED_TO_GENERATE_PRESIGNED_URL);
     }
   }
-
-  public static String getFileNameFromPresignedUrl(String presignedUrl) {
-    int queryIndex = presignedUrl.indexOf('?');
-    return presignedUrl.substring(presignedUrl.lastIndexOf('/', queryIndex) + 1, queryIndex);
-  }
-
-  public static String getFileNameWithNoExtension(String fileName) {
-    return fileName.substring(0, fileName.indexOf('.'));
-  }
-
-  protected static String getFileExtension(String fileName) {
-    return fileName.substring(fileName.lastIndexOf("."));
-  }
 }
