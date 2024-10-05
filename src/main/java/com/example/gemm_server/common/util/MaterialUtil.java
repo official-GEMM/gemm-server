@@ -33,14 +33,14 @@ public class MaterialUtil {
 
   public static List<MaterialType> binaryToList(Short materialType) {
     List<MaterialType> materialTypes = new ArrayList<>();
+    if (hasPPT(materialType)) {
+      materialTypes.add(MaterialType.PPT);
+    }
     if (hasActivitySheet(materialType)) {
       materialTypes.add(MaterialType.ACTIVITY_SHEET);
     }
     if (hasCutOut(materialType)) {
       materialTypes.add(MaterialType.CUTOUT);
-    }
-    if (hasPPT(materialType)) {
-      materialTypes.add(MaterialType.PPT);
     }
     return materialTypes;
   }
