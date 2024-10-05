@@ -76,6 +76,12 @@ public class S3Util {
     }
   }
 
+  public static String deleteFile(String filePath) {
+    DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(staticBucketName, filePath);
+    staticAmazonS3.deleteObject(deleteObjectRequest);
+    return filePath;
+  }
+
   public static InputStream downloadFile(String filePath) {
     try {
       S3Object s3Object = staticAmazonS3.getObject(staticBucketName, filePath);

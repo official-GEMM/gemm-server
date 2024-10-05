@@ -15,7 +15,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProfileImageService {
 
   private final ProfileImageRepository profileImageRepository;
-  
+
+  public ProfileImage deleteProfileImageIfExist(Long memberId) {
+    ProfileImage profileImage = profileImageRepository.findByMemberId(memberId);
+    if (profileImage == null) {
+      return null;
+    }
+    S3Util.deleteFile(profileImage.getDirectoryPath() + profileImage.getFileName());
+    profileImageRepository.delete(profileImage);
+    return profileImage;
+  }
+
   public ProfileImage save(Long memberId, MultipartFile profileImageFile) {
     String s3fileName = FileUtil.generateFileName(profileImageFile.getOriginalFilename());
     S3Util.uploadFile(profileImageFile, s3fileName, SAVE_PROFILE_PATH);
