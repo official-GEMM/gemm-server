@@ -39,8 +39,8 @@ public class Banner extends Timestamped {
   private String fileName;
 
   @ColumnDescription("파일 경로")
-  @Column(name = "file_path", nullable = false)
-  private String filePath;
+  @Column(name = "directory_path", nullable = false)
+  private String directoryPath;
 
   @ColumnDescription("배너 위치 및 종류")
   @Enumerated(value = EnumType.STRING)

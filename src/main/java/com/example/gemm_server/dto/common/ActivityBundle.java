@@ -18,6 +18,6 @@ public class ActivityBundle {
     if (thumbnail == null) {
       return S3Util.getFileUrl(FilePath.defaultThumbnailImagePath);
     }
-    return S3Util.getFileUrl(thumbnail.getFilePath() + thumbnail.getFileName());
+    return S3Util.getFileUrl(thumbnail.getDirectoryPath() + thumbnail.getFileName());
   }
 }

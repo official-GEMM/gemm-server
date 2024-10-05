@@ -41,8 +41,8 @@ public class ProfileImage extends Timestamped {
   private String fileName;
 
   @ColumnDescription("파일 경로")
-  @Column(name = "file_path", nullable = false) // 최대 255바이트
-  private String filePath;
+  @Column(name = "directory_path", nullable = false) // 최대 255바이트
+  private String directoryPath;
 
   @ColumnDescription("사용자 아이디")
   @OneToOne(fetch = FetchType.LAZY)

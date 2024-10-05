@@ -34,7 +34,7 @@ public class GetMainResponse {
     private BannerLocation location;
 
     public BannerImageResponse(Banner banner) {
-      this.path = S3Util.getFileUrl(banner.getFilePath() + banner.getFileName());
+      this.path = S3Util.getFileUrl(banner.getDirectoryPath() + banner.getFileName());
       this.location = banner.getLocation();
     }
   }
