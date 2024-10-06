@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public record GenerateMaterialRequest(
     String content,
 
     @Schema(description = "PPT 슬라이드에 반영하고 싶은 내용")
+    @Size(min = 1, max = 20)
     List<String> ppt,
 
     @Schema(description = "활동지에 반영하고 싶은 내용")
