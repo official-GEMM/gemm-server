@@ -28,14 +28,14 @@ public class PoiUtil {
   private static final String PNG = "png";
   private static final String PDF = "pdf";
 
-  public static List<String> convertPptToPng(InputStream fileInputStream) {
-    try (XMLSlideShow ppt = new XMLSlideShow(fileInputStream);) {
+  public static List<String> convertPptToPng(InputStream file, String fileName) {
+    try (XMLSlideShow ppt = new XMLSlideShow(file)) {
       List<String> imageFileNames = new ArrayList<>();
       Dimension pgsize = ppt.getPageSize();
       List<XSLFSlide> slides = ppt.getSlides();
       BufferedImage img;
 
-      for (XSLFSlide slide : slides) {
+      for (int i = 0; i < slides.size(); i++) {
         img = new BufferedImage(pgsize.width, pgsize.height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = img.createGraphics();
 
@@ -43,12 +43,12 @@ public class PoiUtil {
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
         graphics.setFont(Font.getFont("Pretendard-Medium"));
 
-        slide.draw(graphics);
+        slides.get(i).draw(graphics);
         graphics.dispose();
-        String saveFileName = UUIDUtil.getRandomUUID() + '.' + PNG;
-        try (FileOutputStream out = new FileOutputStream(saveFileName)) {
+        String savedFileName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.lastIndexOf('.')) + i + '.' + PNG;
+        try (FileOutputStream out = new FileOutputStream(savedFileName)) {
           ImageIO.write(img, PNG, out);
-          imageFileNames.add(saveFileName);
+          imageFileNames.add(savedFileName);
         }
       }
       return imageFileNames;
@@ -65,13 +65,13 @@ public class PoiUtil {
           (familyName, encoding, size, style, color) -> FontFactory.getFont("Pretendard-Medium.otf",
               BaseFont.IDENTITY_H, BaseFont.EMBEDDED, size, style, color));
 
-      String filePath = fileName.substring(10, fileName.lastIndexOf('.') + 1) + PDF;
+      String filePath =
+          fileName.substring(fileName.lastIndexOf('/') + 1, fileName.lastIndexOf('.') + 1) + PDF;
       OutputStream out = new FileOutputStream(new File(filePath));
       PdfConverter.getInstance().convert(document, out, options);
       return filePath;
     } catch (IOException ex) {
-      System.out.println(ex.getMessage());
-      return null;
+      throw new GeneratorException(FAILED_TO_GENERATE_ACTIVITY_SHEET_THUMBNAIL);
     }
   }
 
@@ -80,14 +80,12 @@ public class PoiUtil {
     try (PDDocument document = PDDocument.load(new File(filePath));) {
       BufferedImage bufferedImage = new PDFRenderer(document).renderImage(0);
 
-      newFilePath = UUIDUtil.getRandomUUID() + "0." + PNG;
+      newFilePath = filePath.substring(0, filePath.lastIndexOf('.') + 1) + PNG;
       ImageIO.write(bufferedImage, "PNG", new File(newFilePath));
     } catch (IOException e) {
       throw new GeneratorException(FAILED_TO_GENERATE_ACTIVITY_SHEET_THUMBNAIL);
     } finally {
-      if (!new File(filePath).delete()) {
-        log.warn("{} 파일 미삭제 경고", filePath);
-      }
+      new File(filePath).delete();
       return newFilePath;
     }
   }

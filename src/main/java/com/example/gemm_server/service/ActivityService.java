@@ -381,42 +381,44 @@ public class ActivityService {
   }
 
   protected String[] getPptThumbnailPaths(LlmPptResponse llmPptResponse) {
-    if (llmPptResponse != null) {
-      List<String> imagePaths = PoiUtil.convertPptToPng(
-          S3Util.downloadFile(llmPptResponse.fileName()));
-      String[] thumbnailPaths = new String[imagePaths.size()];
-      for (int i = 0; i < imagePaths.size(); i++) {
-        File file = new File(imagePaths.get(i));
-        thumbnailPaths[i] = S3Util.getFileUrl(S3Util.uploadFile(file,
-            llmPptResponse.fileName().substring(llmPptResponse.fileName().lastIndexOf('/') + 1,
-                llmPptResponse.fileName().lastIndexOf('.'))
-                + i + ".png", TEMP_PPT_THUMBNAIL_PATH));
-      }
-      return thumbnailPaths;
+    if (llmPptResponse == null) {
+      return null;
     }
-    return null;
+
+    List<String> imagePaths = PoiUtil.convertPptToPng(
+        S3Util.downloadFile(llmPptResponse.fileName()), llmPptResponse.fileName());
+    List<String> thumbnailPaths = new ArrayList<>();
+
+    for (String imagePath : imagePaths) {
+      File file = new File(imagePath);
+      String uploadedFileName = S3Util.uploadFile(file, imagePath, TEMP_PPT_THUMBNAIL_PATH);
+      thumbnailPaths.add(S3Util.getFileUrl(uploadedFileName));
+    }
+    return thumbnailPaths.toArray(String[]::new);
   }
 
   protected String getActivitySheetThumbnailPath(
       LlmActivitySheetResponse llmActivitySheetResponse) {
-    if (llmActivitySheetResponse != null) {
-      String docxFilePath = PoiUtil.convertDocxToPdf(
-          S3Util.downloadFile(llmActivitySheetResponse.fileName()),
-          llmActivitySheetResponse.fileName());
-      String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
-      return S3Util.getFileUrl(
-          S3Util.uploadFile(new File(pngFilePath), llmActivitySheetResponse.fileName()
-                  .substring(llmActivitySheetResponse.fileName().lastIndexOf('/'),
-                      llmActivitySheetResponse.fileName().lastIndexOf('.') + 1) + "png",
-              TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH));
+    if (llmActivitySheetResponse == null) {
+      return null;
     }
-    return null;
+
+    String docxFilePath = PoiUtil.convertDocxToPdf(
+        S3Util.downloadFile(llmActivitySheetResponse.fileName()),
+        llmActivitySheetResponse.fileName());
+    String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
+
+    File file = new File(pngFilePath);
+    String uploadedFileName = S3Util.uploadFile(file, pngFilePath,
+        TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH);
+    return S3Util.getFileUrl(uploadedFileName);
   }
 
   protected String getCutoutThumbnailPath(LlmCutoutResponse llmCutoutResponse) {
-    if (llmCutoutResponse != null) {
-      return llmCutoutResponse.filePath();
+    if (llmCutoutResponse == null) {
+      return null;
     }
-    return null;
+
+    return llmCutoutResponse.filePath();
   }
 }
