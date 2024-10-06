@@ -14,8 +14,8 @@ drop table if exists `activity` cascade;
 
 CREATE TABLE `banner`
 (
-    `created_at`     datetime(6)          NOT NULL,
-    `deleted_at`     datetime(6) DEFAULT NULL,
+    `created_at`     datetime(3)          NOT NULL,
+    `deleted_at`     datetime(3) DEFAULT NULL,
     `id`             bigint               NOT NULL AUTO_INCREMENT,
     `directory_path` varchar(255)         NOT NULL,
     `file_name`      varchar(255)         NOT NULL,
@@ -30,8 +30,8 @@ CREATE TABLE `activity`
 (
     `age`           smallint    NOT NULL,
     `material_type` bit(3)      NOT NULL,
-    `created_at`    datetime(6) NOT NULL,
-    `deleted_at`    datetime(6) DEFAULT NULL,
+    `created_at`    datetime(3) NOT NULL,
+    `deleted_at`    datetime(3) DEFAULT NULL,
     `id`            bigint      NOT NULL AUTO_INCREMENT,
     `title`         varchar(90) NOT NULL,
     `content`       text        NOT NULL,
@@ -59,11 +59,11 @@ CREATE TABLE `member`
     `gem`                       int                               NOT NULL DEFAULT '0',
     `is_registration_completed` bit(1)                            NOT NULL DEFAULT b'0',
     `manage_age`                smallint                                   DEFAULT NULL,
-    `banned_at`                 datetime(6)                                DEFAULT NULL,
-    `created_at`                datetime(6)                       NOT NULL,
-    `deleted_at`                datetime(6)                                DEFAULT NULL,
+    `banned_at`                 datetime(3)                                DEFAULT NULL,
+    `created_at`                datetime(3)                       NOT NULL,
+    `deleted_at`                datetime(3)                                DEFAULT NULL,
     `id`                        bigint                            NOT NULL AUTO_INCREMENT,
-    `last_login_at`             datetime(6)                                DEFAULT NULL,
+    `last_login_at`             datetime(3)                                DEFAULT NULL,
     `referral_code`             varchar(8)                        NOT NULL,
     `phone_number`              varchar(15)                                DEFAULT NULL,
     `nickname`                  varchar(30)                                DEFAULT NULL,
@@ -85,8 +85,8 @@ CREATE TABLE `deal`
     `price`       int         NOT NULL DEFAULT '0',
     `activity_id` bigint      NOT NULL,
     `buyer_id`    bigint      NOT NULL,
-    `created_at`  datetime(6) NOT NULL,
-    `deleted_at`  datetime(6)          DEFAULT NULL,
+    `created_at`  datetime(3) NOT NULL,
+    `deleted_at`  datetime(3)          DEFAULT NULL,
     `id`          bigint      NOT NULL AUTO_INCREMENT,
     `seller_id`   bigint      NOT NULL,
     PRIMARY KEY (`id`),
@@ -103,8 +103,8 @@ CREATE TABLE `deal`
 CREATE TABLE `gem`
 (
     `amount`     int         NOT NULL DEFAULT '0',
-    `created_at` datetime(6) NOT NULL,
-    `deleted_at` datetime(6)          DEFAULT NULL,
+    `created_at` datetime(3) NOT NULL,
+    `deleted_at` datetime(3)          DEFAULT NULL,
     `id`         bigint      NOT NULL AUTO_INCREMENT,
     `member_id`  bigint      NOT NULL,
     `usage_type` enum (
@@ -124,8 +124,8 @@ CREATE TABLE `gem`
 CREATE TABLE `generation`
 (
     `activity_id` bigint      NOT NULL,
-    `created_at`  datetime(6) NOT NULL,
-    `deleted_at`  datetime(6) DEFAULT NULL,
+    `created_at`  datetime(3) NOT NULL,
+    `deleted_at`  datetime(3) DEFAULT NULL,
     `id`          bigint      NOT NULL AUTO_INCREMENT,
     `owner_id`    bigint      NOT NULL,
     PRIMARY KEY (`id`),
@@ -146,10 +146,10 @@ CREATE TABLE `market_item`
     `scrap_count`   int         NOT NULL DEFAULT '0',
     `year`          smallint             DEFAULT NULL,
     `activity_id`   bigint      NOT NULL,
-    `banned_at`     datetime(6)          DEFAULT NULL,
-    `confirmed_at`  datetime(6)          DEFAULT NULL,
-    `created_at`    datetime(6) NOT NULL,
-    `deleted_at`    datetime(6)          DEFAULT NULL,
+    `banned_at`     datetime(3)          DEFAULT NULL,
+    `confirmed_at`  datetime(3)          DEFAULT NULL,
+    `created_at`    datetime(3) NOT NULL,
+    `deleted_at`    datetime(3)          DEFAULT NULL,
     `id`            bigint      NOT NULL AUTO_INCREMENT,
     `owner_id`      bigint      NOT NULL,
     PRIMARY KEY (`id`),
@@ -164,8 +164,8 @@ CREATE TABLE `market_item`
 CREATE TABLE `material`
 (
     `activity_id`    bigint       NOT NULL,
-    `created_at`     datetime(6)  NOT NULL,
-    `deleted_at`     datetime(6) DEFAULT NULL,
+    `created_at`     datetime(3)  NOT NULL,
+    `deleted_at`     datetime(3) DEFAULT NULL,
     `id`             bigint       NOT NULL AUTO_INCREMENT,
     `directory_path` varchar(255) NOT NULL,
     `file_name`      varchar(255) NOT NULL,
@@ -185,8 +185,8 @@ CREATE TABLE `material`
 CREATE TABLE `notification`
 (
     `is_opened`   bit(1)       NOT NULL DEFAULT b'0',
-    `created_at`  datetime(6)  NOT NULL,
-    `deleted_at`  datetime(6)           DEFAULT NULL,
+    `created_at`  datetime(3)  NOT NULL,
+    `deleted_at`  datetime(3)           DEFAULT NULL,
     `id`          bigint       NOT NULL AUTO_INCREMENT,
     `receiver_id` bigint       NOT NULL,
     `sender_id`   bigint                DEFAULT NULL,
@@ -209,8 +209,8 @@ CREATE TABLE `notification`
 
 CREATE TABLE `profile_image`
 (
-    `created_at`     datetime(6)  NOT NULL,
-    `deleted_at`     datetime(6) DEFAULT NULL,
+    `created_at`     datetime(3)  NOT NULL,
+    `deleted_at`     datetime(3) DEFAULT NULL,
     `id`             bigint       NOT NULL AUTO_INCREMENT,
     `member_id`      bigint      DEFAULT NULL,
     `directory_path` varchar(255) NOT NULL,
@@ -226,9 +226,9 @@ CREATE TABLE `profile_image`
 CREATE TABLE `review`
 (
     `score`          float        NOT NULL,
-    `banned_at`      datetime(6) DEFAULT NULL,
-    `created_at`     datetime(6)  NOT NULL,
-    `deleted_at`     datetime(6) DEFAULT NULL,
+    `banned_at`      datetime(3) DEFAULT NULL,
+    `created_at`     datetime(3)  NOT NULL,
+    `deleted_at`     datetime(3) DEFAULT NULL,
     `id`             bigint       NOT NULL AUTO_INCREMENT,
     `market_item_id` bigint       NOT NULL,
     `member_id`      bigint       NOT NULL,
@@ -244,8 +244,8 @@ CREATE TABLE `review`
 
 CREATE TABLE `scrap`
 (
-    `created_at`     datetime(6) NOT NULL,
-    `deleted_at`     datetime(6) DEFAULT NULL,
+    `created_at`     datetime(3) NOT NULL,
+    `deleted_at`     datetime(3) DEFAULT NULL,
     `id`             bigint      NOT NULL AUTO_INCREMENT,
     `market_item_id` bigint      NOT NULL,
     `member_id`      bigint      NOT NULL,
@@ -261,8 +261,8 @@ CREATE TABLE `scrap`
 CREATE TABLE `thumbnail`
 (
     `sequence`       smallint     NOT NULL DEFAULT '0',
-    `created_at`     datetime(6)  NOT NULL,
-    `deleted_at`     datetime(6)           DEFAULT NULL,
+    `created_at`     datetime(3)  NOT NULL,
+    `deleted_at`     datetime(3)           DEFAULT NULL,
     `id`             bigint       NOT NULL AUTO_INCREMENT,
     `material_id`    bigint       NOT NULL,
     `directory_path` varchar(255) NOT NULL,
