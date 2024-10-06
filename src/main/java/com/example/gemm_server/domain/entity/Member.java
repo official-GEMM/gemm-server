@@ -80,11 +80,11 @@ public class Member extends Timestamped {
   private LocalDate birth;
 
   @ColumnDescription("사용 금지 일시")
-  @Column(name = "banned_at")
+  @Column(name = "banned_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime bannedAt;
 
   @ColumnDescription("마지막 로그인 일시")
-  @Column(name = "last_login_at")
+  @Column(name = "last_login_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime lastLoginAt;
 
   @ColumnDescription("회원가입 절차 완료 여부")

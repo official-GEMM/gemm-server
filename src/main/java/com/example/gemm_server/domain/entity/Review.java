@@ -40,7 +40,7 @@ public class Review extends Timestamped {
   private String content;
 
   @ColumnDescription("블라인드 처리 일시")
-  @Column(name = "banned_at")
+  @Column(name = "banned_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime bannedAt;
 
   @ColumnDescription("작성자 아이디")

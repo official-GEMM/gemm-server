@@ -16,10 +16,10 @@ public class Timestamped {
 
   @ColumnDescription("생성 일시")
   @CreatedDate
-  @Column(name = "created_at", updatable = false, nullable = false)
+  @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "DATETIME(3)")
   protected LocalDateTime createdAt;
 
   @ColumnDescription("삭제 일시")
-  @Column(name = "deleted_at")
+  @Column(name = "deleted_at", columnDefinition = "DATETIME(3)")
   protected LocalDateTime deletedAt;
 }

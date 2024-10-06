@@ -62,11 +62,11 @@ public class MarketItem extends Timestamped {
   private Short month;
 
   @ColumnDescription("관리자 확인 일시")
-  @Column(name = "confirmed_at")
+  @Column(name = "confirmed_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime confirmedAt;
 
   @ColumnDescription("블라인드 처리 일시")
-  @Column(name = "banned_at")
+  @Column(name = "banned_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime bannedAt;
 
   @ColumnDescription("소유자 아이디")
