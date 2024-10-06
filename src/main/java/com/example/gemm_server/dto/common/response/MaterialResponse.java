@@ -23,7 +23,7 @@ public class MaterialResponse {
     this.materialId = material.getId();
     this.type = material.getType();
     this.thumbnailPaths = material.getThumbnails().stream().map((thumbnail) ->
-            S3Util.getFileUrl(thumbnail.getFilePath() + thumbnail.getFileName())
+            S3Util.getFileUrl(thumbnail.getDirectoryPath() + thumbnail.getFileName())
         )
         .toArray(String[]::new);
   }

@@ -48,8 +48,8 @@ public class Material extends Timestamped {
   private String fileName;
 
   @ColumnDescription("파일 경로")
-  @Column(name = "file_path", nullable = false) // 최대 255바이트
-  private String filePath;
+  @Column(name = "directory_path", nullable = false) // 최대 255바이트
+  private String directoryPath;
 
   @ColumnDescription("자료의 종류")
   @Enumerated(value = EnumType.STRING)
@@ -67,11 +67,11 @@ public class Material extends Timestamped {
   private List<Thumbnail> thumbnails;
 
   @Builder
-  public Material(String originName, String fileName, String filePath, MaterialType type,
+  public Material(String originName, String fileName, String directoryPath, MaterialType type,
       Activity activity) {
     this.originName = originName;
     this.fileName = fileName;
-    this.filePath = filePath;
+    this.directoryPath = directoryPath;
     this.type = type;
     this.activity = activity;
   }

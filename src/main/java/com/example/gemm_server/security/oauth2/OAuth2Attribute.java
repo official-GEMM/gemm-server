@@ -66,6 +66,7 @@ public record OAuth2Attribute(String name, String socialId, Provider provider, S
         .provider(provider)
         .referralCode(UUIDUtil.generateCharacterUUID(8))
         .gem(0)
+        .isRegistrationCompleted(false)
         .role(Role.USER)
         .build();
   }

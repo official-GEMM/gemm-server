@@ -7,12 +7,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -37,8 +34,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "member",
     uniqueConstraints = @UniqueConstraint(columnNames = {"social_id", "provider"}))
 public class Member extends Timestamped {
-
-
+  
   @Id
   @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,15 +80,15 @@ public class Member extends Timestamped {
   private LocalDate birth;
 
   @ColumnDescription("사용 금지 일시")
-  @Column(name = "banned_at")
+  @Column(name = "banned_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime bannedAt;
 
   @ColumnDescription("마지막 로그인 일시")
-  @Column(name = "last_login_at")
+  @Column(name = "last_login_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime lastLoginAt;
 
   @ColumnDescription("회원가입 절차 완료 여부")
-  @Column(name = "is_registration_complete", nullable = false)
+  @Column(name = "is_registration_completed", nullable = false)
   @ColumnDefault("0")
   private Boolean isRegistrationCompleted;
 
@@ -101,11 +97,6 @@ public class Member extends Timestamped {
   @Enumerated(value = EnumType.STRING)
   @ColumnDefault("'USER'")
   private Role role;
-
-  @ColumnDescription("프로필 이미지 아이디")
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "profile_image_id")
-  private ProfileImage profileImage;
 
   public boolean isDataCompleted() {
     return name != null && phoneNumber != null && nickname != null && birth != null

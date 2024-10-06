@@ -10,19 +10,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE profile_image SET deleted_at = CURRENT_TIMESTAMP where id = ?")
-@SQLRestriction("deleted_at is NULL")
 @Table(name = "profile_image")
 public class ProfileImage extends Timestamped {
 
@@ -41,11 +38,19 @@ public class ProfileImage extends Timestamped {
   private String fileName;
 
   @ColumnDescription("파일 경로")
-  @Column(name = "file_path", nullable = false) // 최대 255바이트
-  private String filePath;
+  @Column(name = "directory_path", nullable = false) // 최대 255바이트
+  private String directoryPath;
 
   @ColumnDescription("사용자 아이디")
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")
   private Member member;
+
+  @Builder
+  public ProfileImage(String originName, String fileName, String directoryPath, Long memberId) {
+    this.originName = originName;
+    this.fileName = fileName;
+    this.directoryPath = directoryPath;
+    this.member = Member.builder().id(memberId).build();
+  }
 }

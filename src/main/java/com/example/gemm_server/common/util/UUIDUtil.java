@@ -9,7 +9,7 @@ public class UUIDUtil {
     return uuid.substring(0, length);
   }
 
-  public static String getRandomUUID() {
+  public static String generateRandomUUID() {
     return UUID.randomUUID().toString();
   }
 }

@@ -10,15 +10,20 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.example.gemm_server.exception.GeneratorException;
 import jakarta.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @RequiredArgsConstructor
@@ -41,30 +46,56 @@ public class S3Util {
     staticExpirationTime = this.expirationTime;
   }
 
-  public static String uploadFile(File file, String fileName, String savePath) {
+  public static String uploadFile(File file, String fileName, String saveDirectoryPath) {
     try {
-      staticAmazonS3.putObject(staticBucketName, savePath + fileName, file);
+      staticAmazonS3.putObject(staticBucketName, saveDirectoryPath + fileName, file);
       file.delete();
-      return savePath + fileName;
+      return saveDirectoryPath + fileName;
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
     }
   }
 
-  public static InputStream downloadFile(String fileName) {
+  public static String uploadFile(MultipartFile multipartFile, String fileName,
+      String saveDirectoryPath) {
     try {
-      S3Object s3Object = staticAmazonS3.getObject(staticBucketName, fileName);
+      ObjectMetadata metadata = new ObjectMetadata();
+      metadata.setContentLength(multipartFile.getSize());
+      metadata.setContentType(multipartFile.getContentType());
+
+      String s3Key = saveDirectoryPath + fileName;
+      PutObjectRequest putObjectRequest = new PutObjectRequest(staticBucketName, s3Key,
+          multipartFile.getInputStream(), metadata);
+      staticAmazonS3.putObject(putObjectRequest);
+
+      return s3Key;
+    } catch (SdkClientException e) {
+      throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static String deleteFile(String filePath) {
+    DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(staticBucketName, filePath);
+    staticAmazonS3.deleteObject(deleteObjectRequest);
+    return filePath;
+  }
+
+  public static InputStream downloadFile(String filePath) {
+    try {
+      S3Object s3Object = staticAmazonS3.getObject(staticBucketName, filePath);
       return s3Object.getObjectContent();
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_DOWNLOAD_FILE);
     }
   }
 
-  public static String copyFile(String fileName, String filePath) {
+  public static String copyFile(String fileName, String directoryPath) {
     try {
-      if (staticAmazonS3.doesObjectExist(staticBucketName, filePath + fileName)) {
-        String savePath = filePath.substring(5) + fileName;
-        staticAmazonS3.copyObject(staticBucketName, filePath + fileName, staticBucketName,
+      if (staticAmazonS3.doesObjectExist(staticBucketName, directoryPath + fileName)) {
+        String savePath = directoryPath.substring(5) + fileName;
+        staticAmazonS3.copyObject(staticBucketName, directoryPath + fileName, staticBucketName,
             savePath);
         return savePath;
       } else {
@@ -75,10 +106,10 @@ public class S3Util {
     }
   }
 
-  public static String getFileUrl(String fileName) {
+  public static String getFileUrl(String filePath) {
     try {
       GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
-          staticBucketName, fileName)
+          staticBucketName, filePath)
           .withMethod(HttpMethod.GET)
           .withExpiration(DateUtil.getExpirationDate(staticExpirationTime));
       presignedUrlRequest.addRequestParameter(
@@ -90,18 +121,5 @@ public class S3Util {
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_GENERATE_PRESIGNED_URL);
     }
-  }
-
-  public static String getFileNameFromPresignedUrl(String presignedUrl) {
-    int queryIndex = presignedUrl.indexOf('?');
-    return presignedUrl.substring(presignedUrl.lastIndexOf('/', queryIndex) + 1, queryIndex);
-  }
-
-  public static String getFileNameWithNoExtension(String fileName) {
-    return fileName.substring(0, fileName.indexOf('.'));
-  }
-
-  protected static String getFileExtension(String fileName) {
-    return fileName.substring(fileName.lastIndexOf("."));
   }
 }

@@ -18,6 +18,6 @@ public class MemberBundle {
     if (profileImage == null) {
       return S3Util.getFileUrl(FilePath.defaultProfileImagePath);
     }
-    return S3Util.getFileUrl(profileImage.getFilePath() + profileImage.getFileName());
+    return S3Util.getFileUrl(profileImage.getDirectoryPath() + profileImage.getFileName());
   }
 }

@@ -6,10 +6,11 @@ import java.util.List;
 
 public class MaterialUtil {
 
-  private static final int MATERIAL_TYPE_COUNT = 3;
-  private static final int PPT_INDEX = MATERIAL_TYPE_COUNT - 1;
-  private static final int ACTIVITY_SHEET_INDEX = MATERIAL_TYPE_COUNT - 2;
-  private static final int CUTOUT_INDEX = MATERIAL_TYPE_COUNT - 3;
+  private static final int MATERIAL_TYPE_MAX_INDEX = 2;
+
+  private static final int PPT_INDEX = MATERIAL_TYPE_MAX_INDEX - 2;
+  private static final int ACTIVITY_SHEET_INDEX = MATERIAL_TYPE_MAX_INDEX - 1;
+  private static final int CUTOUT_INDEX = MATERIAL_TYPE_MAX_INDEX;
 
   public static boolean hasPPT(Short materialType) {
     String binary = BinaryUtil.parseBinaryString(materialType);
@@ -32,14 +33,14 @@ public class MaterialUtil {
 
   public static List<MaterialType> binaryToList(Short materialType) {
     List<MaterialType> materialTypes = new ArrayList<>();
+    if (hasPPT(materialType)) {
+      materialTypes.add(MaterialType.PPT);
+    }
     if (hasActivitySheet(materialType)) {
       materialTypes.add(MaterialType.ACTIVITY_SHEET);
     }
     if (hasCutOut(materialType)) {
       materialTypes.add(MaterialType.CUTOUT);
-    }
-    if (hasPPT(materialType)) {
-      materialTypes.add(MaterialType.PPT);
     }
     return materialTypes;
   }
@@ -47,14 +48,19 @@ public class MaterialUtil {
   public static short getMaterialBitMask(String pptUrl, String activitySheetUrl, String cutoutUrl) {
     short materialBit = 0;
     if (pptUrl != null && !pptUrl.isBlank()) {
-      materialBit += (short) 4;
+      materialBit += getBitMaskForIndex(PPT_INDEX);
     }
     if (activitySheetUrl != null && !activitySheetUrl.isBlank()) {
-      materialBit += (short) 2;
+      materialBit += getBitMaskForIndex(ACTIVITY_SHEET_INDEX);
     }
     if (cutoutUrl != null && !cutoutUrl.isBlank()) {
-      materialBit += (short) 1;
+      materialBit += getBitMaskForIndex(CUTOUT_INDEX);
     }
     return materialBit;
+  }
+
+  private static short getBitMaskForIndex(int index) {
+    int exponent = MATERIAL_TYPE_MAX_INDEX - index;
+    return (short) (1 << exponent);
   }
 }

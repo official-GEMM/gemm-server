@@ -1,7 +1,5 @@
 package com.example.gemm_server.common.constant;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,18 +18,8 @@ public class FilePath {
   public static final String TEMP_CUTOUT_PATH = "temp/png/";
   public static final String SAVE_CUTOUT_PATH = "png/";
 
-  public static String defaultProfileImagePath;
-  public static String defaultThumbnailImagePath;
+  public static final String SAVE_PROFILE_PATH = "profile/";
 
-  @Value("${default-image.profile}")
-  private String defaultProfileImage;
-
-  @Value("${default-image.thumbnail}")
-  private String defaultThumbnailImage;
-
-  @PostConstruct
-  public void init() {
-    defaultProfileImagePath = this.defaultProfileImage;
-    defaultThumbnailImagePath = this.defaultThumbnailImage;
-  }
+  public static final String defaultProfileImagePath = "default/profile/profile-image";
+  public static final String defaultThumbnailImagePath = "default/thumbnail/thumbnail-image";
 }

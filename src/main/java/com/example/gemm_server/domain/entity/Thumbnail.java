@@ -45,8 +45,8 @@ public class Thumbnail extends Timestamped {
   private String fileName;
 
   @ColumnDescription("파일 경로")
-  @Column(name = "file_path", nullable = false) // 최대 255바이트
-  private String filePath;
+  @Column(name = "directory_path", nullable = false) // 최대 255바이트
+  private String directoryPath;
 
   @ColumnDescription("순서")
   @Column(name = "sequence", nullable = false)
@@ -59,11 +59,11 @@ public class Thumbnail extends Timestamped {
   private Material material;
 
   @Builder
-  public Thumbnail(String originName, String fileName, String filePath, Short sequence,
+  public Thumbnail(String originName, String fileName, String directoryPath, Short sequence,
       Material material) {
     this.originName = originName;
     this.fileName = fileName;
-    this.filePath = filePath;
+    this.directoryPath = directoryPath;
     this.sequence = sequence;
     this.material = material;
   }

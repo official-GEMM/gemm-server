@@ -1,25 +1,32 @@
 package com.example.gemm_server.common.util;
 
-import static com.example.gemm_server.common.code.error.GeneratorErrorCode.*;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.FAILED_TO_GENERATE_ACTIVITY_SHEET_THUMBNAIL;
+import static com.example.gemm_server.common.code.error.GeneratorErrorCode.FAILED_TO_GENERATE_PPT_THUMBNAIL;
 
 import com.example.gemm_server.exception.GeneratorException;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.pdf.BaseFont;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
-
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.List;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 @Slf4j
