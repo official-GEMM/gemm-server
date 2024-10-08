@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.Map;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 public record CustomOauth2User(
     Member member,
-    Map<String, Object> attributes) implements OAuth2User, UserDetails {
+    boolean isJoinCompensationReceived,
+    Map<String, Object> attributes) implements OAuth2User {
 
   @Override
   public String getName() {
@@ -28,15 +28,4 @@ public record CustomOauth2User(
     return Collections.singletonList(
         new SimpleGrantedAuthority(member.getRole().getName()));
   }
-
-  @Override
-  public String getPassword() {
-    return null;
-  }
-
-  @Override
-  public String getUsername() {
-    return member.getId().toString();
-  }
-
 }
