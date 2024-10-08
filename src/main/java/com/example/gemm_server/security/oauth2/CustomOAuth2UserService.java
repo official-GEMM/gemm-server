@@ -32,18 +32,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     Map<String, Object> oAuth2UserAttributes = super.loadUser(userRequest).getAttributes();
     String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
     OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(registrationId, oAuth2UserAttributes);
 
-    Member member = getOrSave(oAuth2Attribute);
-    return new CustomOauth2User(member, oAuth2UserAttributes);
+    Member member = getOrCreate(oAuth2Attribute);
+    if (isNotYetJoined(member)) {
+      Member joinedMember = saveMemberWithJoinCompensation(member);
+      return new CustomOauth2User(joinedMember, true, oAuth2UserAttributes);
+    }
+    return new CustomOauth2User(member, false, oAuth2UserAttributes);
   }
 
-  private Member getOrSave(OAuth2Attribute oAuth2Attribute) {
+  private Member getOrCreate(OAuth2Attribute oAuth2Attribute) {
     Member member = memberRepository.findOneBySocialIdAndProviderIncludingDeleted(
             oAuth2Attribute.socialId(),
             oAuth2Attribute.provider().toString())
-        .orElseGet(() -> saveMemberWithJoinCompensation(oAuth2Attribute.toEntity()));
+        .orElseGet(oAuth2Attribute::toEntityOfRegistration);
     validateMember(member);
     return member;
   }
@@ -64,5 +67,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
       throw new OAuth2AuthenticationException(new OAuth2Error("UNAUTHORIZED"),
           MEMBER_BANNED.getMessage());
     }
+  }
+
+  private boolean isNotYetJoined(Member member) {
+    return member.getId() == null;
   }
 }
