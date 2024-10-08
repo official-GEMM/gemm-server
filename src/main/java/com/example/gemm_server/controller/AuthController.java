@@ -16,6 +16,7 @@ import com.example.gemm_server.dto.auth.request.CheckNicknameDuplicationRequest;
 import com.example.gemm_server.dto.auth.request.CheckPhoneVerificationCodeRequest;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
 import com.example.gemm_server.dto.auth.request.SendPhoneVerificationCodeRequest;
+import com.example.gemm_server.dto.auth.response.AttendanceResponse;
 import com.example.gemm_server.dto.auth.response.CheckNicknameDuplicationResponse;
 import com.example.gemm_server.dto.auth.response.GetNecessaryMemberDataResponse;
 import com.example.gemm_server.dto.auth.response.ReissueResponse;
@@ -29,7 +30,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -43,7 +43,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @RequiredArgsConstructor
 @RestController()
@@ -55,25 +54,18 @@ public class AuthController {
   private final TokenProvider tokenProvider;
   private final MemberService memberService;
 
-  @Value("${authentication.url.login-redirect}")
-  private String loginRedirectUrl;
   @Value("${authentication.domain.cookie.refresh-token}")
   private String refreshTokenCookieDomain;
 
-  @Operation(summary = "소셜 로그인", description = "소셜 로그인 처리 이후 redirect되는 API")
-  @GetMapping("/login")
-  public void login(
-      @CookieValue(value = "refreshToken") Cookie refreshTokenCookie,
-      HttpServletResponse response
-  ) throws IOException {
-    String refreshToken = refreshTokenCookie.getValue();
-    Long userId = tokenProvider.getUserIdFromToken(refreshToken);
-    boolean isAttendanceCompensated = authService.compensateMemberForDailyAttendance(userId);
-
-    String redirectWithParams = UriComponentsBuilder.fromUriString(loginRedirectUrl)
-        .queryParam("isAttendanceCompensated", isAttendanceCompensated)
-        .toUriString();
-    response.sendRedirect(redirectWithParams);
+  @BearerAuth
+  @Operation(summary = "출석 보상 요청", description = "사용자가 아직 출석을 하지 않은 경우에 출석 보상을 주는 API")
+  @PostMapping("/attendance")
+  public ResponseEntity<CommonResponse<AttendanceResponse>> checkAttendance(
+      @AuthenticationPrincipal CustomUser user
+  ) {
+    boolean isAttendanceCompensated = authService.compensateMemberForDailyAttendance(user.getId());
+    AttendanceResponse attendanceResponse = new AttendanceResponse(isAttendanceCompensated);
+    return ResponseEntity.ok(new CommonResponse<>(attendanceResponse));
   }
 
   @BearerAuth
