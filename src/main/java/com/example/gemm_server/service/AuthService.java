@@ -23,7 +23,7 @@ import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
 import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
 import com.example.gemm_server.exception.MemberException;
 import jakarta.annotation.PostConstruct;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
@@ -73,13 +73,13 @@ public class AuthService {
   public boolean compensateMemberForDailyAttendance(Long memberId) {
     Member member = memberService.findMemberByMemberIdOrThrow(memberId);
     boolean isCompensated = false;
-    if (!DateUtil.isToday(member.getLastLoginAt())) {
+    if (!DateUtil.isToday(member.getLastAttendance())) {
       gemService.saveChangesOfGemWithMember(member, ATTENDANCE_COMPENSATION,
           GemUsageType.COMPENSATION);
       isCompensated = true;
       // TODO: 출석 보상 알림 생성
     }
-    member.setLastLoginAt(LocalDateTime.now(TimeZone.DEFAULT));
+    member.setLastAttendance(LocalDate.now(TimeZone.DEFAULT));
     return isCompensated;
   }
 

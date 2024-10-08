@@ -20,6 +20,6 @@ public class FilePath {
 
   public static final String SAVE_PROFILE_PATH = "profile/";
 
-  public static final String defaultProfileImagePath = "default/profile/profile-image";
-  public static final String defaultThumbnailImagePath = "default/thumbnail/thumbnail-image";
+  public static final String defaultProfileImagePath = "default/profile/profile-image.png";
+  public static final String defaultThumbnailImagePath = "default/thumbnail/thumbnail-image.png";
 }

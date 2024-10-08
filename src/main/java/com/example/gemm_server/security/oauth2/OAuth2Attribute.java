@@ -59,7 +59,7 @@ public record OAuth2Attribute(String name, String socialId, Provider provider, S
         .build();
   }
 
-  public Member toEntity() {
+  public Member toEntityOfRegistration() {
     return Member.builder()
         .name(name)
         .socialId(socialId)

@@ -83,9 +83,9 @@ public class Member extends Timestamped {
   @Column(name = "banned_at", columnDefinition = "DATETIME(3)")
   private LocalDateTime bannedAt;
 
-  @ColumnDescription("마지막 로그인 일시")
-  @Column(name = "last_login_at", columnDefinition = "DATETIME(3)")
-  private LocalDateTime lastLoginAt;
+  @ColumnDescription("마지막 출석 일시")
+  @Column(name = "last_attendance", columnDefinition = "DATE")
+  private LocalDate lastAttendance;
 
   @ColumnDescription("회원가입 절차 완료 여부")
   @Column(name = "is_registration_completed", nullable = false)

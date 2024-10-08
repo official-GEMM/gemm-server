@@ -63,7 +63,7 @@ CREATE TABLE `member`
     `created_at`                datetime(3)                       NOT NULL,
     `deleted_at`                datetime(3)                                DEFAULT NULL,
     `id`                        bigint                            NOT NULL AUTO_INCREMENT,
-    `last_login_at`             datetime(3)                                DEFAULT NULL,
+    `last_attendance`           date                                       DEFAULT NULL,
     `referral_code`             varchar(8)                        NOT NULL,
     `phone_number`              varchar(15)                                DEFAULT NULL,
     `nickname`                  varchar(30)                                DEFAULT NULL,
