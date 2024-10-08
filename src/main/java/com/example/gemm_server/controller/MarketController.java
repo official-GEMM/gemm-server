@@ -34,6 +34,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.websocket.server.PathParam;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -129,9 +130,9 @@ public class MarketController {
 
   @BearerAuth
   @Operation(summary = "상품 생성", description = "마켓에 상품을 등록하는 API")
-  @PostMapping()
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<MarketItemIdResponse>> createMarketItem(
-      @Valid @RequestBody PostMarketItemRequest request
+      @Valid @ModelAttribute PostMarketItemRequest request
   ) {
     MarketItemIdResponse response = new MarketItemIdResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -140,9 +141,9 @@ public class MarketController {
   @BearerAuth
   @AuthorizeOwner(MarketItem.class)
   @Operation(summary = "상품 수정", description = "마켓에 상품을 수정하는 API")
-  @PutMapping("/{marketItemId}")
+  @PutMapping(name = "/{marketItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<MarketItemIdResponse>> updateMarketItem(
-      @Valid @RequestBody UpdateMarketItemRequest request,
+      @Valid @ModelAttribute UpdateMarketItemRequest request,
       @PathParam("marketItemId") Long marketItemId
   ) {
     MarketItemIdResponse response = new MarketItemIdResponse();
