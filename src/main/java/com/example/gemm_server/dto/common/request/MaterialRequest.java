@@ -17,7 +17,7 @@ public class MaterialRequest {
   private MaterialType type;
 
   @NotNull
-  @ValidFile // validation 설정 필요
+  @ValidFile // TODO: validation 설정 필요
   @Schema(description = "업로드할 자료")
   private MultipartFile uploadFile;
 }
