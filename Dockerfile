@@ -8,6 +8,4 @@ EXPOSE 8080
 
 ENTRYPOINT ["java"]
 
-ENV PROFILE=${PROFILE}
-
 CMD ["-jar","./app.jar", "--spring.profiles.active=${PROFILE}", "-Duser.timezone=Asia/Seoul"]

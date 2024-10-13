@@ -10,8 +10,8 @@ services:
     volumes:
       - /home/ubuntu/Pretendard-Medium.otf:/usr/share/fonts/Pretendard-Medium.otf
       - /home/ubuntu/Pretendard-Medium.otf:/app/Pretendard-Medium.otf
-    env_file:
-      - .env
+    environment:
+      - PROFILE=prod
     networks:
       - gemm
 
