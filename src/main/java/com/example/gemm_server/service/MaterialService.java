@@ -13,6 +13,6 @@ public class MaterialService {
   private final MaterialRepository materialRepository;
 
   public List<Material> getMaterialsWithThumbnailByActivityId(Long activityId) {
-    return materialRepository.findWithThumbnailByActivityIdOrderByIdDesc(activityId);
+    return materialRepository.findWithThumbnailByActivityIdOrderByType(activityId);
   }
 }
