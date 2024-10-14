@@ -12,9 +12,6 @@ env:
   ECR_REGISTRY: ${{secrets.ECR_PROD_SERVER_REGISTRY}}
   ECR_REPOSITORY: ${{secrets.ECR_PROD_SERVER_REPOSITORY}}
   ECR_IMAGE_TAG: ${{github.sha}}
-  SSH_HOST: ${{secrets.SSH_PROD_SERVER_HOST}}
-  SSH_USERNAME: ${{secrets.SSH_PROD_SERVER_USERNAME}}
-  SSH_KEY: ${{secrets.SSH_PROD_SERVER_KEY}}
   S3_BUCKET_NAME: ${{secrets.S3_BUCKET_NAME}}
   CODE_DEPLOY_APPLICATION_NAME: ${{secrets.CODE_DEPLOY_APPLICATION_NAME}}
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: ${{secrets.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME}}
@@ -83,14 +80,9 @@ jobs:
 
     steps:
       - name: Run CodeDeploy
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: $SSH_HOST
-          username: $SSH_USERNAME
-          key: $SSH_KEY
-          run: |
-            aws deploy create-deployment \
-            --application-name $CODE_DEPLOY_APPLICATION_NAME \
-            --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name $CODE_DEPLOY_DEPLOYMENT_GROUP_NAME \
-            --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$ECR_IMAGE_TAG.zip
+        run: |
+          aws deploy create-deployment \
+          --application-name $CODE_DEPLOY_APPLICATION_NAME \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --deployment-group-name $CODE_DEPLOY_DEPLOYMENT_GROUP_NAME \
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$ECR_IMAGE_TAG.zip
