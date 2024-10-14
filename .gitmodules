@@ -1,0 +1,3 @@
+[submodule "gemm-server-config"]
+	path = gemm-server-config
+	url = https://github.com/official-GEMM/gemm-server-config.git
