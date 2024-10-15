@@ -1,0 +1,32 @@
+version: '3'
+services:
+  gemm-server:
+    image: ${ECR_DEV_REGISTRY}/${ECR_DEV_REPOSITORY}:latest
+    container_name: gemm-dev-server
+    restart: always
+    ports:
+      - "80:8080"
+      - "8080:8080"
+    volumes:
+      - /home/ubuntu/Pretendard-Medium.otf:/usr/share/fonts/Pretendard-Medium.otf
+      - /home/ubuntu/Pretendard-Medium.otf:/app/Pretendard-Medium.otf
+    environment:
+      - PROFILE=dev
+    networks:
+      - gemm
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    expose:
+      - "6379"
+    volumes:
+      - /home/ubuntu/redis_data:/data
+    networks:
+      - gemm
+
+networks:
+  gemm:
+    driver: bridge

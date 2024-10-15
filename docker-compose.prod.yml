@@ -1,9 +1,8 @@
 version: '3'
 services:
   gemm-server:
-    build: ./
-    image: gemm-dev-server:1.0
-    container_name: gemm-dev-server
+    image: ${ECR_PROD_REGISTRY}/${ECR_PROD_REPOSITORY}:latest
+    container_name: gemm-prod-server
     restart: always
     ports:
       - "80:8080"
@@ -11,16 +10,8 @@ services:
     volumes:
       - /home/ubuntu/Pretendard-Medium.otf:/usr/share/fonts/Pretendard-Medium.otf
       - /home/ubuntu/Pretendard-Medium.otf:/app/Pretendard-Medium.otf
-    networks:
-      - gemm
-    depends_on:
-      - redis
-
-  redis:
-    image: redis:latest
-    container_name: redis
-    expose:
-      - "6379"
+    environment:
+      - PROFILE=prod
     networks:
       - gemm
 
