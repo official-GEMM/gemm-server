@@ -9,8 +9,10 @@ env:
   AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
   AWS_REGION: ${{secrets.AWS_REGION}}
+  AWS_SECURITY_GROUP_ID: ${{secrets.AWS_DEV_SERVER_SECURITY_GROUP_ID}}
   ECR_REGISTRY: ${{secrets.ECR_DEV_SERVER_REGISTRY}}
   ECR_REPOSITORY: ${{secrets.ECR_DEV_SERVER_REPOSITORY}}
+  ECR_IMAGE_TAG: ${{github.sha}}
   SSH_HOST: ${{secrets.SSH_DEV_SERVER_HOST}}
   SSH_USERNAME: ${{secrets.SSH_DEV_SERVER_USERNAME}}
   SSH_KEY: ${{secrets.SSH_DEV_SERVER_KEY}}
@@ -52,16 +54,13 @@ jobs:
           aws-region: ${{env.AWS_REGION}}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push docker image to Amazon ECR
-        env:
-          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker buildx build --push --platform linux/arm64,linux/amd64 \
-          -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}} \
-          -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:latest .
+          -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.ECR_IMAGE_TAG}} \
+          -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:latest.
 
   deploy:
     needs: [ integrate ]
@@ -79,6 +78,18 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Get github actions public IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Add github actions ip to security group
+        run: |
+          aws ec2 authorize-security-group-ingress \
+          --group-id ${{secrets.AWS_SECURITY_GROUP_ID}} \
+          --protocol tcp \
+          --port 22 \
+          --cidr ${{steps.ip.outputs.ipv4}}/32
+
       - name: Docker compose restart
         uses: appleboy/ssh-action@v1.1.0
         with:
@@ -89,3 +100,11 @@ jobs:
             docker-compose down
             docker rmi -f ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:latest
             docker-compose up -d
+
+      - name: Remove github actions ip to security group
+        run: |
+          aws ec2 revoke-security-group-ingress \
+          --group-id ${{secrets.AWS_SECURITY_GROUP_ID}} \
+          --protocol tcp \
+          --port 22 \
+          --cidr ${{steps.ip.outputs.ipv4}}/32
