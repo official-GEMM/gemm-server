@@ -28,6 +28,7 @@ import com.example.gemm_server.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -163,25 +164,27 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
   @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/activities/{generationId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadGeneratedActivityMaterial(
-      @AuthenticationPrincipal CustomUser user,
       @PathVariable("generationId") Long generationId
   ) {
-    DownloadMaterialResponse response = new DownloadMaterialResponse();
+    Generation generation = generationService.getGenerationWithActivityOrThrow(generationId);
+    List<Material> materials = materialService.getMaterialsWithActivityId(
+        generation.getActivity().getId());
+    DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
     return ResponseEntity.ok(response);
   }
 
+  // 미완성 API
   @AuthorizeOwner(Deal.class)
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(
       @PathVariable("dealId") Long dealId
   ) {
-    DownloadMaterialResponse response = new DownloadMaterialResponse();
+    DownloadMaterialResponse response = new DownloadMaterialResponse(new ArrayList<>());
     return ResponseEntity.ok(response);
   }
 }
