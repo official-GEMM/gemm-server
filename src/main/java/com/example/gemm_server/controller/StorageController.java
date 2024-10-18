@@ -167,14 +167,14 @@ public class StorageController {
   @AuthorizeOwner(Generation.class)
   @Operation(summary = "생성한 활동 자료 다운로드", description = "사용자가 생성한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/activities/{generationId}/download")
-  public ResponseEntity<DownloadMaterialResponse> downloadGeneratedActivityMaterial(
+  public ResponseEntity<CommonResponse<DownloadMaterialResponse>> downloadGeneratedActivityMaterial(
       @PathVariable("generationId") Long generationId
   ) {
     Generation generation = generationService.getGenerationWithActivityOrThrow(generationId);
     List<Material> materials = materialService.getMaterialsWithActivityId(
         generation.getActivity().getId());
     DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   // 미완성 API
