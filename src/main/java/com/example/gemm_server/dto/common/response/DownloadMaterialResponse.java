@@ -15,7 +15,7 @@ public class DownloadMaterialResponse {
 
   public DownloadMaterialResponse(List<Material> materials) {
     materialPaths = materials.stream()
-        .map(material -> S3Util.getFileUrl(material.getDirectoryPath() + material.getFileName()))
+        .map(material -> S3Util.downloadFile(material.getDirectoryPath() + material.getFileName()))
         .toArray(String[]::new);
   }
 }
