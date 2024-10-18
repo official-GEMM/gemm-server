@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.websocket.server.PathParam;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -114,7 +115,7 @@ public class MarketController {
   public ResponseEntity<CommonResponse<DownloadMaterialResponse>> downloadMaterials(
       @PathParam("marketItemId") Long marketItemId
   ) {
-    DownloadMaterialResponse response = new DownloadMaterialResponse();
+    DownloadMaterialResponse response = new DownloadMaterialResponse(new ArrayList<>());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
