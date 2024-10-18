@@ -1,6 +1,9 @@
 package com.example.gemm_server.dto.common.response;
 
+import com.example.gemm_server.common.util.S3Util;
+import com.example.gemm_server.domain.entity.Material;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -10,6 +13,9 @@ public class DownloadMaterialResponse {
   @Schema(description = "자료 다운로드 경로 리스트")
   private String[] materialPaths;
 
-  public DownloadMaterialResponse() {
+  public DownloadMaterialResponse(List<Material> materials) {
+    materialPaths = materials.stream()
+        .map(material -> S3Util.getFileUrl(material.getDirectoryPath() + material.getFileName()))
+        .toArray(String[]::new);
   }
 }
