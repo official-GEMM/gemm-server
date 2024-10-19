@@ -16,7 +16,7 @@ public class MaterialService {
     return materialRepository.findWithThumbnailByActivityIdOrderByType(activityId);
   }
 
-  public List<Material> getMaterialsWithActivityId(Long activityId) {
+  public List<Material> getMaterialsByActivityId(Long activityId) {
     return materialRepository.findByActivityIdOrderByType(activityId);
   }
 }
