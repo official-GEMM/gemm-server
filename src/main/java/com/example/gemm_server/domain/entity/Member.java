@@ -34,7 +34,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "member",
     uniqueConstraints = @UniqueConstraint(columnNames = {"social_id", "provider"}))
 public class Member extends Timestamped {
-  
+
   @Id
   @ColumnDescription("아이디")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,7 +55,7 @@ public class Member extends Timestamped {
   private String referralCode;
 
   @ColumnDescription("실명")
-  @Column(name = "name", length = 90, nullable = false) // 최대 30자
+  @Column(name = "name", length = 90) // 최대 30자
   private String name;
 
   @ColumnDescription("별명")
