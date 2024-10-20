@@ -98,7 +98,7 @@ public class AuthService {
     if (phoneNumber.equals(member.getPhoneNumber())) {
       return;
     }
-    if (!isPhoneNumberValidated(phoneNumber)) {
+    if (!isPhoneNumberValidated(memberId)) {
       throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
     }
     if (memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
@@ -106,9 +106,9 @@ public class AuthService {
     }
   }
 
-  protected boolean isPhoneNumberValidated(String phoneNumber) {
+  protected boolean isPhoneNumberValidated(Long memberId) {
     Optional<PhoneVerification> phoneVerification = this.phoneVerificationRepository.findById(
-        phoneNumber);
+        memberId);
     return phoneVerification.isPresent() && phoneVerification.get().isVerified();
   }
 
@@ -124,8 +124,7 @@ public class AuthService {
     }
   }
 
-  public SingleMessageSentResponse sendVerificationCodeWithSms(String to,
-      String verificationCode) {
+  public SingleMessageSentResponse sendVerificationCodeWithSms(String to, String verificationCode) {
     Message message = new Message();
     message.setFrom(fromNumber);
     message.setTo(to.replaceAll("-", "")); // 발신번호 및 수신번호 형식: 01012345678
@@ -133,24 +132,26 @@ public class AuthService {
     return this.messageService.sendOne(new SingleMessageSendingRequest(message));
   }
 
-  public String generateVerificationCodeIfValid(String phoneNumber) {
-    if (this.phoneVerificationRepository.existsById(phoneNumber)) {
+  public String generateVerificationCodeIfValid(Long memberId) {
+    if (this.phoneVerificationRepository.existsById(memberId)) {
       throw new MemberException(VERIFICATION_RESEND_DURATION);
     }
     return RandomUtil.getRandomNumber(4);
   }
 
-  public PhoneVerification saveVerificationCode(String phoneNumber, String verificationCode) {
-    if (this.phoneVerificationRepository.existsById(phoneNumber)) {
+  public PhoneVerification saveVerificationCode(Long memberId, String phoneNumber,
+      String verificationCode) {
+    if (this.phoneVerificationRepository.existsById(memberId)) {
       throw new MemberException(VERIFICATION_RESEND_DURATION);
     }
-    PhoneVerification phoneVerification = new PhoneVerification(phoneNumber, verificationCode);
+    PhoneVerification phoneVerification = new PhoneVerification(memberId, phoneNumber,
+        verificationCode);
     return this.phoneVerificationRepository.save(phoneVerification);
   }
 
-  public PhoneVerification getPhoneVerificationWithIncrementingAttemptCount(String phoneNumber) {
+  public PhoneVerification getPhoneVerificationWithIncrementingAttemptCount(Long memberId) {
     PhoneVerification phoneVerification = this.phoneVerificationRepository.findById(
-        phoneNumber).orElseThrow(() -> new MemberException(VERIFICATION_NOT_FOUND));
+        memberId).orElseThrow(() -> new MemberException(VERIFICATION_NOT_FOUND));
 
     phoneVerification.incrementAttemptCount();
     return this.phoneVerificationRepository.save(phoneVerification);

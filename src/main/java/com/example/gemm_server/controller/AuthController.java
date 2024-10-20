@@ -140,24 +140,28 @@ public class AuthController {
   @Operation(summary = "휴대폰 인증번호 전송", description = "사용자의 휴대전화를 인증할 수 있는 코드를 전송하는 API")
   @PostMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> sendPhoneVerificationCode(
-      @Valid @RequestBody SendPhoneVerificationCodeRequest sendPhoneVerificationCodeRequest) {
+      @Valid @RequestBody SendPhoneVerificationCodeRequest sendPhoneVerificationCodeRequest,
+      @AuthenticationPrincipal CustomUser user
+  ) {
     String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
-    String verificationCode = authService.generateVerificationCodeIfValid(phoneNumber);
+    String verificationCode = authService.generateVerificationCodeIfValid(user.getId());
 
     authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
-    authService.saveVerificationCode(phoneNumber, verificationCode);
+    authService.saveVerificationCode(user.getId(), phoneNumber, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 
   @Operation(summary = "휴대폰 인증번호 확인", description = "사용자의 휴대전화를 인증할 수 있는 코드를 확인하는 API")
   @PutMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> checkPhoneVerificationCode(
-      @Valid @RequestBody CheckPhoneVerificationCodeRequest checkPhoneVerificationCodeRequest) {
+      @Valid @RequestBody CheckPhoneVerificationCodeRequest checkPhoneVerificationCodeRequest,
+      @AuthenticationPrincipal CustomUser user
+  ) {
     String phoneNumber = checkPhoneVerificationCodeRequest.getPhoneNumber();
     String verificationCode = checkPhoneVerificationCodeRequest.getVerificationCode();
 
     PhoneVerification phoneVerification =
-        authService.getPhoneVerificationWithIncrementingAttemptCount(phoneNumber);
+        authService.getPhoneVerificationWithIncrementingAttemptCount(user.getId());
     authService.validatePhoneVerification(phoneVerification, verificationCode);
     return ResponseEntity.ok(new EmptyDataResponse(PHONE_VERIFICATION));
   }
