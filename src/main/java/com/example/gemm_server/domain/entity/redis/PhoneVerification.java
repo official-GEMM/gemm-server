@@ -11,13 +11,15 @@ import org.springframework.data.redis.core.RedisHash;
 public class PhoneVerification {
 
   @Id
+  private Long memberId;
   private String phoneNumber;
   private String verificationCode;
   private int attemptCount;
   @Setter
   private boolean verified;
 
-  public PhoneVerification(String phoneNumber, String verificationCode) {
+  public PhoneVerification(Long memberId, String phoneNumber, String verificationCode) {
+    this.memberId = memberId;
     this.phoneNumber = phoneNumber;
     this.verificationCode = verificationCode;
     this.attemptCount = 0;
