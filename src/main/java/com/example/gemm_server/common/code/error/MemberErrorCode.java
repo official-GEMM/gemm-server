@@ -13,10 +13,12 @@ public enum MemberErrorCode implements ErrorCode {
   OWN_REFERRAL_CODE(HttpStatus.BAD_REQUEST, "자신을 추천인으로 등록할 수 없습니다."),
   VERIFICATION_RESEND_DURATION(HttpStatus.BAD_REQUEST, "인증 번호 발송 후 3분 이내로는 재발송이 불가합니다."),
   VERIFICATION_ATTEMPT_EXCEED(HttpStatus.BAD_REQUEST, "인증 시도 가능한 횟수를 초과하였습니다. 인증코드를 재발급 받아주세요."),
+  VERIFICATION_SMS_SEND_ATTEMPT_EXCEED(HttpStatus.BAD_REQUEST,
+      "인증 문자를 전송 가능한 최대 횟수를 초과하였습니다. 자정 이후에 다시 시도해주세요."),
   VERIFICATION_NOT_MATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
+  PHONE_NUMBER_NOT_VALIDATED(HttpStatus.BAD_REQUEST, "인증되지 않은 전화번호입니다."),
 
   LOGIN_NECESSARY(HttpStatus.UNAUTHORIZED, "로그인이 필요한 기능입니다."),
-  PHONE_NUMBER_NOT_VALIDATED(HttpStatus.BAD_REQUEST, "인증되지 않은 전화번호입니다."),
 
   MEMBER_BANNED(HttpStatus.FORBIDDEN, "관리자에 의해 사용이 금지된 사용자입니다."),
   LACK_OF_AUTHORITY(HttpStatus.FORBIDDEN, "관리자 권한이 필요한 기능입니다."),
