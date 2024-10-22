@@ -6,6 +6,7 @@ import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHON
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.common.constant.TimeZone;
 import com.example.gemm_server.common.util.CookieUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.PhoneVerification;
@@ -30,6 +31,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.concurrent.locks.ReentrantLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -53,6 +56,7 @@ public class AuthController {
   private final AuthService authService;
   private final TokenProvider tokenProvider;
   private final MemberService memberService;
+  private final ReentrantLock phoneVerificationSendLock = new ReentrantLock();
 
   @Value("${authentication.domain.cookie.refresh-token}")
   private String refreshTokenCookieDomain;
@@ -144,11 +148,16 @@ public class AuthController {
       @AuthenticationPrincipal CustomUser user
   ) {
     String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
-    LocalDate today = LocalDate.now(TimeZone.DEFAULT);
-    String verificationCode = authService.generateVerificationCodeIfValid(user.getId(), today);
-    authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
-    authService.saveVerificationCode(user.getId(), phoneNumber, verificationCode);
-    authService.increaseVerificationSmsSendAttempt(user.getId(), today);
+    phoneVerificationSendLock.lock();
+    try {
+      LocalDate today = LocalDate.now(TimeZone.DEFAULT);
+      String verificationCode = authService.generateVerificationCodeIfValid(user.getId(), today);
+      authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
+      authService.saveVerificationCode(user.getId(), phoneNumber, verificationCode);
+      authService.increaseVerificationSmsSendAttempt(user.getId(), today);
+    } finally {
+      phoneVerificationSendLock.unlock();
+    }
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 
