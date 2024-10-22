@@ -8,6 +8,7 @@ import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICA
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_NOT_MATCH;
 import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_RESEND_DURATION;
+import static com.example.gemm_server.common.code.error.MemberErrorCode.VERIFICATION_SMS_SEND_ATTEMPT_EXCEED;
 import static com.example.gemm_server.common.constant.Policy.ATTENDANCE_COMPENSATION;
 import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATION;
 
@@ -18,9 +19,11 @@ import com.example.gemm_server.common.util.RandomUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.domain.entity.redis.TokenBlackList;
+import com.example.gemm_server.domain.entity.redis.VerificationSmsSendAttempt;
 import com.example.gemm_server.domain.repository.redis.PhoneVerificationRepository;
 import com.example.gemm_server.domain.repository.redis.RefreshTokenRepository;
 import com.example.gemm_server.domain.repository.redis.TokenBlackListRepository;
+import com.example.gemm_server.domain.repository.redis.VerificationSmsSendAttemptRepository;
 import com.example.gemm_server.exception.MemberException;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -52,6 +55,7 @@ public class AuthService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final NotificationService notificationService;
   private final PhoneVerificationRepository phoneVerificationRepository;
+  private final VerificationSmsSendAttemptRepository verificationSmsSendAttemptRepository;
 
   private DefaultMessageService messageService;
 
@@ -132,7 +136,12 @@ public class AuthService {
     return this.messageService.sendOne(new SingleMessageSendingRequest(message));
   }
 
-  public String generateVerificationCodeIfValid(Long memberId) {
+  public String generateVerificationCodeIfValid(Long memberId, LocalDate today) {
+    Optional<VerificationSmsSendAttempt> smsSendAttempt =
+        this.verificationSmsSendAttemptRepository.findByMemberIdAndAttemptDate(memberId, today);
+    if (smsSendAttempt.isPresent() && !smsSendAttempt.get().isAttemptCountValid()) {
+      throw new MemberException(VERIFICATION_SMS_SEND_ATTEMPT_EXCEED);
+    }
     if (this.phoneVerificationRepository.existsById(memberId)) {
       throw new MemberException(VERIFICATION_RESEND_DURATION);
     }
@@ -141,9 +150,6 @@ public class AuthService {
 
   public PhoneVerification saveVerificationCode(Long memberId, String phoneNumber,
       String verificationCode) {
-    if (this.phoneVerificationRepository.existsById(memberId)) {
-      throw new MemberException(VERIFICATION_RESEND_DURATION);
-    }
     PhoneVerification phoneVerification = new PhoneVerification(memberId, phoneNumber,
         verificationCode);
     return this.phoneVerificationRepository.save(phoneVerification);
@@ -167,5 +173,14 @@ public class AuthService {
     }
     phoneVerification.setVerified(true);
     return this.phoneVerificationRepository.save(phoneVerification);
+  }
+
+  public VerificationSmsSendAttempt increaseVerificationSmsSendAttempt(Long memberId,
+      LocalDate today) {
+    VerificationSmsSendAttempt smsSendAttempt =
+        this.verificationSmsSendAttemptRepository.findByMemberIdAndAttemptDate(memberId, today)
+            .orElseGet(() -> new VerificationSmsSendAttempt(memberId, today));
+    smsSendAttempt.incrementAttemptCount();
+    return this.verificationSmsSendAttemptRepository.save(smsSendAttempt);
   }
 }

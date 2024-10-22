@@ -144,13 +144,15 @@ public class AuthController {
       @AuthenticationPrincipal CustomUser user
   ) {
     String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
-    String verificationCode = authService.generateVerificationCodeIfValid(user.getId());
-
+    LocalDate today = LocalDate.now(TimeZone.DEFAULT);
+    String verificationCode = authService.generateVerificationCodeIfValid(user.getId(), today);
     authService.sendVerificationCodeWithSms(phoneNumber, verificationCode);
     authService.saveVerificationCode(user.getId(), phoneNumber, verificationCode);
+    authService.increaseVerificationSmsSendAttempt(user.getId(), today);
     return ResponseEntity.ok(new EmptyDataResponse(SEND_PHONE_VERIFICATION_CODE));
   }
 
+  @BearerAuth
   @Operation(summary = "휴대폰 인증번호 확인", description = "사용자의 휴대전화를 인증할 수 있는 코드를 확인하는 API")
   @PutMapping("/verify/phone")
   public ResponseEntity<EmptyDataResponse> checkPhoneVerificationCode(
