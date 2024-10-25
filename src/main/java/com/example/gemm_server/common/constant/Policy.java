@@ -25,4 +25,5 @@ public class Policy {
 
   // 휴대전화 인증 시도 가능 횟수
   public static final int VERIFICATION_LIMIT = 5;
+  public static final int VERIFICATION_SMS_SEND_LIMIT = 5;
 }
