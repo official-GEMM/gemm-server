@@ -48,7 +48,7 @@ public class PoiUtil {
 
         graphics.setPaint(Color.white);
         graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
-        graphics.setFont(Font.getFont("Pretendard-Medium"));
+        graphics.setFont(Font.getFont("BMJUA_otf.otf"));
 
         slides.get(i).draw(graphics);
         graphics.dispose();
@@ -69,7 +69,7 @@ public class PoiUtil {
       XWPFDocument document = new XWPFDocument(file);
       PdfOptions options = PdfOptions.create();
       options.fontProvider(
-          (familyName, encoding, size, style, color) -> FontFactory.getFont("Pretendard-Medium.otf",
+          (familyName, encoding, size, style, color) -> FontFactory.getFont("BMJUA_otf.otf",
               BaseFont.IDENTITY_H, BaseFont.EMBEDDED, size, style, color));
 
       String filePath =
