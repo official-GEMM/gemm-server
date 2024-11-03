@@ -1,5 +1,8 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.SEARCH_TYPE_NULL;
+
+import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
@@ -22,13 +25,13 @@ public class MarketItemService {
   private final ScrapService scrapService;
 
   public Page<MarketItem> getMarketItemsOrderByScrapCountDesc(int pageNumber, int pageSize) {
-    Sort sort = Sort.by(Direction.DESC, "scrapCount");
+    Sort sort = Order.SCRAP.sortBy();
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
     return marketItemRepository.findWithActivityAndOwnerBy(pageable);
   }
 
   public Page<MarketItem> getMarketItemsOrderByRecommendation(int pageNumber, int pageSize) {
-    Sort sort = Sort.by(Direction.DESC, "scrapCount"); // TODO: 추천 공식 정리
+    Sort sort = Order.RECOMMENDED.sortBy();
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
     return marketItemRepository.findWithActivityAndOwnerBy(pageable);
   }
