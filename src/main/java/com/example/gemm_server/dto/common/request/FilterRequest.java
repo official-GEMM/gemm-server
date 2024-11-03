@@ -5,6 +5,7 @@ import com.example.gemm_server.common.enums.MaterialType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,10 +14,10 @@ import lombok.Setter;
 public class FilterRequest {
 
   @Schema(description = "연령")
-  private Short age;
+  private List<Short> ages;
 
   @Schema(description = "영역 및 활동")
-  private Category category;
+  private List<Category> categories;
 
   @Schema(description = "연도")
   private Integer year;
@@ -27,7 +28,7 @@ public class FilterRequest {
   private Short month;
 
   @Schema(description = "자료 종류")
-  private MaterialType[] materialType;
+  private List<MaterialType> materialTypes;
 
   @Schema(description = "무료 여부")
   private Boolean isFree;
