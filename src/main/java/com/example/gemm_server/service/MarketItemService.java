@@ -6,14 +6,18 @@ import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
+import com.example.gemm_server.dto.common.request.FilterRequest;
+import com.example.gemm_server.dto.common.request.SearchRequest;
 import com.example.gemm_server.dto.market.MarketItemBundle;
+import com.example.gemm_server.exception.MarketItemException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,4 +51,41 @@ public class MarketItemService {
     return marketItems.stream().map(marketItem -> convertToMarketItemBundle(marketItem, memberId))
         .toList();
   }
+
+  public Page<MarketItem> searchMarketItems(SearchRequest search,
+      FilterRequest filter, Order order, int pageNumber, Integer pageSize) {
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, order.sortBy());
+    Specification<MarketItem> filterSpecification = generateSpecificationForFilter(filter);
+    Specification<MarketItem> searchSpecification = generateSpecificationForSearch(search);
+
+    List<MarketItem> results = marketItemRepository.findAll(
+        filterSpecification.and(searchSpecification)); // TODO: 쿼리 최적화
+    return new PageImpl<>(results, pageable, results.size());
+  }
+
+  public Specification<MarketItem> generateSpecificationForSearch(SearchRequest search) {
+    if (search == null) {
+      return MarketItemSpecification.alwaysTrue();
+    }
+    if (search.getType() == null) {
+      throw new MarketItemException(SEARCH_TYPE_NULL);
+    }
+    return search.getType().getSpecification(search.getWord());
+  }
+
+
+  public Specification<MarketItem> generateSpecificationForFilter(FilterRequest filter) {
+    if (filter == null) {
+      return MarketItemSpecification.alwaysTrue();
+    }
+
+    return
+        MarketItemSpecification.hasActivityAge(filter.getAges())
+            .and(MarketItemSpecification.hasActivityCategory(filter.getCategories()))
+            .and(MarketItemSpecification.hasActivityMaterialType(filter.getMaterialTypes()))
+            .and(MarketItemSpecification.hasYear(filter.getYear()))
+            .and(MarketItemSpecification.hasMonth(filter.getMonth()));
+  }
+
 }
