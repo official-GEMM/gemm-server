@@ -18,6 +18,7 @@ public class Policy {
   public static final int UPDATE_CUTOUT = 15;
 
   // 페이지 당 요소 개수
+  public static final int MARKET_SEARCH_PAGE_SIZE = 12;
   public static final int STORAGE_ACTIVITY_PAGE_SIZE = 9;
   public static final int STORAGE_GUIDE_PAGE_SIZE = 6;
   public static final int MAIN_MOST_SCRAPPED_PAGE_SIZE = 8;

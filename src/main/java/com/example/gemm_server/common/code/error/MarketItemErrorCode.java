@@ -6,6 +6,9 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum MarketItemErrorCode implements ErrorCode {
+
+  SEARCH_TYPE_NULL(HttpStatus.BAD_REQUEST, "검색 타입을 지정해주세요."),
+
   MARKET_ITEM_NOT_BELONGS_TO_MEMBER(HttpStatus.UNAUTHORIZED, "사용자의 거래가 아닙니다."),
 
   MARKET_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 거래 ID 입니다."),

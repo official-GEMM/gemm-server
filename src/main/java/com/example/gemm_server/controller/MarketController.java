@@ -2,6 +2,7 @@ package com.example.gemm_server.controller;
 
 import static com.example.gemm_server.common.constant.Policy.MAIN_MOST_SCRAPPED_PAGE_SIZE;
 import static com.example.gemm_server.common.constant.Policy.MAIN_RECOMMENDED_PAGE_SIZE;
+import static com.example.gemm_server.common.constant.Policy.MARKET_SEARCH_PAGE_SIZE;
 
 import com.example.gemm_server.common.annotation.auth.AuthorizeOwner;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
@@ -10,6 +11,7 @@ import com.example.gemm_server.domain.entity.Banner;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.market.MarketItemBundle;
@@ -35,6 +37,7 @@ import jakarta.websocket.server.PathParam;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -85,9 +88,19 @@ public class MarketController {
   @Operation(summary = "검색", description = "마켓 내의 상품을 검색하는 API")
   @GetMapping("/search")
   public ResponseEntity<CommonResponse<GetMarketItemsResponse>> search(
-      @Valid @ModelAttribute SearchQueryRequest request
+      @Valid @ModelAttribute SearchQueryRequest request,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetMarketItemsResponse response = new GetMarketItemsResponse();
+    Integer page = request.getPage();
+    Page<MarketItem> marketItems = marketItemService.searchMarketItems(request.getSearch(),
+        request.getFilter(), request.getOrder(), page - 1, MARKET_SEARCH_PAGE_SIZE);
+
+    Long memberId = CustomUser.getId(user);
+    List<MarketItemBundle> marketItemBundles =
+        marketItemService.convertToMarketItemBundle(marketItems.getContent(), memberId);
+    PageInfo pageInfo = new PageInfo(page, marketItems.getTotalPages());
+
+    GetMarketItemsResponse response = new GetMarketItemsResponse(marketItemBundles, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -217,7 +230,8 @@ public class MarketController {
   public ResponseEntity<CommonResponse<GetMarketItemsResponse>> getMyMarketItems(
       @RequestParam("page") @Min(1) Integer page
   ) {
-    GetMarketItemsResponse response = new GetMarketItemsResponse();
+    GetMarketItemsResponse response = new GetMarketItemsResponse(new ArrayList<>(),
+        new PageInfo(0, 0));
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }
