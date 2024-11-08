@@ -20,6 +20,13 @@ public class ScrapService {
     return scrapRepository.existsByMemberIdAndMarketItemId(memberId, marketItemId);
   }
 
+  public Scrap delete(Long memberId, Long marketItemId) {
+    Scrap scrap = scrapRepository.findByMemberIdAndMarketItemId(memberId, marketItemId)
+        .orElseThrow(() -> new ScrapException(SCRAP_NOT_FOUND_FOR_USER));
+    scrapRepository.delete(scrap);
+    return scrap;
+  }
+
   public Scrap scrap(Long memberId, Long marketItemId) {
     if (isScrapped(memberId, marketItemId)) {
       throw new ScrapException(SCRAP_AlREADY_EXISTS);

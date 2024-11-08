@@ -233,8 +233,10 @@ public class MarketController {
   @Operation(summary = "스크랩 취소", description = "마켓의 상품을 스크랩 취소하는 API")
   @DeleteMapping("/{marketItemId}/scrap")
   public ResponseEntity<EmptyDataResponse> cancelScrapMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
+    scrapService.delete(user.getId(), marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
