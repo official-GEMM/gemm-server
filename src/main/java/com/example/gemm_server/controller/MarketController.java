@@ -9,6 +9,9 @@ import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.enums.ReviewOrder;
 import com.example.gemm_server.domain.entity.Banner;
 import com.example.gemm_server.domain.entity.MarketItem;
+import com.example.gemm_server.domain.entity.Material;
+import com.example.gemm_server.domain.entity.Member;
+import com.example.gemm_server.domain.entity.Review;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.PageInfo;
@@ -28,7 +31,13 @@ import com.example.gemm_server.dto.market.response.MarketItemDetailResponse;
 import com.example.gemm_server.dto.market.response.MarketItemIdResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.BannerService;
+import com.example.gemm_server.service.DealService;
+import com.example.gemm_server.service.GemService;
 import com.example.gemm_server.service.MarketItemService;
+import com.example.gemm_server.service.MaterialService;
+import com.example.gemm_server.service.MemberService;
+import com.example.gemm_server.service.ReviewService;
+import com.example.gemm_server.service.ScrapService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,6 +55,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +72,12 @@ public class MarketController {
 
   private final MarketItemService marketItemService;
   private final BannerService bannerService;
+  private final MaterialService materialService;
+  private final MemberService memberService;
+  private final ScrapService scrapService;
+  private final DealService dealService;
+  private final GemService gemService;
+  private final ReviewService reviewService;
 
   // 미완성 API
   @Operation(summary = "메인", description = "메인 페이지에 필요한 정보를 가져오는 API")
@@ -69,10 +86,13 @@ public class MarketController {
       @AuthenticationPrincipal CustomUser user
   ) {
     Long memberId = CustomUser.getId(user);
-    List<MarketItem> recommendedMarketItems = marketItemService.getMarketItemsOrderByRecommendation(
-        0, MAIN_RECOMMENDED_PAGE_SIZE).getContent();
-    List<MarketItem> mostScrappedMarketItems = marketItemService.getMarketItemsOrderByScrapCountDesc(
-        0, MAIN_MOST_SCRAPPED_PAGE_SIZE).getContent();
+    Sort recommededSort = Order.RECOMMENDED.getSort();
+    List<MarketItem> recommendedMarketItems = marketItemService.getMarketItemsOrderBy(
+        0, MAIN_RECOMMENDED_PAGE_SIZE, recommededSort).getContent();
+
+    Sort scrapSort = Order.SCRAP.getSort();
+    List<MarketItem> mostScrappedMarketItems = marketItemService.getMarketItemsOrderBy(
+        0, MAIN_MOST_SCRAPPED_PAGE_SIZE, scrapSort).getContent();
 
     List<MarketItemBundle> recommendedMarketItemBundles =
         marketItemService.convertToMarketItemBundle(recommendedMarketItems, memberId);
@@ -107,9 +127,18 @@ public class MarketController {
   @Operation(summary = "상품 상세", description = "상품의 상세 정보를 조회하는 API")
   @GetMapping("/{marketItemId}")
   public ResponseEntity<CommonResponse<MarketItemDetailResponse>> getMarketItemDetail(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    MarketItemDetailResponse response = new MarketItemDetailResponse();
+    Long memberId = CustomUser.getId(user);
+    MarketItem marketItem = marketItemService.findMarketItemOrThrow(marketItemId);
+    List<Material> materials = materialService.getMaterialsWithThumbnailByActivityId(
+        marketItem.getActivity().getId());
+    boolean isScrapped = scrapService.isScrapped(memberId, marketItemId);
+    boolean isPurchased = dealService.isPurchased(memberId, marketItem.getActivity().getId());
+
+    MarketItemDetailResponse response = new MarketItemDetailResponse(marketItem, materials,
+        isScrapped, isPurchased, memberId);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

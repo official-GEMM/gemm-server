@@ -42,4 +42,11 @@ public class DealService {
   public List<DealBundle> convertToDealBundle(List<Deal> deals) {
     return deals.stream().map(this::convertToDealBundle).toList();
   }
+
+  public Boolean isPurchased(Long buyerId, Long activityId) {
+    if (buyerId == null) {
+      return false;
+    }
+    return dealRepository.existsByActivityIdAndBuyerId(activityId, buyerId);
+  }
 }

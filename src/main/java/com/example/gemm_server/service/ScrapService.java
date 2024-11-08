@@ -11,6 +11,9 @@ public class ScrapService {
   private final ScrapRepository scrapRepository;
 
   public boolean isScrapped(Long memberId, Long marketItemId) {
+    if (memberId == null) {
+      return false;
+    }
     return scrapRepository.existsByMemberIdAndMarketItemId(memberId, marketItemId);
   }
 }

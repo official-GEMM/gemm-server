@@ -28,8 +28,7 @@ public class MarketItemService {
   private final ThumbnailService thumbnailService;
   private final ScrapService scrapService;
 
-  public Page<MarketItem> getMarketItemsOrderByScrapCountDesc(int pageNumber, int pageSize) {
-    Sort sort = Order.SCRAP.sortBy();
+  public Page<MarketItem> getMarketItemsOrderBy(int pageNumber, int pageSize, Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
     return marketItemRepository.findWithActivityAndOwnerBy(pageable);
   }
@@ -88,4 +87,8 @@ public class MarketItemService {
             .and(MarketItemSpecification.hasMonth(filter.getMonth()));
   }
 
+  public MarketItem findMarketItemOrThrow(Long marketItemId) {
+    return this.marketItemRepository.findWithActivityAndOwnerById(marketItemId)
+        .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+  }
 }

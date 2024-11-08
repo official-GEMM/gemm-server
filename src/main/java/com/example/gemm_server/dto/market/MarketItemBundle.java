@@ -13,9 +13,9 @@ public class MarketItemBundle extends ActivityBundle {
   private Member seller;
   private boolean isScrapped;
 
-  public MarketItemBundle(MarketItem marketItemWithActivityAndOwner, Thumbnail thumbnail,
+  public MarketItemBundle(MarketItem marketItemWithActivityAndOwner, Thumbnail mainThumbnail,
       boolean isScrapped) {
-    super(marketItemWithActivityAndOwner.getActivity(), thumbnail);
+    super(marketItemWithActivityAndOwner.getActivity(), mainThumbnail);
     this.seller = marketItemWithActivityAndOwner.getOwner();
     this.marketItem = marketItemWithActivityAndOwner;
     this.isScrapped = isScrapped;

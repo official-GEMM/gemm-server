@@ -21,7 +21,7 @@ public enum Order {
   private final String[] properties;
   private final Direction direction;
 
-  public Sort sortBy() {
+  public Sort getSort() {
     return Sort.by(direction, properties);
   }
 
