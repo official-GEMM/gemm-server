@@ -22,6 +22,12 @@ public class ReviewService {
   private final ReviewRepository reviewRepository;
   private final MemberService memberService;
 
+  public Page<Review> getReviewsForMarketItem(Long marketItemId, Integer pageNumber, int pageSize,
+      Sort sort) {
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+    return reviewRepository.findWithMemberByMarketItemId(marketItemId, pageable);
+  }
+
   public ReviewBundle convertToReviewBundle(Review reviewWithWriter) {
     MemberBundle writer = memberService.convertToMemberBundle(reviewWithWriter.getMember());
     return new ReviewBundle(reviewWithWriter, writer);

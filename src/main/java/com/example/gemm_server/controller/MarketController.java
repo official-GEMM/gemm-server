@@ -239,11 +239,18 @@ public class MarketController {
   @Operation(summary = "리뷰 리스트 조회", description = "마켓 상품의 리뷰 리스트를 조회하는 API")
   @GetMapping("/{marketItemId}/reviews")
   public ResponseEntity<CommonResponse<GetReviewsForMarketItemResponse>> getReviewsOfMarketItem(
-      @PathParam("marketItemId") Long marketItemId,
+      @PathVariable("marketItemId") Long marketItemId,
       @RequestParam("order") ReviewOrder order,
-      @RequestParam("page") @Min(1) Integer page
+      @RequestParam("page") @Min(1) Integer page,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse();
+    Long memberId = CustomUser.getId(user);
+    Page<Review> reviews = reviewService.getReviewsForMarketItem(marketItemId, page - 1,
+        REVIEW_PAGE_SIZE, order.getSort());
+    List<ReviewBundle> reviewBundles = reviewService.convertToReviewBundle(reviews.getContent());
+    PageInfo pageInfo = new PageInfo(page, reviews.getTotalPages());
+    GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse(reviewBundles,
+        pageInfo, memberId);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
