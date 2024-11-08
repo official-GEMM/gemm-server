@@ -1,14 +1,20 @@
 package com.example.gemm_server.controller;
 
+import static com.example.gemm_server.common.constant.Policy.DEAL_PAGE_SIZE;
+import static com.example.gemm_server.common.constant.Policy.SCRAP_PAGE_SIZE;
+
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.domain.entity.ProfileImage;
+import com.example.gemm_server.domain.entity.Scrap;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.MemberBundle;
+import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.my.NotificationBundle;
+import com.example.gemm_server.dto.my.ScrapBundle;
 import com.example.gemm_server.dto.my.request.UpdateMyInformationRequest;
 import com.example.gemm_server.dto.my.request.UpdateProfileImageRequest;
 import com.example.gemm_server.dto.my.response.GetHeaderResponse;
@@ -25,6 +31,7 @@ import com.example.gemm_server.service.AuthService;
 import com.example.gemm_server.service.MemberService;
 import com.example.gemm_server.service.NotificationService;
 import com.example.gemm_server.service.ProfileImageService;
+import com.example.gemm_server.service.ScrapService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,6 +39,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -153,13 +163,19 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
+  @BearerAuth
   @Operation(summary = "내 스크랩 조회", description = "사용자의 스크랩 리스트를 가져오는 API")
   @GetMapping("/scraps")
   public ResponseEntity<CommonResponse<GetMyScrapsResponse>> getMyScraps(
-      @RequestParam("page") @Min(1) Integer page
+      @RequestParam("page") @Min(1) Integer page,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetMyScrapsResponse response = new GetMyScrapsResponse();
+    Page<Scrap> scraps = scrapService.getScrapsByMemberIdOrderByCreatedAt(user.getId(), page - 1,
+        SCRAP_PAGE_SIZE);
+    List<ScrapBundle> scrapBundles = scrapService.convertToScrapBundle(scraps.getContent(),
+        user.getId());
+    PageInfo pageInfo = new PageInfo(page, scraps.getTotalPages());
+    GetMyScrapsResponse response = new GetMyScrapsResponse(scrapBundles, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
