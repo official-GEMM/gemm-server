@@ -14,6 +14,7 @@ import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
 import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
+import com.example.gemm_server.dto.generator.response.PptTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
@@ -28,6 +29,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -139,5 +141,12 @@ public class GeneratorController {
     UpdatedCutoutResponse updatedCutoutResponse = activityService.updateCutout(updateCutoutRequest,
         user.getId());
     return ResponseEntity.ok(new CommonResponse<>(updatedCutoutResponse));
+  }
+
+  @Operation(summary = "PPT 템플릿 조회", description = "s3로부터 PPT 템플릿 대표 이미지와 번호를 불러오는 API")
+  @GetMapping("/materials/template/ppt")
+  public ResponseEntity<CommonResponse<PptTemplatesResponse>> getPptTemplates() {
+    PptTemplatesResponse pptTemplates = activityService.getPptTemplates();
+    return ResponseEntity.ok(new CommonResponse<>(pptTemplates));
   }
 }
