@@ -42,6 +42,16 @@ public class DealService {
         pageable);
   }
 
+  public Page<Deal> getDealsBySellerId(Long sellerId, int pageNumber, int pageSize, Sort sort,
+      int year, short month) {
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+    LocalDateTime startDate = YearMonth.of(year, month).atDay(1).atStartOfDay();
+    LocalDateTime endDate = YearMonth.of(year, month).atEndOfMonth().atTime(LocalTime.MAX);
+    return dealRepository.findWithActivityAndBuyerBySellerIdAndCreatedAtBetween(sellerId, startDate,
+        endDate, pageable);
+  }
+
   public Deal getDealWithActivityOrThrow(Long dealId) {
     return dealRepository.findWithActivityById(dealId)
         .orElseThrow(() -> new DealException(DEAL_NOT_FOUND));

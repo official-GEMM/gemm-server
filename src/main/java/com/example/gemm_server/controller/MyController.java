@@ -202,14 +202,21 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @BearerAuth
   @Operation(summary = "내 판매 내역 조회", description = "사용자의 마켓 상품 판매 내역을 가져오는 API")
   @GetMapping("/history/sales")
   public ResponseEntity<CommonResponse<GetMySalesResponse>> getMySales(
       @RequestParam("page") @Min(1) Integer page,
       @RequestParam("year") Integer year,
-      @RequestParam("month") @Min(1) @Max(12) Short month
+      @RequestParam("month") @Min(1) @Max(12) Short month,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetMySalesResponse response = new GetMySalesResponse();
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Page<Deal> deals = dealService.getDealsBySellerId(user.getId(), page - 1, DEAL_PAGE_SIZE, sort,
+        year, month);
+    List<DealBundle> dealBundles = dealService.convertToDealBundle(deals.getContent());
+    PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
+    GetMySalesResponse response = new GetMySalesResponse(dealBundles, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }
