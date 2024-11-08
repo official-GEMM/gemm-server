@@ -12,6 +12,7 @@ import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.common.enums.ReviewOrder;
 import com.example.gemm_server.domain.entity.Banner;
+import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.domain.entity.Member;
@@ -23,6 +24,8 @@ import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.market.MarketItemBundle;
+import com.example.gemm_server.dto.market.ReviewBundle;
+import com.example.gemm_server.dto.market.ReviewResponse;
 import com.example.gemm_server.dto.market.request.PostMarketItemRequest;
 import com.example.gemm_server.dto.market.request.PostReviewRequest;
 import com.example.gemm_server.dto.market.request.SearchQueryRequest;
@@ -245,13 +248,20 @@ public class MarketController {
   }
 
   @BearerAuth
+  @AuthorizeOwner(Deal.class)
   @Operation(summary = "리뷰 생성", description = "마켓의 상품에 리뷰를 등록하는 API")
   @PostMapping("/{marketItemId}/review")
-  public ResponseEntity<CommonResponse<GetReviewsForMarketItemResponse>> postReviewToMarketItem(
-      @PathParam("marketItemId") Long marketItemId,
-      @Valid @RequestBody PostReviewRequest request
+  public ResponseEntity<CommonResponse<ReviewResponse>> postReviewToMarketItem(
+      @PathVariable("marketItemId") Long marketItemId,
+      @Valid @RequestBody PostReviewRequest request,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse();
+    Float score = request.getScore();
+    String content = request.getContent();
+    Review review = reviewService.saveIfNotExists(marketItemId, user.getId(), score, content);
+    ReviewBundle reviewBundle = reviewService.convertToReviewBundle(review);
+
+    ReviewResponse response = new ReviewResponse(reviewBundle);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
