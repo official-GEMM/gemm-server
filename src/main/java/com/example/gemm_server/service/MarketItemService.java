@@ -33,15 +33,17 @@ public class MarketItemService {
     return marketItemRepository.findWithActivityAndOwnerBy(pageable);
   }
 
-  public Page<MarketItem> getMarketItemsOrderByRecommendation(int pageNumber, int pageSize) {
-    Sort sort = Order.RECOMMENDED.sortBy();
+  public Page<MarketItem> getMarketItemsByOwnerOrderBy(Long ownerId, int pageNumber, int pageSize,
+      Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-    return marketItemRepository.findWithActivityAndOwnerBy(pageable);
+    return marketItemRepository.findWithActivityAndOwnerByOwnerId(ownerId, pageable);
   }
 
   public MarketItemBundle convertToMarketItemBundle(MarketItem marketItem, Long memberId) {
     Thumbnail thumbnail = thumbnailService.getMainThumbnail(marketItem.getActivity().getId());
-    boolean isScrapped = scrapService.isScrapped(memberId, marketItem.getId());
+    boolean isScrapped =
+        memberId != null && scrapRepository.existsByMemberIdAndMarketItemId(memberId,
+            marketItem.getId());
     return new MarketItemBundle(marketItem, thumbnail, isScrapped);
   }
 
@@ -90,5 +92,9 @@ public class MarketItemService {
   public MarketItem findMarketItemOrThrow(Long marketItemId) {
     return this.marketItemRepository.findWithActivityAndOwnerById(marketItemId)
         .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+  }
+
+  public Member findOwner(Long marketItemId) {
+    return findMarketItemOrThrow(marketItemId).getOwner();
   }
 }

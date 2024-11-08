@@ -14,6 +14,9 @@ public interface MarketItemRepository extends JpaRepository<MarketItem, Long> {
   Page<MarketItem> findWithActivityAndOwnerBy(Pageable pageable);
 
   @EntityGraph(attributePaths = {"activity", "owner"})
+  Page<MarketItem> findWithActivityAndOwnerByOwnerId(Long ownerId, Pageable pageable);
+
+  @EntityGraph(attributePaths = {"activity", "owner"})
   List<MarketItem> findAll(Specification<MarketItem> spec);
 
 }

@@ -3,9 +3,13 @@ package com.example.gemm_server.controller;
 import static com.example.gemm_server.common.constant.Policy.MAIN_MOST_SCRAPPED_PAGE_SIZE;
 import static com.example.gemm_server.common.constant.Policy.MAIN_RECOMMENDED_PAGE_SIZE;
 import static com.example.gemm_server.common.constant.Policy.MARKET_SEARCH_PAGE_SIZE;
+import static com.example.gemm_server.common.constant.Policy.MARKET_SELLER_OTHERS_PAGE_SIZE;
+import static com.example.gemm_server.common.constant.Policy.REVIEW_PAGE_SIZE;
 
 import com.example.gemm_server.common.annotation.auth.AuthorizeOwner;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.common.enums.GemUsageType;
+import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.common.enums.ReviewOrder;
 import com.example.gemm_server.domain.entity.Banner;
 import com.example.gemm_server.domain.entity.MarketItem;
@@ -144,10 +148,17 @@ public class MarketController {
 
   @Operation(summary = "판매자의 다른 상품", description = "판매자의 다른 상품을 추천순으로 조회하는 API")
   @GetMapping("/{marketItemId}/others")
-  public ResponseEntity<CommonResponse<GetOtherMarketItemsOfSellerResponse>> getOtherMarketItmesOfSeller(
-      @PathParam("marketItemId") Long marketItemId
+  public ResponseEntity<CommonResponse<GetOtherMarketItemsOfSellerResponse>> getOtherMarketItemsOfSeller(
+      @PathVariable("marketItemId") Long marketItemId
   ) {
-    GetOtherMarketItemsOfSellerResponse response = new GetOtherMarketItemsOfSellerResponse();
+    Member owner = marketItemService.findOwner(marketItemId);
+    Sort newestFirstSort = Order.NEWEST_FIRST.getSort();
+    Page<MarketItem> marketItems = marketItemService.getMarketItemsByOwnerOrderBy(owner.getId(), 0,
+        MARKET_SELLER_OTHERS_PAGE_SIZE, newestFirstSort);
+    List<MarketItemBundle> marketItemBundles =
+        marketItemService.convertToMarketItemBundle(marketItems.getContent(), owner.getId());
+    GetOtherMarketItemsOfSellerResponse response = new GetOtherMarketItemsOfSellerResponse(
+        marketItemBundles);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
