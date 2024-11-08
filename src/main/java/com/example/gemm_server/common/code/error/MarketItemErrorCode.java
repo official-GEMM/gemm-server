@@ -8,8 +8,11 @@ import org.springframework.http.HttpStatus;
 public enum MarketItemErrorCode implements ErrorCode {
 
   SEARCH_TYPE_NULL(HttpStatus.BAD_REQUEST, "검색 타입을 지정해주세요."),
+  CANNOT_PURCHASE_OWN_MARKET_ITEM(HttpStatus.BAD_REQUEST, "본인의 마켓 상품을 구매할 수 없습니다."),
+  MARKET_ITEM_ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "이미 리뷰가 작성된 상품입니다."),
 
-  MARKET_ITEM_NOT_BELONGS_TO_MEMBER(HttpStatus.UNAUTHORIZED, "사용자의 거래가 아닙니다."),
+  MARKET_ITEM_NOT_BELONGS_TO_MEMBER(HttpStatus.UNAUTHORIZED, "사용자가 보유한 상품이 아닙니다."),
+  MARKET_ITEM_NOT_PURCHASED(HttpStatus.UNAUTHORIZED, "사용자가 구매한 상품이 아닙니다."),
 
   MARKET_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 거래 ID 입니다."),
 
