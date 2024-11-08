@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,4 +36,10 @@ public class Scrap extends Timestamped {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "market_item_id", nullable = false)
   private MarketItem marketItem;
+
+  @Builder
+  public Scrap(Long memberId, Long marketItemId) {
+    this.member = Member.builder().id(memberId).build();
+    this.marketItem = MarketItem.builder().id(marketItemId).build();
+  }
 }
