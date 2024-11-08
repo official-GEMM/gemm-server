@@ -115,4 +115,9 @@ public class MarketItemService {
       throw new MarketItemException(CANNOT_PURCHASE_OWN_MARKET_ITEM);
     }
   }
+
+  public MarketItem getMarketItemWithActivityOrThrow(Long marketItemId) {
+    return marketItemRepository.findWithActivityById(marketItemId)
+        .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+  }
 }
