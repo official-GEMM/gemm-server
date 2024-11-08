@@ -1,9 +1,13 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.DealErrorCode.DEAL_AlREADY_EXISTS;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.CANNOT_PURCHASE_OWN_MARKET_ITEM;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.SEARCH_TYPE_NULL;
 
 import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.domain.entity.MarketItem;
+import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
 import com.example.gemm_server.dto.common.request.FilterRequest;
@@ -56,7 +60,7 @@ public class MarketItemService {
   public Page<MarketItem> searchMarketItems(SearchRequest search,
       FilterRequest filter, Order order, int pageNumber, Integer pageSize) {
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, order.sortBy());
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, order.getSort());
     Specification<MarketItem> filterSpecification = generateSpecificationForFilter(filter);
     Specification<MarketItem> searchSpecification = generateSpecificationForSearch(search);
 
