@@ -4,6 +4,7 @@ import static com.example.gemm_server.common.constant.Policy.DEAL_PAGE_SIZE;
 import static com.example.gemm_server.common.constant.Policy.SCRAP_PAGE_SIZE;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
+import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Notification;
 import com.example.gemm_server.domain.entity.ProfileImage;
@@ -26,8 +27,10 @@ import com.example.gemm_server.dto.my.response.GetNotificationsByUserResponse;
 import com.example.gemm_server.dto.my.response.GetProfileResponse;
 import com.example.gemm_server.dto.my.response.UpdateMyInformationResponse;
 import com.example.gemm_server.dto.my.response.UpdateProfileImageResponse;
+import com.example.gemm_server.dto.storage.DealBundle;
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.AuthService;
+import com.example.gemm_server.service.DealService;
 import com.example.gemm_server.service.MemberService;
 import com.example.gemm_server.service.NotificationService;
 import com.example.gemm_server.service.ProfileImageService;
@@ -67,6 +70,8 @@ public class MyController {
   private final AuthService authService;
   private final NotificationService notificationService;
   private final ProfileImageService profileImageService;
+  private final DealService dealService;
+  private final ScrapService scrapService;
 
   @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보를 가져오는 API")
   @GetMapping()
@@ -179,14 +184,21 @@ public class MyController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
+  @BearerAuth
   @Operation(summary = "내 구매 내역 조회", description = "사용자의 마켓 상품 구매 내역을 가져오는 API")
   @GetMapping("/history/purchases")
   public ResponseEntity<CommonResponse<GetMyPurchasesResponse>> getMyPurchases(
       @RequestParam("page") @Min(1) Integer page,
       @RequestParam("year") Integer year,
-      @RequestParam("month") @Min(1) @Max(12) Short month
+      @RequestParam("month") @Min(1) @Max(12) Short month,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetMyPurchasesResponse response = new GetMyPurchasesResponse();
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Page<Deal> deals = dealService.getDealsByBuyerId(user.getId(), page - 1, DEAL_PAGE_SIZE, sort,
+        year, month);
+    List<DealBundle> dealBundles = dealService.convertToDealBundle(deals.getContent());
+    PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
+    GetMyPurchasesResponse response = new GetMyPurchasesResponse(dealBundles, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

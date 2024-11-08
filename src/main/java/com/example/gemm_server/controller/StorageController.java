@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -140,8 +142,9 @@ public class StorageController {
       @AuthenticationPrincipal CustomUser user,
       @RequestParam("page") @Min(1) Integer page
   ) {
-    Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page - 1,
-        Policy.STORAGE_ACTIVITY_PAGE_SIZE);
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Page<Deal> deals = dealService.getDealsByMemberId(user.getId(), page - 1,
+        Policy.STORAGE_ACTIVITY_PAGE_SIZE, sort);
     PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
 
     List<DealBundle> generationWithThumbnails = dealService.convertToDealBundle(deals.getContent());
