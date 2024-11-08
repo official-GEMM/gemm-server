@@ -180,9 +180,21 @@ public class MarketController {
   @Operation(summary = "상품 구매", description = "마켓의 상품을 구매하는 API")
   @PostMapping("/{marketItemId}/buy")
   public ResponseEntity<CommonResponse<GemResponse>> buyMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GemResponse response = new GemResponse(0);
+    MarketItem marketItem = marketItemService.findMarketItemOrThrow(marketItemId);
+    Member seller = marketItem.getOwner();
+    Member buyer = memberService.findMemberByMemberIdOrThrow(user.getId());
+    marketItemService.validatePurchasable(seller.getId(), buyer.getId(),
+        marketItem.getActivity().getId());
+
+    Integer price = marketItem.getPrice();
+    dealService.savePurchaseForMarketItem(marketItem, buyer.getId());
+    gemService.saveChangesOfGemWithMember(buyer, price, GemUsageType.MARKET_PURCHASE);
+    gemService.saveChangesOfGemWithMember(seller, price, GemUsageType.MARKET_SALE);
+
+    GemResponse response = new GemResponse(buyer.getGem());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

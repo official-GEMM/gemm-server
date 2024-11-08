@@ -14,4 +14,6 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
 
   @EntityGraph(attributePaths = {"activity"})
   Page<Deal> findWithActivityByBuyerId(Long buyerId, Pageable pageable);
+
+  Boolean existsByActivityIdAndBuyerId(Long activityId, Long buyerId);
 }

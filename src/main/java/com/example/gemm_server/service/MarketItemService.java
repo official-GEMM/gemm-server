@@ -9,10 +9,13 @@ import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Thumbnail;
+import com.example.gemm_server.domain.repository.DealRepository;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
+import com.example.gemm_server.domain.repository.ScrapRepository;
 import com.example.gemm_server.dto.common.request.FilterRequest;
 import com.example.gemm_server.dto.common.request.SearchRequest;
 import com.example.gemm_server.dto.market.MarketItemBundle;
+import com.example.gemm_server.exception.DealException;
 import com.example.gemm_server.exception.MarketItemException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +33,8 @@ public class MarketItemService {
 
   private final MarketItemRepository marketItemRepository;
   private final ThumbnailService thumbnailService;
-  private final ScrapService scrapService;
+  private final ScrapRepository scrapRepository;
+  private final DealRepository dealRepository;
 
   public Page<MarketItem> getMarketItemsOrderBy(int pageNumber, int pageSize, Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
@@ -100,5 +104,15 @@ public class MarketItemService {
 
   public Member findOwner(Long marketItemId) {
     return findMarketItemOrThrow(marketItemId).getOwner();
+  }
+
+  public void validatePurchasable(Long sellerId, Long buyerId, Long activityId) {
+    boolean isPurchased = dealRepository.existsByActivityIdAndBuyerId(activityId, buyerId);
+    if (isPurchased) {
+      throw new DealException(DEAL_AlREADY_EXISTS);
+    }
+    if (sellerId.equals(buyerId)) {
+      throw new MarketItemException(CANNOT_PURCHASE_OWN_MARKET_ITEM);
+    }
   }
 }

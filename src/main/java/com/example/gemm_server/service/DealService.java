@@ -49,4 +49,9 @@ public class DealService {
     }
     return dealRepository.existsByActivityIdAndBuyerId(activityId, buyerId);
   }
+
+  public Deal savePurchaseForMarketItem(MarketItem marketItemWithActivityAndOwner, Long buyerId) {
+    Deal deal = new Deal(marketItemWithActivityAndOwner, buyerId);
+    return dealRepository.save(deal);
+  }
 }
