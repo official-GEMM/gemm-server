@@ -280,10 +280,17 @@ public class MarketController {
   @Operation(summary = "나의 상품 조회", description = "내가 마켓에 올린 상품 리스트를 최신순으로 조회하는 API")
   @GetMapping("/my")
   public ResponseEntity<CommonResponse<GetMarketItemsResponse>> getMyMarketItems(
-      @RequestParam("page") @Min(1) Integer page
+      @RequestParam("page") @Min(1) Integer page,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetMarketItemsResponse response = new GetMarketItemsResponse(new ArrayList<>(),
-        new PageInfo(0, 0));
+    Sort newestFirstSort = Order.NEWEST_FIRST.getSort();
+    Page<MarketItem> marketItems = marketItemService.getMarketItemsByOwnerOrderBy(user.getId(), 0,
+        MARKET_SELLER_OTHERS_PAGE_SIZE, newestFirstSort);
+    List<MarketItemBundle> marketItemBundles =
+        marketItemService.convertToMarketItemBundle(marketItems.getContent(), user.getId());
+
+    PageInfo pageInfo = new PageInfo(page, marketItems.getTotalPages());
+    GetMarketItemsResponse response = new GetMarketItemsResponse(marketItemBundles, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }
