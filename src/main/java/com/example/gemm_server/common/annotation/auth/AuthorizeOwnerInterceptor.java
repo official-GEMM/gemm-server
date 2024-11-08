@@ -6,6 +6,7 @@ import static com.example.gemm_server.common.code.error.GenerationErrorCode.GENE
 import static com.example.gemm_server.common.code.error.GenerationErrorCode.GENERATION_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_BELONGS_TO_MEMBER;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_FOUND;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_PURCHASED;
 
 import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.Generation;
@@ -22,6 +23,7 @@ import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -74,7 +76,6 @@ public class AuthorizeOwnerInterceptor implements HandlerInterceptor {
     } catch (NumberFormatException e) {
       ErrorResponse.setJsonResponse(response, 400, e.getMessage());
     }
-    
     return false;
   }
 
@@ -90,11 +91,23 @@ public class AuthorizeOwnerInterceptor implements HandlerInterceptor {
 
   private void checkDealOwner(Long memberId) {
     Long dealId = getIdFromUrl("dealId");
+    Long marketItemId = getIdFromUrl("marketItemId");
 
-    Deal deal = dealRepository.findById(dealId)
-        .orElseThrow(() -> new DealException(DEAL_NOT_FOUND));
-    if (!deal.getBuyer().getId().equals(memberId)) {
-      throw new DealException(DEAL_NOT_BELONGS_TO_MEMBER);
+    if (dealId != null) {
+      Deal deal = dealRepository.findById(dealId)
+          .orElseThrow(() -> new DealException(DEAL_NOT_FOUND));
+      if (!deal.getBuyer().getId().equals(memberId)) {
+        throw new DealException(DEAL_NOT_BELONGS_TO_MEMBER);
+      }
+    }
+
+    if (marketItemId != null) {
+      MarketItem marketItem = marketItemRepository.findWithActivityById(marketItemId)
+          .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+      Long activityId = marketItem.getActivity().getId();
+      if (!dealRepository.existsByActivityIdAndBuyerId(activityId, memberId)) {
+        throw new MarketItemException(MARKET_ITEM_NOT_PURCHASED);
+      }
     }
   }
 
@@ -124,6 +137,8 @@ public class AuthorizeOwnerInterceptor implements HandlerInterceptor {
     @SuppressWarnings("unchecked")
     Map<String, String> pathVariables =
         (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-    return Long.parseLong(pathVariables.get(name));
+    return Optional.ofNullable(pathVariables.get(name))
+        .map(Long::parseLong)
+        .orElse(null);
   }
 }
