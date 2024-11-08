@@ -13,13 +13,9 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@SQLDelete(sql = "UPDATE scrap SET deleted_at = CURRENT_TIMESTAMP where id = ?")
-@SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "scrap")
 public class Scrap extends Timestamped {
