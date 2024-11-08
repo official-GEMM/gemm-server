@@ -1,9 +1,13 @@
 package com.example.gemm_server.dto.market.response;
 
+import com.example.gemm_server.dto.common.MemberBundle;
+import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.MemberWithProfileImageResponse;
 import com.example.gemm_server.dto.common.response.PageInformationResponse;
+import com.example.gemm_server.dto.market.MarketItemBundle;
 import com.example.gemm_server.dto.market.MarketItemResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -20,6 +24,11 @@ public class GetMarketItemsOfSellerResponse {
   @Schema(description = "페이지 정보")
   private PageInformationResponse pageInfo;
 
-  public GetMarketItemsOfSellerResponse() {
+  public GetMarketItemsOfSellerResponse(List<MarketItemBundle> marketItemBundles,
+      MemberBundle sellerBundle, PageInfo pageInfo) {
+    this.marketItems = marketItemBundles.stream().map(MarketItemResponse::new)
+        .toArray(MarketItemResponse[]::new);
+    this.seller = new MemberWithProfileImageResponse(sellerBundle);
+    this.pageInfo = new PageInformationResponse(pageInfo);
   }
 }

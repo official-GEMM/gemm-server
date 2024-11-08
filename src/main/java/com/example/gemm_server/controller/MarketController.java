@@ -18,6 +18,7 @@ import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Review;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
+import com.example.gemm_server.dto.common.MemberBundle;
 import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
@@ -258,9 +259,20 @@ public class MarketController {
   @GetMapping("/seller/{memberId}")
   public ResponseEntity<CommonResponse<GetMarketItemsOfSellerResponse>> getMarketItemsOfSeller(
       @RequestParam("page") @Min(1) Integer page,
-      @PathParam("memberId") Long memberId
+      @PathVariable("memberId") Long memberId
   ) {
-    GetMarketItemsOfSellerResponse response = new GetMarketItemsOfSellerResponse();
+    Sort newestFirstSort = Order.NEWEST_FIRST.getSort();
+    Page<MarketItem> marketItems = marketItemService.getMarketItemsByOwnerOrderBy(memberId, 0,
+        MARKET_SELLER_OTHERS_PAGE_SIZE, newestFirstSort);
+    List<MarketItemBundle> marketItemBundles =
+        marketItemService.convertToMarketItemBundle(marketItems.getContent(), memberId);
+
+    Member owner = memberService.findMemberByMemberIdOrThrow(memberId);
+    MemberBundle ownerBundle = memberService.convertToMemberBundle(owner);
+
+    PageInfo pageInfo = new PageInfo(page, marketItems.getTotalPages());
+    GetMarketItemsOfSellerResponse response = new GetMarketItemsOfSellerResponse(marketItemBundles,
+        ownerBundle, pageInfo);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
