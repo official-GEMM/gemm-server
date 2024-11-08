@@ -222,8 +222,10 @@ public class MarketController {
   @Operation(summary = "스크랩", description = "마켓의 상품을 스크랩하는 API")
   @PostMapping("/{marketItemId}/scrap")
   public ResponseEntity<EmptyDataResponse> scrapMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
+    scrapService.scrap(user.getId(), marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
