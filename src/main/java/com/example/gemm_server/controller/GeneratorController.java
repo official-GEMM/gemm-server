@@ -11,6 +11,7 @@ import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
 import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
+import com.example.gemm_server.dto.generator.response.ActivitySheetTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
@@ -148,5 +149,12 @@ public class GeneratorController {
   public ResponseEntity<CommonResponse<PptTemplatesResponse>> getPptTemplates() {
     PptTemplatesResponse pptTemplates = activityService.getPptTemplates();
     return ResponseEntity.ok(new CommonResponse<>(pptTemplates));
+  }
+
+  @Operation(summary = "활동지 템플릿 조회", description = "s3로부터 활동지 템플릿 대표 이미지와 번호를 불러오는 API")
+  @GetMapping("/materials/template/activitySheet")
+  public ResponseEntity<CommonResponse<ActivitySheetTemplatesResponse>> getActivitySheetTemplates() {
+    ActivitySheetTemplatesResponse activitySheetTemplatesResponse = activityService.getActivitySheetTemplates();
+    return ResponseEntity.ok(new CommonResponse<>(activitySheetTemplatesResponse));
   }
 }

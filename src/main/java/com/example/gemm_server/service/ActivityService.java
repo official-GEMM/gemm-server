@@ -53,6 +53,7 @@ import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
 import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
+import com.example.gemm_server.dto.generator.response.ActivitySheetTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
@@ -345,6 +346,13 @@ public class ActivityService {
         .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
         .collect(Collectors.toList());
     return new PptTemplatesResponse(templateResponses);
+  }
+
+  public ActivitySheetTemplatesResponse getActivitySheetTemplates() {
+    List<TemplateResponse> templateResponses = IntStream.range(0, activitySheetTemplateCount)
+        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .collect(Collectors.toList());
+    return new ActivitySheetTemplatesResponse(templateResponses);
   }
 
   protected Material uploadMaterialToS3(String fileName, String tempSavedDirectoryPath,
