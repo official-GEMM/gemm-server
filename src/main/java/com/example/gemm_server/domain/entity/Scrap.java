@@ -11,15 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@SQLDelete(sql = "UPDATE scrap SET deleted_at = CURRENT_TIMESTAMP where id = ?")
-@SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "scrap")
 public class Scrap extends Timestamped {
@@ -39,4 +36,10 @@ public class Scrap extends Timestamped {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "market_item_id", nullable = false)
   private MarketItem marketItem;
+
+  @Builder
+  public Scrap(Long memberId, Long marketItemId) {
+    this.member = Member.builder().id(memberId).build();
+    this.marketItem = MarketItem.builder().id(marketItemId).build();
+  }
 }

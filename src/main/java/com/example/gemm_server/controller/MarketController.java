@@ -50,8 +50,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.websocket.server.PathParam;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -167,12 +165,16 @@ public class MarketController {
   }
 
   @BearerAuth
+  @AuthorizeOwner(Deal.class)
   @Operation(summary = "자료 다운로드", description = "상품의 활동 자료들을 다운로드하는 API")
   @GetMapping("/{marketItemId}/download")
   public ResponseEntity<CommonResponse<DownloadMaterialResponse>> downloadMaterials(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId
   ) {
-    DownloadMaterialResponse response = new DownloadMaterialResponse(new ArrayList<>());
+    MarketItem marketItem = marketItemService.getMarketItemWithActivityOrThrow(marketItemId);
+    List<Material> materials = materialService.getMaterialsByActivityId(
+        marketItem.getActivity().getId());
+    DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -180,9 +182,21 @@ public class MarketController {
   @Operation(summary = "상품 구매", description = "마켓의 상품을 구매하는 API")
   @PostMapping("/{marketItemId}/buy")
   public ResponseEntity<CommonResponse<GemResponse>> buyMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GemResponse response = new GemResponse(0);
+    MarketItem marketItem = marketItemService.findMarketItemOrThrow(marketItemId);
+    Member seller = marketItem.getOwner();
+    Member buyer = memberService.findMemberByMemberIdOrThrow(user.getId());
+    marketItemService.validatePurchasable(seller.getId(), buyer.getId(),
+        marketItem.getActivity().getId());
+
+    Integer price = marketItem.getPrice();
+    dealService.savePurchaseForMarketItem(marketItem, buyer.getId());
+    gemService.saveChangesOfGemWithMember(buyer, price, GemUsageType.MARKET_PURCHASE);
+    gemService.saveChangesOfGemWithMember(seller, price, GemUsageType.MARKET_SALE);
+
+    GemResponse response = new GemResponse(buyer.getGem());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -199,10 +213,10 @@ public class MarketController {
   @BearerAuth
   @AuthorizeOwner(MarketItem.class)
   @Operation(summary = "상품 수정", description = "마켓에 상품을 수정하는 API")
-  @PutMapping(name = "/{marketItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PutMapping(value = "/{marketItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<MarketItemIdResponse>> updateMarketItem(
       @Valid @ModelAttribute UpdateMarketItemRequest request,
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId
   ) {
     MarketItemIdResponse response = new MarketItemIdResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -213,7 +227,7 @@ public class MarketController {
   @Operation(summary = "상품 삭제", description = "마켓의 상품을 삭제하는 API")
   @DeleteMapping("/{marketItemId}")
   public ResponseEntity<EmptyDataResponse> deleteMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId
   ) {
     return ResponseEntity.ok(new EmptyDataResponse());
   }
@@ -222,8 +236,10 @@ public class MarketController {
   @Operation(summary = "스크랩", description = "마켓의 상품을 스크랩하는 API")
   @PostMapping("/{marketItemId}/scrap")
   public ResponseEntity<EmptyDataResponse> scrapMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
+    scrapService.scrap(user.getId(), marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
@@ -231,8 +247,10 @@ public class MarketController {
   @Operation(summary = "스크랩 취소", description = "마켓의 상품을 스크랩 취소하는 API")
   @DeleteMapping("/{marketItemId}/scrap")
   public ResponseEntity<EmptyDataResponse> cancelScrapMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
+    scrapService.delete(user.getId(), marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
