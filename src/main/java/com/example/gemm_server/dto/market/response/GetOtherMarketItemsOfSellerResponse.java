@@ -1,7 +1,9 @@
 package com.example.gemm_server.dto.market.response;
 
+import com.example.gemm_server.dto.market.MarketItemBundle;
 import com.example.gemm_server.dto.market.MarketItemResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -11,6 +13,8 @@ public class GetOtherMarketItemsOfSellerResponse {
   @Schema(description = "마켓 상품 리스트")
   private MarketItemResponse[] marketItems;
 
-  public GetOtherMarketItemsOfSellerResponse() {
+  public GetOtherMarketItemsOfSellerResponse(List<MarketItemBundle> marketItemBundles) {
+    this.marketItems = marketItemBundles.stream().map(MarketItemResponse::new)
+        .toArray(MarketItemResponse[]::new);
   }
 }

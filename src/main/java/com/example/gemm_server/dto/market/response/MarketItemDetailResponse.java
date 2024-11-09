@@ -1,19 +1,18 @@
 package com.example.gemm_server.dto.market.response;
 
-import com.example.gemm_server.common.enums.Category;
-import com.example.gemm_server.domain.entity.Activity;
+import com.example.gemm_server.domain.entity.MarketItem;
+import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
 import com.example.gemm_server.dto.common.response.MemberResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
 @Schema(description = "마켓 상품 상세 응답", requiredProperties = {"marketItemId", "title", "materials",
-    "age", "category", "contents", "scrapCount", "isScrapped", "seller", "isMyMarketItem",
-    "isBought", "reviewAverageScore", "reviewCount", "price"})
+    "age", "category", "contents", "scrapCount", "isScrapped", "seller", "isOwnedByCurrentMember",
+    "isPurchased", "reviewAverageScore", "reviewCount", "price"})
 public class MarketItemDetailResponse extends ActivityDetailResponse {
 
   @Schema(description = "마켓 상품 아이디")
@@ -29,10 +28,10 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
   private MemberResponse seller;
 
   @Schema(description = "내 마켓 상품 여부")
-  private Boolean isMyMarketItem;
+  private Boolean isOwnedByCurrentMember;
 
   @Schema(description = "구매 여부")
-  private Boolean isBought;
+  private Boolean isPurchased;
 
   @Schema(description = "리뷰 평점")
   private float reviewAverageScore;
@@ -51,7 +50,19 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
   @Schema(description = "월")
   private short month;
 
-  public MarketItemDetailResponse() {
-    super(new Activity("", (short) 0, (short) 0, Category.ART_AREA, ""), new ArrayList<>());
+  public MarketItemDetailResponse(MarketItem marketItem, List<Material> materialsWithThumbnail,
+      boolean isScrapped, boolean isPurchased, Long currentMemberId) {
+    super(marketItem.getActivity(), materialsWithThumbnail);
+    this.marketItemId = marketItem.getId();
+    this.scrapCount = marketItem.getScrapCount();
+    this.isScrapped = isScrapped;
+    this.seller = new MemberResponse(marketItem.getOwner());
+    this.isOwnedByCurrentMember = marketItem.getOwner().getId().equals(currentMemberId);
+    this.isPurchased = isPurchased;
+    this.reviewAverageScore = marketItem.getAverageScore();
+    this.reviewCount = marketItem.getReviewCount();
+    this.price = marketItem.getPrice();
+    this.year = marketItem.getYear();
+    this.month = marketItem.getMonth();
   }
 }

@@ -28,10 +28,11 @@ import com.example.gemm_server.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -140,8 +141,9 @@ public class StorageController {
       @AuthenticationPrincipal CustomUser user,
       @RequestParam("page") @Min(1) Integer page
   ) {
-    Page<Deal> deals = dealService.getDealsByMemberIdAndPage(user.getId(), page - 1,
-        Policy.STORAGE_ACTIVITY_PAGE_SIZE);
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Page<Deal> deals = dealService.getDealsByMemberId(user.getId(), page - 1,
+        Policy.STORAGE_ACTIVITY_PAGE_SIZE, sort);
     PageInfo pageInfo = new PageInfo(page, deals.getTotalPages());
 
     List<DealBundle> generationWithThumbnails = dealService.convertToDealBundle(deals.getContent());
@@ -177,14 +179,16 @@ public class StorageController {
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
-  // 미완성 API
   @AuthorizeOwner(Deal.class)
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
   public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(
       @PathVariable("dealId") Long dealId
   ) {
-    DownloadMaterialResponse response = new DownloadMaterialResponse(new ArrayList<>());
+    Deal deal = dealService.getDealWithActivityOrThrow(dealId);
+    List<Material> materials = materialService.getMaterialsByActivityId(
+        deal.getActivity().getId());
+    DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
     return ResponseEntity.ok(response);
   }
 }

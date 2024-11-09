@@ -1,14 +1,21 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.DealErrorCode.DEAL_AlREADY_EXISTS;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.CANNOT_PURCHASE_OWN_MARKET_ITEM;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.SEARCH_TYPE_NULL;
 
 import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.domain.entity.MarketItem;
+import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Thumbnail;
+import com.example.gemm_server.domain.repository.DealRepository;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
+import com.example.gemm_server.domain.repository.ScrapRepository;
 import com.example.gemm_server.dto.common.request.FilterRequest;
 import com.example.gemm_server.dto.common.request.SearchRequest;
 import com.example.gemm_server.dto.market.MarketItemBundle;
+import com.example.gemm_server.exception.DealException;
 import com.example.gemm_server.exception.MarketItemException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,23 +33,25 @@ public class MarketItemService {
 
   private final MarketItemRepository marketItemRepository;
   private final ThumbnailService thumbnailService;
-  private final ScrapService scrapService;
+  private final ScrapRepository scrapRepository;
+  private final DealRepository dealRepository;
 
-  public Page<MarketItem> getMarketItemsOrderByScrapCountDesc(int pageNumber, int pageSize) {
-    Sort sort = Order.SCRAP.sortBy();
+  public Page<MarketItem> getMarketItemsOrderBy(int pageNumber, int pageSize, Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
     return marketItemRepository.findWithActivityAndOwnerBy(pageable);
   }
 
-  public Page<MarketItem> getMarketItemsOrderByRecommendation(int pageNumber, int pageSize) {
-    Sort sort = Order.RECOMMENDED.sortBy();
+  public Page<MarketItem> getMarketItemsByOwnerOrderBy(Long ownerId, int pageNumber, int pageSize,
+      Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-    return marketItemRepository.findWithActivityAndOwnerBy(pageable);
+    return marketItemRepository.findWithActivityAndOwnerByOwnerId(ownerId, pageable);
   }
 
   public MarketItemBundle convertToMarketItemBundle(MarketItem marketItem, Long memberId) {
     Thumbnail thumbnail = thumbnailService.getMainThumbnail(marketItem.getActivity().getId());
-    boolean isScrapped = scrapService.isScrapped(memberId, marketItem.getId());
+    boolean isScrapped =
+        memberId != null && scrapRepository.existsByMemberIdAndMarketItemId(memberId,
+            marketItem.getId());
     return new MarketItemBundle(marketItem, thumbnail, isScrapped);
   }
 
@@ -55,7 +64,7 @@ public class MarketItemService {
   public Page<MarketItem> searchMarketItems(SearchRequest search,
       FilterRequest filter, Order order, int pageNumber, Integer pageSize) {
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, order.sortBy());
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, order.getSort());
     Specification<MarketItem> filterSpecification = generateSpecificationForFilter(filter);
     Specification<MarketItem> searchSpecification = generateSpecificationForSearch(search);
 
@@ -88,4 +97,27 @@ public class MarketItemService {
             .and(MarketItemSpecification.hasMonth(filter.getMonth()));
   }
 
+  public MarketItem findMarketItemOrThrow(Long marketItemId) {
+    return this.marketItemRepository.findWithActivityAndOwnerById(marketItemId)
+        .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+  }
+
+  public Member findOwner(Long marketItemId) {
+    return findMarketItemOrThrow(marketItemId).getOwner();
+  }
+
+  public void validatePurchasable(Long sellerId, Long buyerId, Long activityId) {
+    boolean isPurchased = dealRepository.existsByActivityIdAndBuyerId(activityId, buyerId);
+    if (isPurchased) {
+      throw new DealException(DEAL_AlREADY_EXISTS);
+    }
+    if (sellerId.equals(buyerId)) {
+      throw new MarketItemException(CANNOT_PURCHASE_OWN_MARKET_ITEM);
+    }
+  }
+
+  public MarketItem getMarketItemWithActivityOrThrow(Long marketItemId) {
+    return marketItemRepository.findWithActivityById(marketItemId)
+        .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+  }
 }

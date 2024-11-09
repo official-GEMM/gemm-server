@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.common.response;
 
+import com.example.gemm_server.dto.common.MemberBundle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -11,6 +12,8 @@ public class MemberWithProfileImageResponse extends MemberResponse {
   @Schema(description = "프로필 이미지 경로")
   private String profileImagePath;
 
-  public MemberWithProfileImageResponse() {
+  public MemberWithProfileImageResponse(MemberBundle memberBundle) {
+    super(memberBundle.getMember());
+    this.profileImagePath = memberBundle.getProfileImageUrl();
   }
 }

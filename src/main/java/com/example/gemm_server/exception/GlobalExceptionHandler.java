@@ -10,8 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Controller
@@ -68,6 +70,20 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(
         new ErrorResponse(HttpStatus.NOT_FOUND.value(),
             ex.getMessage()), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException ex) {
+    return new ResponseEntity<>(
+        new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException ex) {
+    return new ResponseEntity<>(
+        new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler({Exception.class})

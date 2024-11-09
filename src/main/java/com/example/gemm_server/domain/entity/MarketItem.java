@@ -13,6 +13,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -20,6 +22,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Getter
+@Builder
+@AllArgsConstructor
 @Entity
 @SQLDelete(sql = "UPDATE market_item SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")

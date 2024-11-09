@@ -27,9 +27,10 @@ public class ActivityDetailResponse {
   @Schema(description = "내용과 형식")
   private ContentResponse[] contents;
 
-  public ActivityDetailResponse(Activity activity, List<Material> materials) {
+  public ActivityDetailResponse(Activity activity, List<Material> materialsWithThumbnail) {
     this.title = activity.getTitle();
-    this.materials = materials.stream().map(MaterialResponse::new).toArray(MaterialResponse[]::new);
+    this.materials = materialsWithThumbnail.stream().map(MaterialResponse::new)
+        .toArray(MaterialResponse[]::new);
     this.age = activity.getAge();
     this.category = activity.getCategory();
     this.contents = ContentResponse.of(activity.getContent());

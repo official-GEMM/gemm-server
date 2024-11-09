@@ -19,10 +19,14 @@ public class Policy {
 
   // 페이지 당 요소 개수
   public static final int MARKET_SEARCH_PAGE_SIZE = 12;
+  public static final int MARKET_SELLER_OTHERS_PAGE_SIZE = 12;
   public static final int STORAGE_ACTIVITY_PAGE_SIZE = 9;
   public static final int STORAGE_GUIDE_PAGE_SIZE = 6;
   public static final int MAIN_MOST_SCRAPPED_PAGE_SIZE = 8;
   public static final int MAIN_RECOMMENDED_PAGE_SIZE = 8;
+  public static final int REVIEW_PAGE_SIZE = 20;
+  public static final int SCRAP_PAGE_SIZE = 9;
+  public static final int DEAL_PAGE_SIZE = 4;
 
   // 휴대전화 인증 시도 가능 횟수
   public static final int VERIFICATION_LIMIT = 5;

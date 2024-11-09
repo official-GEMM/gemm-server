@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -52,4 +53,12 @@ public class Review extends Timestamped {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "market_item_id", nullable = false)
   private MarketItem marketItem;
+
+  @Builder
+  public Review(Long marketItemId, Long memberId, Float score, String content) {
+    this.marketItem = MarketItem.builder().id(marketItemId).build();
+    this.member = Member.builder().id(memberId).build();
+    this.score = score;
+    this.content = content;
+  }
 }
