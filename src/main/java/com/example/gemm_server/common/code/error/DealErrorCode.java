@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum DealErrorCode implements ErrorCode {
+  DEAL_AlREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 구매가 완료된 상품입니다."),
+
   DEAL_NOT_BELONGS_TO_MEMBER(HttpStatus.UNAUTHORIZED, "해당 거래의 구매자가 아닙니다."),
 
   DEAL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 거래 ID 입니다."),
