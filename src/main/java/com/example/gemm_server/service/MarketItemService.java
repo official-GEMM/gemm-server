@@ -116,6 +116,12 @@ public class MarketItemService {
     }
   }
 
+  public MarketItem delete(Long marketItemId) {
+    MarketItem marketItem = findMarketItemOrThrow(marketItemId);
+    marketItemRepository.delete(marketItem);
+    return marketItem;
+  }
+
   public MarketItem getMarketItemWithActivityOrThrow(Long marketItemId) {
     return marketItemRepository.findWithActivityById(marketItemId)
         .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));

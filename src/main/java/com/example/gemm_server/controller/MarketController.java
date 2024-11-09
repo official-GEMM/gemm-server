@@ -84,8 +84,7 @@ public class MarketController {
   private final DealService dealService;
   private final GemService gemService;
   private final ReviewService reviewService;
-
-  // 미완성 API
+  
   @Operation(summary = "메인", description = "메인 페이지에 필요한 정보를 가져오는 API")
   @GetMapping("/main")
   public ResponseEntity<CommonResponse<GetMainResponse>> getMain(
@@ -229,6 +228,7 @@ public class MarketController {
   public ResponseEntity<EmptyDataResponse> deleteMarketItem(
       @PathVariable("marketItemId") Long marketItemId
   ) {
+    marketItemService.delete(marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
