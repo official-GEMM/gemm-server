@@ -12,6 +12,7 @@ import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.common.enums.ReviewOrder;
 import com.example.gemm_server.domain.entity.Banner;
+import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.domain.entity.Member;
@@ -23,6 +24,8 @@ import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.market.MarketItemBundle;
+import com.example.gemm_server.dto.market.ReviewBundle;
+import com.example.gemm_server.dto.market.ReviewResponse;
 import com.example.gemm_server.dto.market.request.PostMarketItemRequest;
 import com.example.gemm_server.dto.market.request.PostReviewRequest;
 import com.example.gemm_server.dto.market.request.SearchQueryRequest;
@@ -47,8 +50,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.websocket.server.PathParam;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -164,12 +165,16 @@ public class MarketController {
   }
 
   @BearerAuth
+  @AuthorizeOwner(Deal.class)
   @Operation(summary = "자료 다운로드", description = "상품의 활동 자료들을 다운로드하는 API")
   @GetMapping("/{marketItemId}/download")
   public ResponseEntity<CommonResponse<DownloadMaterialResponse>> downloadMaterials(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId
   ) {
-    DownloadMaterialResponse response = new DownloadMaterialResponse(new ArrayList<>());
+    MarketItem marketItem = marketItemService.getMarketItemWithActivityOrThrow(marketItemId);
+    List<Material> materials = materialService.getMaterialsByActivityId(
+        marketItem.getActivity().getId());
+    DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -177,9 +182,21 @@ public class MarketController {
   @Operation(summary = "상품 구매", description = "마켓의 상품을 구매하는 API")
   @PostMapping("/{marketItemId}/buy")
   public ResponseEntity<CommonResponse<GemResponse>> buyMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GemResponse response = new GemResponse(0);
+    MarketItem marketItem = marketItemService.findMarketItemOrThrow(marketItemId);
+    Member seller = marketItem.getOwner();
+    Member buyer = memberService.findMemberByMemberIdOrThrow(user.getId());
+    marketItemService.validatePurchasable(seller.getId(), buyer.getId(),
+        marketItem.getActivity().getId());
+
+    Integer price = marketItem.getPrice();
+    dealService.savePurchaseForMarketItem(marketItem, buyer.getId());
+    gemService.saveChangesOfGemWithMember(buyer, price, GemUsageType.MARKET_PURCHASE);
+    gemService.saveChangesOfGemWithMember(seller, price, GemUsageType.MARKET_SALE);
+
+    GemResponse response = new GemResponse(buyer.getGem());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -196,10 +213,10 @@ public class MarketController {
   @BearerAuth
   @AuthorizeOwner(MarketItem.class)
   @Operation(summary = "상품 수정", description = "마켓에 상품을 수정하는 API")
-  @PutMapping(name = "/{marketItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PutMapping(value = "/{marketItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<MarketItemIdResponse>> updateMarketItem(
       @Valid @ModelAttribute UpdateMarketItemRequest request,
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId
   ) {
     MarketItemIdResponse response = new MarketItemIdResponse();
     return ResponseEntity.ok(new CommonResponse<>(response));
@@ -210,7 +227,7 @@ public class MarketController {
   @Operation(summary = "상품 삭제", description = "마켓의 상품을 삭제하는 API")
   @DeleteMapping("/{marketItemId}")
   public ResponseEntity<EmptyDataResponse> deleteMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId
   ) {
     return ResponseEntity.ok(new EmptyDataResponse());
   }
@@ -219,8 +236,10 @@ public class MarketController {
   @Operation(summary = "스크랩", description = "마켓의 상품을 스크랩하는 API")
   @PostMapping("/{marketItemId}/scrap")
   public ResponseEntity<EmptyDataResponse> scrapMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
+    scrapService.scrap(user.getId(), marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
@@ -228,30 +247,46 @@ public class MarketController {
   @Operation(summary = "스크랩 취소", description = "마켓의 상품을 스크랩 취소하는 API")
   @DeleteMapping("/{marketItemId}/scrap")
   public ResponseEntity<EmptyDataResponse> cancelScrapMarketItem(
-      @PathParam("marketItemId") Long marketItemId
+      @PathVariable("marketItemId") Long marketItemId,
+      @AuthenticationPrincipal CustomUser user
   ) {
+    scrapService.delete(user.getId(), marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
   @Operation(summary = "리뷰 리스트 조회", description = "마켓 상품의 리뷰 리스트를 조회하는 API")
   @GetMapping("/{marketItemId}/reviews")
   public ResponseEntity<CommonResponse<GetReviewsForMarketItemResponse>> getReviewsOfMarketItem(
-      @PathParam("marketItemId") Long marketItemId,
+      @PathVariable("marketItemId") Long marketItemId,
       @RequestParam("order") ReviewOrder order,
-      @RequestParam("page") @Min(1) Integer page
+      @RequestParam("page") @Min(1) Integer page,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse();
+    Long memberId = CustomUser.getId(user);
+    Page<Review> reviews = reviewService.getReviewsForMarketItem(marketItemId, page - 1,
+        REVIEW_PAGE_SIZE, order.getSort());
+    List<ReviewBundle> reviewBundles = reviewService.convertToReviewBundle(reviews.getContent());
+    PageInfo pageInfo = new PageInfo(page, reviews.getTotalPages());
+    GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse(reviewBundles,
+        pageInfo, memberId);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
   @BearerAuth
+  @AuthorizeOwner(Deal.class)
   @Operation(summary = "리뷰 생성", description = "마켓의 상품에 리뷰를 등록하는 API")
   @PostMapping("/{marketItemId}/review")
-  public ResponseEntity<CommonResponse<GetReviewsForMarketItemResponse>> postReviewToMarketItem(
-      @PathParam("marketItemId") Long marketItemId,
-      @Valid @RequestBody PostReviewRequest request
+  public ResponseEntity<CommonResponse<ReviewResponse>> postReviewToMarketItem(
+      @PathVariable("marketItemId") Long marketItemId,
+      @Valid @RequestBody PostReviewRequest request,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    GetReviewsForMarketItemResponse response = new GetReviewsForMarketItemResponse();
+    Float score = request.getScore();
+    String content = request.getContent();
+    Review review = reviewService.saveIfNotExists(marketItemId, user.getId(), score, content);
+    ReviewBundle reviewBundle = reviewService.convertToReviewBundle(review);
+
+    ReviewResponse response = new ReviewResponse(reviewBundle);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 

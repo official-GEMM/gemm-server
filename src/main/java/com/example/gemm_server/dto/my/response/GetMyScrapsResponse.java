@@ -1,8 +1,11 @@
 package com.example.gemm_server.dto.my.response;
 
+import com.example.gemm_server.dto.common.PageInfo;
 import com.example.gemm_server.dto.common.response.PageInformationResponse;
+import com.example.gemm_server.dto.my.ScrapBundle;
 import com.example.gemm_server.dto.my.ScrapResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -15,6 +18,8 @@ public class GetMyScrapsResponse {
   @Schema(description = "페이지 정보")
   private PageInformationResponse pageInfo;
 
-  public GetMyScrapsResponse() {
+  public GetMyScrapsResponse(List<ScrapBundle> scraps, PageInfo pageInfo) {
+    this.scraps = scraps.stream().map(ScrapResponse::new).toArray(ScrapResponse[]::new);
+    this.pageInfo = new PageInformationResponse(pageInfo);
   }
 }

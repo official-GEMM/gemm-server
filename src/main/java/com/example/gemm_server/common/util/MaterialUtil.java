@@ -1,8 +1,10 @@
 package com.example.gemm_server.common.util;
 
 import com.example.gemm_server.common.enums.MaterialType;
+import com.example.gemm_server.dto.common.TypedMaterialFile;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public class MaterialUtil {
 
@@ -53,5 +55,24 @@ public class MaterialUtil {
   public static short getMaterialBitMask(List<MaterialType> materialTypes) {
     return (short) materialTypes.stream()
         .mapToInt(MaterialType::getBitMask).sum();
+  }
+
+  public static TypedMaterialFile convertToTypedMaterial(MultipartFile file) {
+    MaterialType materialType = getMaterialType(file.getOriginalFilename());
+    return new TypedMaterialFile(materialType, file);
+  }
+
+  public static MaterialType getMaterialType(String fileName) {
+    String extension = FileUtil.getFileExtension(fileName);
+    if (MaterialType.PPT.containExtension(extension)) {
+      return MaterialType.PPT;
+    }
+    if (MaterialType.ACTIVITY_SHEET.containExtension(extension)) {
+      return MaterialType.ACTIVITY_SHEET;
+    }
+    if (MaterialType.CUTOUT.containExtension(extension)) {
+      return MaterialType.CUTOUT;
+    }
+    throw new IllegalArgumentException("Unsupported file type: " + fileName);
   }
 }

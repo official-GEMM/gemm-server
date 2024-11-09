@@ -2,7 +2,10 @@ package com.example.gemm_server.dto.my;
 
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.MaterialType;
+import com.example.gemm_server.common.util.MaterialUtil;
+import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.common.response.MemberResponse;
+import com.example.gemm_server.dto.market.MarketItemBundle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -27,13 +30,13 @@ public class ScrapResponse {
   private float reviewAverageScore;
 
   @Schema(description = "리뷰 수")
-  private Long reviewCount;
+  private Integer reviewCount;
 
   @Schema(description = "가격")
-  private Long price;
+  private Integer price;
 
   @Schema(description = "타켓 연령")
-  private Long age;
+  private Short age;
 
   @Schema(description = "영역 및 활동")
   private Category category;
@@ -41,6 +44,19 @@ public class ScrapResponse {
   @Schema(description = "자료 종류")
   private MaterialType[] materialType;
 
-  public ScrapResponse() {
+  public ScrapResponse(ScrapBundle scrapBundle) {
+    MarketItemBundle marketItemBundle = scrapBundle.getMarketItemBundle();
+    MarketItem marketItem = marketItemBundle.getMarketItem();
+    this.scrapId = scrapBundle.getScrap().getId();
+    this.title = marketItem.getActivity().getTitle();
+    this.thumbnailPath = marketItemBundle.getThumbnailPath();
+    this.seller = new MemberResponse(marketItemBundle.getSeller());
+    this.reviewAverageScore = marketItem.getAverageScore();
+    this.reviewCount = marketItem.getReviewCount();
+    this.price = marketItem.getPrice();
+    this.age = marketItem.getActivity().getAge();
+    this.category = marketItem.getActivity().getCategory();
+    this.materialType = MaterialUtil.binaryToList(marketItem.getActivity().getMaterialType())
+        .toArray(MaterialType[]::new);
   }
 }

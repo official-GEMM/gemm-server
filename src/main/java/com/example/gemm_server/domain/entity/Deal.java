@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -50,4 +51,13 @@ public class Deal extends Timestamped {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
+
+  @Builder
+  public Deal(MarketItem marketItemWithActivityAndOwner, Long buyerId) {
+    this.price = marketItemWithActivityAndOwner.getPrice();
+    this.buyer = Member.builder().id(buyerId).build();
+    Long sellerId = marketItemWithActivityAndOwner.getOwner().getId();
+    this.seller = Member.builder().id(sellerId).build();
+    this.activity = marketItemWithActivityAndOwner.getActivity();
+  }
 }

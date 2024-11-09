@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.market;
 
+import com.example.gemm_server.domain.entity.Review;
 import com.example.gemm_server.dto.common.response.MemberWithProfileImageResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -25,6 +26,12 @@ public class ReviewResponse {
   @Schema(description = "생성 일시")
   private LocalDateTime createdAt;
 
-  public ReviewResponse() {
+  public ReviewResponse(ReviewBundle reviewBundle) {
+    Review review = reviewBundle.getReview();
+    this.reviewId = review.getId();
+    this.writer = new MemberWithProfileImageResponse(reviewBundle.getWriter());
+    this.score = review.getScore();
+    this.content = review.getContent();
+    this.createdAt = review.getCreatedAt();
   }
 }
