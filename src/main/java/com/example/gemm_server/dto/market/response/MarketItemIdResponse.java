@@ -10,6 +10,7 @@ public class MarketItemIdResponse {
   @Schema(description = "생성된 마켓 상품의 아이디")
   private long marketItemId;
 
-  public MarketItemIdResponse() {
+  public MarketItemIdResponse(Long marketItemId) {
+    this.marketItemId = marketItemId;
   }
 }
