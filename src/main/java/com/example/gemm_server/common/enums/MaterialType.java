@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 public enum MaterialType {
   PPT("피피티", (short) 0b100, List.of(".pptx")),
-  ACTIVITY_SHEET("활동지", (short) 0b010, List.of("docx", "pdf")),
-  CUTOUT("컷도안", (short) 0b001, List.of("jpg", "jpeg", "png"));
+  ACTIVITY_SHEET("활동지", (short) 0b010, List.of(".docx", ".pdf")),
+  CUTOUT("컷도안", (short) 0b001, List.of(".jpg", ".jpeg", ".png"));
 
   private final String description;
   private final short bitMask;
