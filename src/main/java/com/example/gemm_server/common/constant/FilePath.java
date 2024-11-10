@@ -1,5 +1,6 @@
 package com.example.gemm_server.common.constant;
 
+import com.example.gemm_server.common.enums.MaterialType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,4 +23,26 @@ public class FilePath {
 
   public static final String defaultProfileImagePath = "default/profile/profile-image.png";
   public static final String defaultThumbnailImagePath = "default/thumbnail/thumbnail-image.png";
+
+  public static String getMaterialFileSaveDirectoryPath(MaterialType materialType) {
+    if (materialType == MaterialType.PPT) {
+      return SAVE_PPT_PATH;
+    }
+    if (materialType == MaterialType.ACTIVITY_SHEET) {
+      return SAVE_ACTIVITY_SHEET_PATH;
+    } else {
+      return SAVE_CUTOUT_PATH;
+    }
+  }
+
+  public static String getThumbnailFileSaveDirectoryPath(MaterialType materialType) {
+    if (materialType == MaterialType.PPT) {
+      return SAVE_PPT_THUMBNAIL_PATH;
+    }
+    if (materialType == MaterialType.ACTIVITY_SHEET) {
+      return SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH;
+    } else {
+      return SAVE_CUTOUT_PATH;
+    }
+  }
 }
