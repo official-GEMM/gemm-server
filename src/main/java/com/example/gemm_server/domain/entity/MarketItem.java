@@ -17,11 +17,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @Entity
@@ -82,4 +84,18 @@ public class MarketItem extends Timestamped {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
+
+  public static MarketItem createInitial(int price, short year, short month, Long ownerId,
+      Activity activity) {
+    return MarketItem.builder()
+        .averageScore((float) 0)
+        .reviewCount(0)
+        .scrapCount(0)
+        .price(price)
+        .year(year)
+        .month(month)
+        .owner(Member.builder().id(ownerId).build())
+        .activity(activity)
+        .build();
+  }
 }
