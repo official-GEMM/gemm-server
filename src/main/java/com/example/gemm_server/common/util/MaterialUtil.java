@@ -52,7 +52,8 @@ public class MaterialUtil {
 
   public static short getMaterialBitMask(List<MaterialType> materialTypes) {
     return (short) materialTypes.stream()
-        .mapToInt(MaterialType::getBitMask).sum();
+        .mapToInt(MaterialType::getBitMask)
+        .reduce(0, (a, b) -> a | b);
   }
 
   public static MaterialType getMaterialType(String fileName) {
