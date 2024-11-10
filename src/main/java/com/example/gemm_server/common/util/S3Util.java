@@ -66,6 +66,10 @@ public class S3Util {
   }
 
   public static String deleteFile(String filePath) {
+    if (!staticAmazonS3.doesObjectExist(staticBucketName, filePath)) {
+      return null;
+    }
+
     DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(staticBucketName, filePath);
     staticAmazonS3.deleteObject(deleteObjectRequest);
     return filePath;
@@ -73,6 +77,10 @@ public class S3Util {
 
   public static InputStream downloadFile(String filePath) {
     try {
+      if (!staticAmazonS3.doesObjectExist(staticBucketName, filePath)) {
+        return null;
+      }
+
       S3Object s3Object = staticAmazonS3.getObject(staticBucketName, filePath);
       return s3Object.getObjectContent();
     } catch (SdkClientException e) {
@@ -82,14 +90,14 @@ public class S3Util {
 
   public static String copyFile(String fileName, String directoryPath) {
     try {
-      if (staticAmazonS3.doesObjectExist(staticBucketName, directoryPath + fileName)) {
-        String savePath = directoryPath.substring(5) + fileName;
-        staticAmazonS3.copyObject(staticBucketName, directoryPath + fileName, staticBucketName,
-            savePath);
-        return savePath;
-      } else {
+      if (!staticAmazonS3.doesObjectExist(staticBucketName, directoryPath + fileName)) {
         return null;
       }
+
+      String savePath = directoryPath.substring(5) + fileName;
+      staticAmazonS3.copyObject(staticBucketName, directoryPath + fileName, staticBucketName,
+          savePath);
+      return savePath;
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_COPY_FILE);
     }
@@ -97,6 +105,10 @@ public class S3Util {
 
   public static String getFileUrl(String filePath) {
     try {
+      if (!staticAmazonS3.doesObjectExist(staticBucketName, filePath)) {
+        return null;
+      }
+
       GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
           staticBucketName, filePath)
           .withMethod(HttpMethod.GET)
