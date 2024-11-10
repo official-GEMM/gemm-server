@@ -73,7 +73,6 @@ import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
 import com.example.gemm_server.exception.GeneratorException;
 import jakarta.transaction.Transactional;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +81,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Slf4j
@@ -388,15 +388,14 @@ public class ActivityService {
     }
 
     InputStream pptFile = S3Util.downloadFile(llmPptResponse.fileName());
-    List<String> imagePaths = PoiUtil.convertPptToPng(pptFile, llmPptResponse.fileName());
-    List<String> thumbnailPaths = new ArrayList<>();
+    List<MultipartFile> thumbnailFiles = PoiUtil.convertPptToPngs(pptFile,
+        llmPptResponse.fileName());
 
-    for (String imagePath : imagePaths) {
-      File file = new File(imagePath);
-      String uploadedFileName = S3Util.uploadFile(file, imagePath, TEMP_PPT_THUMBNAIL_PATH);
-      thumbnailPaths.add(S3Util.getFileUrl(uploadedFileName));
-    }
-    return thumbnailPaths.toArray(String[]::new);
+    return thumbnailFiles.stream().map(thumbnailFile -> {
+      String fileName = thumbnailFile.getOriginalFilename();
+      String uploadedFileName = S3Util.uploadFile(thumbnailFile, fileName, TEMP_PPT_THUMBNAIL_PATH);
+      return S3Util.getFileUrl(uploadedFileName);
+    }).toArray(String[]::new);
   }
 
   protected String getActivitySheetThumbnailPath(
@@ -405,13 +404,11 @@ public class ActivityService {
       return null;
     }
 
-    String docxFilePath = PoiUtil.convertDocxToPdf(
+    MultipartFile thumbnailFile = PoiUtil.convertDocxToPng(
         S3Util.downloadFile(llmActivitySheetResponse.fileName()),
         llmActivitySheetResponse.fileName());
-    String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
 
-    File file = new File(pngFilePath);
-    String uploadedFileName = S3Util.uploadFile(file, pngFilePath,
+    String uploadedFileName = S3Util.uploadFile(thumbnailFile, thumbnailFile.getOriginalFilename(),
         TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH);
     return S3Util.getFileUrl(uploadedFileName);
   }
