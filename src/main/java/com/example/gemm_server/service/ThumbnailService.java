@@ -54,4 +54,13 @@ public class ThumbnailService {
         .build();
     return thumbnailRepository.save(thumbnail);
   }
+
+  public List<Thumbnail> deleteByMaterialToS3AndDB(Material material) {
+    List<Thumbnail> thumbnails = thumbnailRepository.findAllByMaterialId(material.getId());
+    for (Thumbnail thumbnail : thumbnails) {
+      S3Util.deleteFile(thumbnail.getDirectoryPath() + thumbnail.getFileName());
+      thumbnailRepository.delete(thumbnail);
+    }
+    return thumbnails;
+  }
 }
