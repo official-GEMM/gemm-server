@@ -63,4 +63,25 @@ public class MaterialService {
         .build();
     return materialRepository.save(material);
   }
+
+  public List<Material> deleteToS3AndDBWithThumbnails(Activity activity,
+      List<Long> materialIds) {
+    return materialIds.stream().map(materialId -> {
+      Material material = findWithActivityByIdOrThrow(materialId);
+      if (!activity.getId().equals(material.getActivity().getId())) {
+        throw new MaterialException(MATERIAL_NOT_BELONGS_TO_ACTIVITY);
+      }
+
+      thumbnailService.deleteByMaterialToS3AndDB(material);
+      S3Util.deleteFile(material.getDirectoryPath() + material.getFileName());
+      materialRepository.delete(material);
+      return material;
+    }).toList();
+  }
+
+
+  public Material findWithActivityByIdOrThrow(Long materialId) {
+    return materialRepository.findWithActivityById(materialId)
+        .orElseThrow(() -> new MaterialException(MATERIAL_NOT_FOUND));
+  }
 }
