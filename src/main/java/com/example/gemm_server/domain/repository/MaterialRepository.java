@@ -2,6 +2,7 @@ package com.example.gemm_server.domain.repository;
 
 import com.example.gemm_server.domain.entity.Material;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,9 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
       "WHEN com.example.gemm_server.common.enums.MaterialType.CUTOUT THEN 3 " +
       "ELSE 4 END")
   List<Material> findByActivityIdOrderByType(Long activityId);
+
+  @EntityGraph(attributePaths = {"activity"})
+  Optional<Material> findWithActivityById(Long id);
+
+  List<Material> findAllByActivityId(Long activityId);
 }

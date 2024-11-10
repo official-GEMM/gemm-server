@@ -11,14 +11,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Getter
+@Setter
 @Entity
+@Builder
+@AllArgsConstructor
 @SQLDelete(sql = "UPDATE activity SET deleted_at = CURRENT_TIMESTAMP where id = ?")
 @SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -51,13 +56,4 @@ public class Activity extends Timestamped {
   @ColumnDescription("활동 내용")
   @Column(name = "content", columnDefinition = "TEXT", nullable = false) // 최대 2000자
   private String content;
-
-  @Builder
-  public Activity(String title, Short age, Short materialType, Category category, String content) {
-    this.title = title;
-    this.age = age;
-    this.materialType = materialType;
-    this.category = category;
-    this.content = content;
-  }
 }

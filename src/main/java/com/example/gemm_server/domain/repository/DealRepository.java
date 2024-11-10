@@ -25,4 +25,6 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
       LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
   Boolean existsByActivityIdAndBuyerId(Long activityId, Long buyerId);
+
+  Boolean existsByActivityId(Long activityId);
 }

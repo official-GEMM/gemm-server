@@ -9,8 +9,11 @@ import static com.example.gemm_server.common.constant.Policy.REVIEW_PAGE_SIZE;
 import com.example.gemm_server.common.annotation.auth.AuthorizeOwner;
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.enums.GemUsageType;
+import com.example.gemm_server.common.enums.MaterialType;
 import com.example.gemm_server.common.enums.Order;
 import com.example.gemm_server.common.enums.ReviewOrder;
+import com.example.gemm_server.common.util.MaterialUtil;
+import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.domain.entity.Banner;
 import com.example.gemm_server.domain.entity.Deal;
 import com.example.gemm_server.domain.entity.MarketItem;
@@ -21,6 +24,7 @@ import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.EmptyDataResponse;
 import com.example.gemm_server.dto.common.MemberBundle;
 import com.example.gemm_server.dto.common.PageInfo;
+import com.example.gemm_server.dto.common.TypedMaterialFile;
 import com.example.gemm_server.dto.common.response.DownloadMaterialResponse;
 import com.example.gemm_server.dto.common.response.GemResponse;
 import com.example.gemm_server.dto.market.MarketItemBundle;
@@ -38,6 +42,7 @@ import com.example.gemm_server.dto.market.response.GetReviewsForMarketItemRespon
 import com.example.gemm_server.dto.market.response.MarketItemDetailResponse;
 import com.example.gemm_server.dto.market.response.MarketItemIdResponse;
 import com.example.gemm_server.security.jwt.CustomUser;
+import com.example.gemm_server.service.ActivityService;
 import com.example.gemm_server.service.BannerService;
 import com.example.gemm_server.service.DealService;
 import com.example.gemm_server.service.GemService;
@@ -68,6 +73,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Validated
 @RequiredArgsConstructor
@@ -84,8 +90,8 @@ public class MarketController {
   private final DealService dealService;
   private final GemService gemService;
   private final ReviewService reviewService;
+  private final ActivityService activityService;
 
-  // 미완성 API
   @Operation(summary = "메인", description = "메인 페이지에 필요한 정보를 가져오는 API")
   @GetMapping("/main")
   public ResponseEntity<CommonResponse<GetMainResponse>> getMain(
@@ -204,9 +210,23 @@ public class MarketController {
   @Operation(summary = "상품 생성", description = "마켓에 상품을 등록하는 API")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<MarketItemIdResponse>> createMarketItem(
-      @Valid @ModelAttribute PostMarketItemRequest request
+      @Valid @ModelAttribute PostMarketItemRequest request,
+      @AuthenticationPrincipal CustomUser user
   ) {
-    MarketItemIdResponse response = new MarketItemIdResponse();
+    List<MultipartFile> materialFiles = request.getMaterials();
+    List<MaterialType> materialTypes = materialFiles.stream().map(
+        MultipartFile::getOriginalFilename).map(MaterialUtil::getMaterialType).toList();
+    short materialType = MaterialUtil.getMaterialBitMask(materialTypes);
+
+    Activity activity = activityService.save(request.getAge(), request.getTitle(),
+        request.getContent(), request.getCategory(), materialType);
+    List<TypedMaterialFile> typedMaterialFiles = TypedMaterialFile.convertTo(materialFiles);
+    materialService.saveToS3AndDBWithThumbnails(activity, typedMaterialFiles);
+
+    MarketItem marketItem = marketItemService.save(activity, user.getId(), request.getPrice(),
+        request.getYear(), request.getMonth());
+
+    MarketItemIdResponse response = new MarketItemIdResponse(marketItem.getId());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -218,7 +238,23 @@ public class MarketController {
       @Valid @ModelAttribute UpdateMarketItemRequest request,
       @PathVariable("marketItemId") Long marketItemId
   ) {
-    MarketItemIdResponse response = new MarketItemIdResponse();
+    MarketItem marketItem = marketItemService.findMarketItemOrThrow(marketItemId);
+    Long activityId = marketItem.getActivity().getId();
+    marketItemService.validateUpdatable(activityId);
+
+    List<MultipartFile> materialFiles = request.getMaterials();
+    List<Long> deletedMaterialIds = request.getDeletedMaterialIds();
+
+    List<TypedMaterialFile> typedMaterialFiles = TypedMaterialFile.convertTo(materialFiles);
+    Activity activity = activityService.findByActivityIdOrThrow(activityId);
+    materialService.saveToS3AndDBWithThumbnails(activity, typedMaterialFiles);
+    materialService.deleteToS3AndDBWithThumbnails(activity, deletedMaterialIds);
+    activityService.update(activity, request.getAge(), request.getTitle(), request.getContent(),
+        request.getCategory());
+    MarketItem updatedMarketItem = marketItemService.update(marketItem, request.getPrice(),
+        request.getYear(), request.getMonth());
+
+    MarketItemIdResponse response = new MarketItemIdResponse(updatedMarketItem.getId());
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -229,6 +265,7 @@ public class MarketController {
   public ResponseEntity<EmptyDataResponse> deleteMarketItem(
       @PathVariable("marketItemId") Long marketItemId
   ) {
+    marketItemService.delete(marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
