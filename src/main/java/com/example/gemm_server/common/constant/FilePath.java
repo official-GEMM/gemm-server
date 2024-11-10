@@ -22,4 +22,7 @@ public class FilePath {
 
   public static final String defaultProfileImagePath = "default/profile/profile-image.png";
   public static final String defaultThumbnailImagePath = "default/thumbnail/thumbnail-image.png";
+
+  public static final String PPT_TEMPLATE_THUMBNAIL_PATH = "template/pptx/";
+  public static final String ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH = "template/docx/";
 }

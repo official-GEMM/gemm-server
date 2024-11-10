@@ -12,6 +12,7 @@ import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_MATERIAL;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_THUMBNAIL;
+import static com.example.gemm_server.common.constant.FilePath.*;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_CUTOUT_PATH;
@@ -23,6 +24,7 @@ import static com.example.gemm_server.common.constant.FilePath.TEMP_CUTOUT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_THUMBNAIL_PATH;
 
+import com.example.gemm_server.common.constant.FilePath;
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.enums.MaterialType;
@@ -51,6 +53,7 @@ import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
 import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
+import com.example.gemm_server.dto.generator.response.ActivitySheetTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
@@ -65,8 +68,10 @@ import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
 import com.example.gemm_server.dto.generator.response.LlmPptResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
+import com.example.gemm_server.dto.generator.response.PptTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
+import com.example.gemm_server.dto.generator.response.TemplateResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
@@ -78,6 +83,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,6 +103,7 @@ public class ActivityService {
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
   private final ActivityRepository activityRepository;
+  private final S3Util s3Util;
 
   @Value("${llm.server.guide-generate-url}")
   private String guideGenerateUrl;
@@ -111,6 +119,10 @@ public class ActivityService {
   private String activitySheetUpdateUrl;
   @Value("${llm.server.cutout-update-url}")
   private String cutoutUpdateUrl;
+  @Value("${cloud.aws.s3.ppt-template-count}")
+  private short pptTemplateCount;
+  @Value("${cloud.aws.s3.activity-sheet-template-count}")
+  private short activitySheetTemplateCount;
 
   @Transactional
   public GenerateGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
@@ -327,6 +339,20 @@ public class ActivityService {
         GemUsageType.AI_USE);
 
     return new UpdatedCutoutResponse(commentedCutoutResponse, member.getGem());
+  }
+
+  public PptTemplatesResponse getPptTemplates() {
+    List<TemplateResponse> templateResponses = IntStream.range(0, pptTemplateCount)
+        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .collect(Collectors.toList());
+    return new PptTemplatesResponse(templateResponses);
+  }
+
+  public ActivitySheetTemplatesResponse getActivitySheetTemplates() {
+    List<TemplateResponse> templateResponses = IntStream.range(0, activitySheetTemplateCount)
+        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .collect(Collectors.toList());
+    return new ActivitySheetTemplatesResponse(templateResponses);
   }
 
   protected Material uploadMaterialToS3(String fileName, String tempSavedDirectoryPath,
