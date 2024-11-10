@@ -134,4 +134,19 @@ public class MarketItemService {
     MarketItem marketItem = MarketItem.createInitial(price, year, month, ownerId, activity);
     return marketItemRepository.save(marketItem);
   }
+
+  public void validateUpdatable(Long activityId) {
+    boolean hasDeal = dealRepository.existsByActivityId(activityId);
+    if (hasDeal) {
+      throw new MarketItemException(MARKET_ITEM_HAS_DEAL);
+    }
+  }
+
+  @Transactional
+  public MarketItem update(MarketItem marketItem, int price, short year, short month) {
+    marketItem.setPrice(price);
+    marketItem.setYear(year);
+    marketItem.setMonth(month);
+    return marketItemRepository.save(marketItem);
+  }
 }
