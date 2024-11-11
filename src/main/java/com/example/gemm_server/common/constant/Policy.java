@@ -31,4 +31,7 @@ public class Policy {
   // 휴대전화 인증 시도 가능 횟수
   public static final int VERIFICATION_LIMIT = 5;
   public static final int VERIFICATION_SMS_SEND_LIMIT = 5;
+
+  // 마켓 상품당 최대 자료 등록 개수
+  public static final int MATERIAL_MAX_COUNT_PER_MARKET_ITEM = 5;
 }
