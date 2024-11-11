@@ -26,8 +26,9 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
       "ELSE 4 END")
   List<Material> findByActivityIdOrderByType(Long activityId);
 
-  @EntityGraph(attributePaths = {"activity"})
-  Optional<Material> findWithActivityById(Long id);
+  Optional<Material> findByIdAndActivityId(Long id, Long activityId);
 
   List<Material> findAllByActivityId(Long activityId);
+
+  int countAllByActivityId(Long activityId);
 }
