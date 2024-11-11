@@ -240,15 +240,14 @@ public class MarketController {
   ) {
     MarketItem marketItem = marketItemService.findMarketItemOrThrow(marketItemId);
     Long activityId = marketItem.getActivity().getId();
-    marketItemService.validateUpdatable(activityId);
-
     List<MultipartFile> materialFiles = request.getMaterials();
     List<Long> deletedMaterialIds = request.getDeletedMaterialIds();
+    marketItemService.validateUpdatable(activityId, materialFiles.size(), deletedMaterialIds);
 
     List<TypedMaterialFile> typedMaterialFiles = TypedMaterialFile.convertTo(materialFiles);
     Activity activity = activityService.findByActivityIdOrThrow(activityId);
     materialService.saveToS3AndDBWithThumbnails(activity, typedMaterialFiles);
-    materialService.deleteToS3AndDBWithThumbnails(activity, deletedMaterialIds);
+    materialService.deleteToS3AndDBWithThumbnails(deletedMaterialIds);
     activityService.update(activity, request.getAge(), request.getTitle(), request.getContent(),
         request.getCategory());
     MarketItem updatedMarketItem = marketItemService.update(marketItem, request.getPrice(),

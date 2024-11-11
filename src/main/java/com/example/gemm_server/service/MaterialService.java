@@ -1,6 +1,5 @@
 package com.example.gemm_server.service;
 
-import static com.example.gemm_server.common.code.error.MaterialErrorCode.MATERIAL_NOT_BELONGS_TO_ACTIVITY;
 import static com.example.gemm_server.common.code.error.MaterialErrorCode.MATERIAL_NOT_FOUND;
 
 import com.example.gemm_server.common.constant.FilePath;
@@ -64,15 +63,10 @@ public class MaterialService {
     return materialRepository.save(material);
   }
 
-  public List<Material> deleteToS3AndDBWithThumbnails(Activity activity,
-      List<Long> materialIds) {
+  public List<Material> deleteToS3AndDBWithThumbnails(List<Long> materialIds) {
     return materialIds.stream().map(materialId -> {
-      Material material = findWithActivityByIdOrThrow(materialId);
-      if (!activity.getId().equals(material.getActivity().getId())) {
-        throw new MaterialException(MATERIAL_NOT_BELONGS_TO_ACTIVITY);
-      }
-
-      thumbnailService.deleteByMaterialToS3AndDB(material);
+      Material material = findByIdOrThrow(materialId);
+      thumbnailService.deleteByMaterialToS3AndDB(material.getId());
       S3Util.deleteFile(material.getDirectoryPath() + material.getFileName());
       materialRepository.delete(material);
       return material;
@@ -80,8 +74,8 @@ public class MaterialService {
   }
 
 
-  public Material findWithActivityByIdOrThrow(Long materialId) {
-    return materialRepository.findWithActivityById(materialId)
+  public Material findByIdOrThrow(Long materialId) {
+    return materialRepository.findById(materialId)
         .orElseThrow(() -> new MaterialException(MATERIAL_NOT_FOUND));
   }
 }

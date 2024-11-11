@@ -47,6 +47,7 @@ public class ActivityDetailRequest {
   private short month;
 
   @NotNull
+  @Size(max = 5)
   @Schema(description = "업로드할 자료 리스트")
   private List<MultipartFile> materials;
 }

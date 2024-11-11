@@ -55,8 +55,8 @@ public class ThumbnailService {
     return thumbnailRepository.save(thumbnail);
   }
 
-  public List<Thumbnail> deleteByMaterialToS3AndDB(Material material) {
-    List<Thumbnail> thumbnails = thumbnailRepository.findAllByMaterialId(material.getId());
+  public List<Thumbnail> deleteByMaterialToS3AndDB(Long materialId) {
+    List<Thumbnail> thumbnails = thumbnailRepository.findAllByMaterialId(materialId);
     for (Thumbnail thumbnail : thumbnails) {
       S3Util.deleteFile(thumbnail.getDirectoryPath() + thumbnail.getFileName());
       thumbnailRepository.delete(thumbnail);
