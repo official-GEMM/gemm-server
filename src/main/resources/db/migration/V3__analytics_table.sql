@@ -4,7 +4,6 @@ CREATE TABLE `analytics`
     `created_at`            datetime(3)          NOT NULL,
     `deleted_at`            datetime(3) DEFAULT NULL,
     `directory_path`        varchar(255)  NOT NULL,
-    `file_name`             varchar(255)  NOT NULL,
     `origin_name`           varchar(255)  NOT NULL,
     `category`              enum (
         'ART_AREA',
