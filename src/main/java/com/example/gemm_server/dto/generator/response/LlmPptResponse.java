@@ -4,7 +4,8 @@ public record LlmPptResponse(
     String fileName,
     String filePath,
     Float layoutCompleteness,
-    Float readability
+    Float readability,
+    Short generationTime
 ) {
 
   public boolean isEmptyFileValue() {
