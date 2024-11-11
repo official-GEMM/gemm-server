@@ -36,7 +36,13 @@ public record GenerateMaterialRequest(
     String activitySheet,
 
     @Schema(description = "컷/도안에 반영하고 싶은 내용")
-    String cutout
+    String cutout,
+
+    @Schema(description = "PPT 템플릿 번호")
+    Short pptTemplateNumber,
+
+    @Schema(description = "활동지 템플릿 번호")
+    Short activitySheetTemplateNumber
 ) {
 
   public boolean isEmptyMaterialRequest() {
