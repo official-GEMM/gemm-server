@@ -38,6 +38,7 @@ public class ActivityDetailRequest {
   @Schema(description = "내용")
   private String content;
 
+  @Min(2020)
   @Schema(description = "연도")
   private short year;
 
