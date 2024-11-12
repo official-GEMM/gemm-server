@@ -4,6 +4,7 @@ import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMB
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.MEMBER_UPDATED;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.PHONE_VERIFICATION;
 import static com.example.gemm_server.common.code.success.MemberSuccessCode.SEND_PHONE_VERIFICATION_CODE;
+import static com.example.gemm_server.common.code.success.MemberSuccessCode.VERIFY_ADMIN_PHONE_NUMBER;
 
 import com.example.gemm_server.common.annotation.auth.BearerAuth;
 import com.example.gemm_server.common.constant.TimeZone;
@@ -60,6 +61,8 @@ public class AuthController {
 
   @Value("${authentication.domain.cookie.refresh-token}")
   private String refreshTokenCookieDomain;
+  @Value("${admin.phone.verification-code}")
+  private String adminPhoneVerificationCode;
 
   @BearerAuth
   @Operation(summary = "출석 보상 요청", description = "사용자가 아직 출석을 하지 않은 경우에 출석 보상을 주는 API")
@@ -148,6 +151,10 @@ public class AuthController {
       @AuthenticationPrincipal CustomUser user
   ) {
     String phoneNumber = sendPhoneVerificationCodeRequest.getPhoneNumber();
+    if (authService.isAdminPhoneNumber(phoneNumber)) {
+      authService.saveVerificationCode(user.getId(), phoneNumber, adminPhoneVerificationCode);
+      return ResponseEntity.ok(new EmptyDataResponse(VERIFY_ADMIN_PHONE_NUMBER));
+    }
     phoneVerificationSendLock.lock();
     try {
       LocalDate today = LocalDate.now(TimeZone.DEFAULT);
@@ -168,7 +175,6 @@ public class AuthController {
       @Valid @RequestBody CheckPhoneVerificationCodeRequest checkPhoneVerificationCodeRequest,
       @AuthenticationPrincipal CustomUser user
   ) {
-    String phoneNumber = checkPhoneVerificationCodeRequest.getPhoneNumber();
     String verificationCode = checkPhoneVerificationCodeRequest.getVerificationCode();
 
     PhoneVerification phoneVerification =
