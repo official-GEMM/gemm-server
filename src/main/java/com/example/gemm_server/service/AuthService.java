@@ -107,7 +107,8 @@ public class AuthService {
     if (!isPhoneNumberValidated(memberId)) {
       throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
     }
-    if (memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
+    if (!isAdminPhoneNumber(phoneNumber) &&
+        memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
       throw new MemberException(PHONE_NUMBER_DUPLICATED);
     }
   }
