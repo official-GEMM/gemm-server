@@ -2,21 +2,29 @@ package com.example.gemm_server.service;
 
 import static com.example.gemm_server.common.code.error.DealErrorCode.DEAL_AlREADY_EXISTS;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.CANNOT_PURCHASE_OWN_MARKET_ITEM;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.EXCEED_MAX_MATERIAL_COUNT;
+import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_HAS_DEAL;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.MARKET_ITEM_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.MarketItemErrorCode.SEARCH_TYPE_NULL;
+import static com.example.gemm_server.common.code.error.MaterialErrorCode.MATERIAL_NOT_BELONGS_TO_ACTIVITY;
+import static com.example.gemm_server.common.constant.Policy.MATERIAL_MAX_COUNT_PER_MARKET_ITEM;
 
 import com.example.gemm_server.common.enums.Order;
+import com.example.gemm_server.domain.entity.Activity;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.DealRepository;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
+import com.example.gemm_server.domain.repository.MaterialRepository;
 import com.example.gemm_server.domain.repository.ScrapRepository;
 import com.example.gemm_server.dto.common.request.FilterRequest;
 import com.example.gemm_server.dto.common.request.SearchRequest;
 import com.example.gemm_server.dto.market.MarketItemBundle;
 import com.example.gemm_server.exception.DealException;
 import com.example.gemm_server.exception.MarketItemException;
+import com.example.gemm_server.exception.MaterialException;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +43,7 @@ public class MarketItemService {
   private final ThumbnailService thumbnailService;
   private final ScrapRepository scrapRepository;
   private final DealRepository dealRepository;
+  private final MaterialRepository materialRepository;
 
   public Page<MarketItem> getMarketItemsOrderBy(int pageNumber, int pageSize, Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
@@ -116,8 +125,45 @@ public class MarketItemService {
     }
   }
 
+  public MarketItem delete(Long marketItemId) {
+    MarketItem marketItem = findMarketItemOrThrow(marketItemId);
+    marketItemRepository.delete(marketItem);
+    return marketItem;
+  }
+
   public MarketItem getMarketItemWithActivityOrThrow(Long marketItemId) {
     return marketItemRepository.findWithActivityById(marketItemId)
         .orElseThrow(() -> new MarketItemException(MARKET_ITEM_NOT_FOUND));
+  }
+
+  public MarketItem save(Activity activity, Long ownerId, int price, short year, short month) {
+    MarketItem marketItem = MarketItem.createInitial(price, year, month, ownerId, activity);
+    return marketItemRepository.save(marketItem);
+  }
+
+  public void validateUpdatable(Long activityId, int addedMaterialCount,
+      List<Long> deletedMaterialIds) {
+    boolean hasDeal = dealRepository.existsByActivityId(activityId);
+    if (hasDeal) {
+      throw new MarketItemException(MARKET_ITEM_HAS_DEAL);
+    }
+    for (Long materialId : deletedMaterialIds) {
+      materialRepository.findByIdAndActivityId(materialId, activityId)
+          .orElseThrow(() -> new MaterialException(MATERIAL_NOT_BELONGS_TO_ACTIVITY));
+    }
+    int materialDeltaCount = addedMaterialCount - deletedMaterialIds.size();
+    int materialCount = materialRepository.countAllByActivityId(activityId) + materialDeltaCount;
+    if (materialCount > MATERIAL_MAX_COUNT_PER_MARKET_ITEM) {
+      throw new MarketItemException(EXCEED_MAX_MATERIAL_COUNT);
+    }
+
+  }
+
+  @Transactional
+  public MarketItem update(MarketItem marketItem, int price, short year, short month) {
+    marketItem.setPrice(price);
+    marketItem.setYear(year);
+    marketItem.setMonth(month);
+    return marketItemRepository.save(marketItem);
   }
 }

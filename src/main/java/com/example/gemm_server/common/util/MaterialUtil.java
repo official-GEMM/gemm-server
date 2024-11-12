@@ -1,10 +1,8 @@
 package com.example.gemm_server.common.util;
 
 import com.example.gemm_server.common.enums.MaterialType;
-import com.example.gemm_server.dto.common.TypedMaterialFile;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.web.multipart.MultipartFile;
 
 public class MaterialUtil {
 
@@ -54,12 +52,8 @@ public class MaterialUtil {
 
   public static short getMaterialBitMask(List<MaterialType> materialTypes) {
     return (short) materialTypes.stream()
-        .mapToInt(MaterialType::getBitMask).sum();
-  }
-
-  public static TypedMaterialFile convertToTypedMaterial(MultipartFile file) {
-    MaterialType materialType = getMaterialType(file.getOriginalFilename());
-    return new TypedMaterialFile(materialType, file);
+        .mapToInt(MaterialType::getBitMask)
+        .reduce(0, (a, b) -> a | b);
   }
 
   public static MaterialType getMaterialType(String fileName) {

@@ -17,7 +17,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.example.gemm_server.exception.GeneratorException;
 import jakarta.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
@@ -46,16 +45,6 @@ public class S3Util {
     staticExpirationTime = this.expirationTime;
   }
 
-  public static String uploadFile(File file, String fileName, String saveDirectoryPath) {
-    try {
-      staticAmazonS3.putObject(staticBucketName, saveDirectoryPath + fileName, file);
-      file.delete();
-      return saveDirectoryPath + fileName;
-    } catch (SdkClientException e) {
-      throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
-    }
-  }
-
   public static String uploadFile(MultipartFile multipartFile, String fileName,
       String saveDirectoryPath) {
     try {
@@ -77,6 +66,10 @@ public class S3Util {
   }
 
   public static String deleteFile(String filePath) {
+    if (!staticAmazonS3.doesObjectExist(staticBucketName, filePath)) {
+      return null;
+    }
+
     DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(staticBucketName, filePath);
     staticAmazonS3.deleteObject(deleteObjectRequest);
     return filePath;
@@ -84,6 +77,10 @@ public class S3Util {
 
   public static InputStream downloadFile(String filePath) {
     try {
+      if (!staticAmazonS3.doesObjectExist(staticBucketName, filePath)) {
+        return null;
+      }
+
       S3Object s3Object = staticAmazonS3.getObject(staticBucketName, filePath);
       return s3Object.getObjectContent();
     } catch (SdkClientException e) {
@@ -93,14 +90,14 @@ public class S3Util {
 
   public static String copyFile(String fileName, String directoryPath) {
     try {
-      if (staticAmazonS3.doesObjectExist(staticBucketName, directoryPath + fileName)) {
-        String savePath = directoryPath.substring(5) + fileName;
-        staticAmazonS3.copyObject(staticBucketName, directoryPath + fileName, staticBucketName,
-            savePath);
-        return savePath;
-      } else {
+      if (!staticAmazonS3.doesObjectExist(staticBucketName, directoryPath + fileName)) {
         return null;
       }
+
+      String savePath = directoryPath.substring(5) + fileName;
+      staticAmazonS3.copyObject(staticBucketName, directoryPath + fileName, staticBucketName,
+          savePath);
+      return savePath;
     } catch (SdkClientException e) {
       throw new GeneratorException(FAILED_TO_COPY_FILE);
     }
@@ -108,6 +105,10 @@ public class S3Util {
 
   public static String getFileUrl(String filePath) {
     try {
+      if (!staticAmazonS3.doesObjectExist(staticBucketName, filePath)) {
+        return null;
+      }
+
       GeneratePresignedUrlRequest presignedUrlRequest = new GeneratePresignedUrlRequest(
           staticBucketName, filePath)
           .withMethod(HttpMethod.GET)

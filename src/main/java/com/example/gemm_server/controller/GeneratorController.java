@@ -11,9 +11,11 @@ import com.example.gemm_server.dto.generator.request.UpdateActivitySheetRequest;
 import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
+import com.example.gemm_server.dto.generator.response.ActivitySheetTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.GenerateGuideResponse;
 import com.example.gemm_server.dto.generator.response.GeneratedMaterialsResponse;
 import com.example.gemm_server.dto.generator.response.LinkedMaterialGuideResponse;
+import com.example.gemm_server.dto.generator.response.PptTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
@@ -28,13 +30,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@BearerAuth
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/generate")
@@ -43,6 +45,7 @@ public class GeneratorController {
 
   private final ActivityService activityService;
 
+  @BearerAuth
   @Operation(summary = "활동 방법 생성", description = "활동 방법을 생성하는 API")
   @PostMapping("/guide")
   public ResponseEntity<CommonResponse<GenerateGuideResponse>> generateActivityGuide(
@@ -54,6 +57,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(generateGuideResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "활동 방법 저장", description = "활동 방법을 내 저장소에 저장하는 API")
   @PostMapping("/guide/result")
   public ResponseEntity<CommonResponse<SavedGuideResponse>> saveActivityGuide(
@@ -65,6 +69,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(savedGuideResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "활동 방법 수정", description = "활동 방법을 수정하는 API")
   @PutMapping("/guide/result")
   public ResponseEntity<CommonResponse<UpdatedGuideResponse>> updateActivityGuide(
@@ -76,6 +81,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(updatedGuideResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "활동 방법 자료 생성 연동", description = "활동 방법을 자료 생성에 연동하는 API")
   @PostMapping("/guide/sync")
   public ResponseEntity<CommonResponse<LinkedMaterialGuideResponse>> linkGuideToMaterial(
@@ -86,6 +92,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(linkedMaterialGuideResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "활동 자료 생성", description = "활동 자료를 생성하는 API")
   @PostMapping("/materials")
   public ResponseEntity<CommonResponse<GeneratedMaterialsResponse>> generateMaterial(
@@ -97,6 +104,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(generatedMaterialsResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "활동 자료 저장", description = "활동 자료를 저장하는 API")
   @PostMapping("/materials/result")
   public ResponseEntity<CommonResponse<SavedMaterialResponse>> saveMaterial(
@@ -108,6 +116,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(savedMaterialResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "PPT 자료 수정", description = "PPT를 수정하는 API")
   @PutMapping("/materials/result/ppt")
   public ResponseEntity<CommonResponse<UpdatedPptResponse>> updatePpt(
@@ -119,6 +128,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(updatedPptResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "활동지 자료 수정", description = "활동지를 수정하는 API")
   @PutMapping("/materials/result/activitySheet")
   public ResponseEntity<CommonResponse<UpdatedActivitySheetResponse>> updateActivitySheet(
@@ -130,6 +140,7 @@ public class GeneratorController {
     return ResponseEntity.ok(new CommonResponse<>(updatedActivitySheetResponse));
   }
 
+  @BearerAuth
   @Operation(summary = "컷/도안 자료 수정", description = "컷/도안을 수정하는 API")
   @PutMapping("/materials/result/cutout")
   public ResponseEntity<CommonResponse<UpdatedCutoutResponse>> updateCutout(
@@ -139,5 +150,19 @@ public class GeneratorController {
     UpdatedCutoutResponse updatedCutoutResponse = activityService.updateCutout(updateCutoutRequest,
         user.getId());
     return ResponseEntity.ok(new CommonResponse<>(updatedCutoutResponse));
+  }
+
+  @Operation(summary = "PPT 템플릿 조회", description = "s3로부터 PPT 템플릿 대표 이미지와 번호를 불러오는 API")
+  @GetMapping("/materials/template/ppt")
+  public ResponseEntity<CommonResponse<PptTemplatesResponse>> getPptTemplates() {
+    PptTemplatesResponse pptTemplates = activityService.getPptTemplates();
+    return ResponseEntity.ok(new CommonResponse<>(pptTemplates));
+  }
+
+  @Operation(summary = "활동지 템플릿 조회", description = "s3로부터 활동지 템플릿 대표 이미지와 번호를 불러오는 API")
+  @GetMapping("/materials/template/activitySheet")
+  public ResponseEntity<CommonResponse<ActivitySheetTemplatesResponse>> getActivitySheetTemplates() {
+    ActivitySheetTemplatesResponse activitySheetTemplatesResponse = activityService.getActivitySheetTemplates();
+    return ResponseEntity.ok(new CommonResponse<>(activitySheetTemplatesResponse));
   }
 }

@@ -48,6 +48,8 @@ public class AuthService {
   private String apiSecretKey;
   @Value("${coolsms.api.fromnumber}")
   private String fromNumber;
+  @Value("${admin.phone.number}")
+  private String adminPhoneNumber;
 
   private final MemberService memberService;
   private final GemService gemService;
@@ -105,7 +107,8 @@ public class AuthService {
     if (!isPhoneNumberValidated(memberId)) {
       throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
     }
-    if (memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
+    if (!isAdminPhoneNumber(phoneNumber) &&
+        memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
       throw new MemberException(PHONE_NUMBER_DUPLICATED);
     }
   }
@@ -182,5 +185,9 @@ public class AuthService {
             .orElseGet(() -> new VerificationSmsSendAttempt(memberId, today));
     smsSendAttempt.incrementAttemptCount();
     return this.verificationSmsSendAttemptRepository.save(smsSendAttempt);
+  }
+
+  public boolean isAdminPhoneNumber(String phoneNumber) {
+    return phoneNumber.equals(adminPhoneNumber);
   }
 }

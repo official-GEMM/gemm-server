@@ -1,5 +1,6 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.ActivityErrorCode.ACTIVITY_NOT_FOUND;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_DESIGN_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_ACTIVITY_SHEET_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_CUTOUT_DESIGN_RESULT;
@@ -12,6 +13,7 @@ import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_MATERIAL;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_THUMBNAIL;
+import static com.example.gemm_server.common.constant.FilePath.*;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_CUTOUT_PATH;
@@ -23,10 +25,13 @@ import static com.example.gemm_server.common.constant.FilePath.TEMP_CUTOUT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_THUMBNAIL_PATH;
 
+import com.example.gemm_server.common.constant.FilePath;
 import com.example.gemm_server.common.constant.Policy;
+import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.enums.MaterialType;
 import com.example.gemm_server.common.util.FileUtil;
+import com.example.gemm_server.common.util.MaterialUtil;
 import com.example.gemm_server.common.util.PoiUtil;
 import com.example.gemm_server.common.util.S3Util;
 import com.example.gemm_server.common.util.WebClientUtil;
@@ -51,6 +56,7 @@ import com.example.gemm_server.dto.generator.request.UpdateCutoutRequest;
 import com.example.gemm_server.dto.generator.request.UpdateGuideRequest;
 import com.example.gemm_server.dto.generator.request.UpdatePptRequest;
 import com.example.gemm_server.dto.generator.response.ActivitySheetPathResponse;
+import com.example.gemm_server.dto.generator.response.ActivitySheetTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.CommentedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.CommentedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.CommentedPptResponse;
@@ -65,23 +71,28 @@ import com.example.gemm_server.dto.generator.response.LlmGuideResponse;
 import com.example.gemm_server.dto.generator.response.LlmMaterialResponse;
 import com.example.gemm_server.dto.generator.response.LlmPptResponse;
 import com.example.gemm_server.dto.generator.response.PptPathResponse;
+import com.example.gemm_server.dto.generator.response.PptTemplatesResponse;
 import com.example.gemm_server.dto.generator.response.SavedGuideResponse;
 import com.example.gemm_server.dto.generator.response.SavedMaterialResponse;
+import com.example.gemm_server.dto.generator.response.TemplateResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedActivitySheetResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedCutoutResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedGuideResponse;
 import com.example.gemm_server.dto.generator.response.UpdatedPptResponse;
+import com.example.gemm_server.exception.ActivityException;
 import com.example.gemm_server.exception.GeneratorException;
 import jakarta.transaction.Transactional;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Slf4j
@@ -97,6 +108,7 @@ public class ActivityService {
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
   private final ActivityRepository activityRepository;
+  private final S3Util s3Util;
 
   @Value("${llm.server.guide-generate-url}")
   private String guideGenerateUrl;
@@ -112,6 +124,10 @@ public class ActivityService {
   private String activitySheetUpdateUrl;
   @Value("${llm.server.cutout-update-url}")
   private String cutoutUpdateUrl;
+  @Value("${cloud.aws.s3.ppt-template-count}")
+  private short pptTemplateCount;
+  @Value("${cloud.aws.s3.activity-sheet-template-count}")
+  private short activitySheetTemplateCount;
 
   @Transactional
   public GenerateGuideResponse generateGuide(GenerateGuideRequest generateGuideRequest,
@@ -332,6 +348,20 @@ public class ActivityService {
     return new UpdatedCutoutResponse(commentedCutoutResponse, member.getGem());
   }
 
+  public PptTemplatesResponse getPptTemplates() {
+    List<TemplateResponse> templateResponses = IntStream.range(0, pptTemplateCount)
+        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .collect(Collectors.toList());
+    return new PptTemplatesResponse(templateResponses);
+  }
+
+  public ActivitySheetTemplatesResponse getActivitySheetTemplates() {
+    List<TemplateResponse> templateResponses = IntStream.range(0, activitySheetTemplateCount)
+        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .collect(Collectors.toList());
+    return new ActivitySheetTemplatesResponse(templateResponses);
+  }
+
   protected Material uploadMaterialToS3(String fileName, String tempSavedDirectoryPath,
       String saveDirectoryPath, Activity activity, MaterialType materialType) {
     Optional.ofNullable(S3Util.copyFile(fileName, tempSavedDirectoryPath)).orElseThrow(() ->
@@ -391,15 +421,14 @@ public class ActivityService {
     }
 
     InputStream pptFile = S3Util.downloadFile(llmPptResponse.fileName());
-    List<String> imagePaths = PoiUtil.convertPptToPng(pptFile, llmPptResponse.fileName());
-    List<String> thumbnailPaths = new ArrayList<>();
+    List<MultipartFile> thumbnailFiles = PoiUtil.convertPptToPngs(pptFile,
+        llmPptResponse.fileName());
 
-    for (String imagePath : imagePaths) {
-      File file = new File(imagePath);
-      String uploadedFileName = S3Util.uploadFile(file, imagePath, TEMP_PPT_THUMBNAIL_PATH);
-      thumbnailPaths.add(S3Util.getFileUrl(uploadedFileName));
-    }
-    return thumbnailPaths.toArray(String[]::new);
+    return thumbnailFiles.stream().map(thumbnailFile -> {
+      String fileName = thumbnailFile.getOriginalFilename();
+      String uploadedFileName = S3Util.uploadFile(thumbnailFile, fileName, TEMP_PPT_THUMBNAIL_PATH);
+      return S3Util.getFileUrl(uploadedFileName);
+    }).toArray(String[]::new);
   }
 
   protected String getActivitySheetThumbnailPath(
@@ -408,13 +437,11 @@ public class ActivityService {
       return null;
     }
 
-    String docxFilePath = PoiUtil.convertDocxToPdf(
+    MultipartFile thumbnailFile = PoiUtil.convertDocxToPng(
         S3Util.downloadFile(llmActivitySheetResponse.fileName()),
         llmActivitySheetResponse.fileName());
-    String pngFilePath = PoiUtil.convertPdfToPng(docxFilePath);
 
-    File file = new File(pngFilePath);
-    String uploadedFileName = S3Util.uploadFile(file, pngFilePath,
+    String uploadedFileName = S3Util.uploadFile(thumbnailFile, thumbnailFile.getOriginalFilename(),
         TEMP_ACTIVITY_SHEET_THUMBNAIL_PATH);
     return S3Util.getFileUrl(uploadedFileName);
   }
@@ -425,5 +452,36 @@ public class ActivityService {
     }
 
     return llmCutoutResponse.filePath();
+  }
+
+  public Activity save(short age, String title, String content, Category category,
+      short materialType) {
+    Activity activity = Activity.builder()
+        .age(age)
+        .title(title)
+        .content(content)
+        .category(category)
+        .materialType(materialType)
+        .build();
+    return activityRepository.save(activity);
+  }
+
+  public Activity findByActivityIdOrThrow(Long activityId) {
+    return activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityException(ACTIVITY_NOT_FOUND));
+  }
+
+  public Activity update(Activity activity, short age, String title, String content,
+      Category category) {
+    List<Material> materials = materialRepository.findAllByActivityId(activity.getId());
+    List<MaterialType> materialTypes = materials.stream().map(Material::getType).toList();
+    short materialType = MaterialUtil.getMaterialBitMask(materialTypes);
+
+    activity.setAge(age);
+    activity.setTitle(title);
+    activity.setContent(content);
+    activity.setCategory(category);
+    activity.setMaterialType(materialType);
+    return activityRepository.save(activity);
   }
 }
