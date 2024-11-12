@@ -103,6 +103,7 @@ public class ActivityService {
   private final WebClientUtil webClientUtil;
   private final GemService gemService;
   private final MemberService memberService;
+  private final AnalyticsService analyticsService;
   private final GenerationRepository generationRepository;
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
@@ -218,6 +219,8 @@ public class ActivityService {
       pptPathResponse = new PptPathResponse(getPptThumbnailPaths(llmMaterialResponse.ppt()),
           llmMaterialResponse.ppt().filePath());
       amount += Policy.GENERATE_PPT;
+      analyticsService.saveAnalyticsInformation(llmMaterialResponse.ppt(),
+          generateMaterialRequest.category(), member.getNickname());
     }
 
     ActivitySheetPathResponse activitySheetPathResponse = null;
