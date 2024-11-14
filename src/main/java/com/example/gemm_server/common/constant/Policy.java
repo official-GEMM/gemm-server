@@ -27,6 +27,7 @@ public class Policy {
   public static final int REVIEW_PAGE_SIZE = 20;
   public static final int SCRAP_PAGE_SIZE = 9;
   public static final int DEAL_PAGE_SIZE = 4;
+  public static final int ANALYTICS_PAGE_SIZE = 10;
 
   // 휴대전화 인증 시도 가능 횟수
   public static final int VERIFICATION_LIMIT = 5;
