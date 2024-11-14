@@ -17,6 +17,7 @@ import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.DealRepository;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
+import com.example.gemm_server.domain.repository.ReviewRepository;
 import com.example.gemm_server.domain.repository.ScrapRepository;
 import com.example.gemm_server.dto.common.request.FilterRequest;
 import com.example.gemm_server.dto.common.request.SearchRequest;
@@ -44,6 +45,7 @@ public class MarketItemService {
   private final ScrapRepository scrapRepository;
   private final DealRepository dealRepository;
   private final MaterialRepository materialRepository;
+  private final ReviewRepository reviewRepository;
 
   public Page<MarketItem> getMarketItemsOrderBy(int pageNumber, int pageSize, Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
@@ -164,6 +166,13 @@ public class MarketItemService {
     marketItem.setPrice(price);
     marketItem.setYear(year);
     marketItem.setMonth(month);
+    return marketItemRepository.save(marketItem);
+  }
+
+  public MarketItem updateMarketItemInformationAboutScrap(Long marketItemId) {
+    MarketItem marketItem = findMarketItemOrThrow(marketItemId);
+    int scrapCount = scrapRepository.countByMarketItemId(marketItemId);
+    marketItem.setScrapCount(scrapCount);
     return marketItemRepository.save(marketItem);
   }
 }

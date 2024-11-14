@@ -15,4 +15,6 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 
   @EntityGraph(attributePaths = {"marketItem"})
   Page<Scrap> findWithMarketItemByMemberId(Long memberId, Pageable pageable);
+
+  Integer countByMarketItemId(Long marketItemId);
 }
