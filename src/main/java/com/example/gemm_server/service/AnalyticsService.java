@@ -10,6 +10,11 @@ import com.example.gemm_server.dto.generator.response.LlmPptResponse;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,6 +57,19 @@ public class AnalyticsService {
     LocalDate endDate = DateUtil.getToday().minusDays(daysAgo);
     LocalDate startDate = endDate.minusDays(daysAgo);
     return analyticsRepository.findAverageScoreByCreatedAtBetween(startDate.atStartOfDay(),
+        endDate.atStartOfDay());
+  }
+
+  public Page<Analytics> getAnalyticsOrderByCreatedAt(int pageNumber, int pageSize,
+      PeriodType periodType) {
+    Sort sort = Sort.by(Direction.DESC, "createdAt");
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+    if (periodType == PeriodType.ALL) {
+      return analyticsRepository.findAll(pageable);
+    }
+    LocalDate startDate = DateUtil.getToday().minusDays(periodType.getDaysAgo());
+    LocalDate endDate = DateUtil.getToday().plusDays(1);
+    return analyticsRepository.findByCreatedAtBetween(pageable, startDate.atStartOfDay(),
         endDate.atStartOfDay());
   }
 }
