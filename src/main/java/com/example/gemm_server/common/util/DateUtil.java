@@ -15,11 +15,15 @@ public class DateUtil {
     }
   }
 
+  public static LocalDate getToday() {
+    return LocalDate.now(TimeZone.DEFAULT);
+  }
+
   public static boolean isToday(LocalDate localDate) {
     if (localDate == null) {
       return false;
     }
-    LocalDate today = LocalDate.now(TimeZone.DEFAULT);
+    LocalDate today = getToday();
     return today.equals(localDate);
   }
 
@@ -27,7 +31,7 @@ public class DateUtil {
     if (localDatetime == null) {
       return false;
     }
-    LocalDate today = LocalDate.now(TimeZone.DEFAULT);
+    LocalDate today = getToday();
     return today.equals(localDatetime.toLocalDate());
   }
 
