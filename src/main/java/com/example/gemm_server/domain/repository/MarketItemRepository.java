@@ -29,4 +29,6 @@ public interface MarketItemRepository extends JpaRepository<MarketItem, Long> {
   MarketItem findByActivityId(Long activityId);
 
   Boolean existsByActivityId(Long activityId);
+
+  void deleteByOwnerId(Long memberId);
 }
