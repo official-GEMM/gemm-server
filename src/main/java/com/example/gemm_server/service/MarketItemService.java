@@ -169,6 +169,10 @@ public class MarketItemService {
     return marketItemRepository.save(marketItem);
   }
 
+  public boolean existsByActivityId(Long activityId) {
+    return marketItemRepository.existsByActivityId(activityId);
+  }
+
   public MarketItem updateMarketItemInformationAboutReview(Long marketItemId) {
     MarketItem marketItem = findMarketItemOrThrow(marketItemId);
     Float averageScore = reviewRepository.findAverageScoreByMarketItemId(marketItemId).floatValue();

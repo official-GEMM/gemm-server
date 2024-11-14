@@ -27,4 +27,6 @@ public interface MarketItemRepository extends JpaRepository<MarketItem, Long> {
   List<MarketItem> findAll(Specification<MarketItem> spec);
 
   MarketItem findByActivityId(Long activityId);
+
+  Boolean existsByActivityId(Long activityId);
 }
