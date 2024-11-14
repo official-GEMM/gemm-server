@@ -8,6 +8,7 @@ import com.example.gemm_server.common.enums.PeriodType;
 import com.example.gemm_server.domain.entity.Analytics;
 import com.example.gemm_server.dto.CommonResponse;
 import com.example.gemm_server.dto.admin.AnalyticsAverage;
+import com.example.gemm_server.dto.admin.response.GetAnalyticsDetailResponse;
 import com.example.gemm_server.dto.admin.response.GetAnalyticsResponse;
 import com.example.gemm_server.dto.admin.response.GetAnalyticsStatusResponse;
 import com.example.gemm_server.dto.common.PageInfo;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,6 +57,19 @@ public class AdminController {
         ANALYTICS_PAGE_SIZE, periodType);
     PageInfo pageInfo = new PageInfo(page, analytics.getTotalPages());
     GetAnalyticsResponse response = new GetAnalyticsResponse(analytics.getContent(), pageInfo);
+    return ResponseEntity.ok(new CommonResponse<>(response));
+  }
+
+  @Operation(summary = "분석 자료 상세 조회", description = "분석 자료의 상세 정보를 조회하는 API")
+  @GetMapping("/analytics/activities/{analyticsId}")
+  public ResponseEntity<CommonResponse<GetAnalyticsDetailResponse>> getAnalyticsDetail(
+      @PathVariable("analyticsId") Long analyticsId
+  ) {
+    Analytics currentAnalytics = analyticsService.findByIdOrThrow(analyticsId);
+    AnalyticsAverage monthAnalyticsAverage = analyticsService.getRecentAverage(PeriodType.MONTH);
+    AnalyticsAverage weekAnalyticsAverage = analyticsService.getRecentAverage(PeriodType.WEEK);
+    GetAnalyticsDetailResponse response = new GetAnalyticsDetailResponse(monthAnalyticsAverage,
+        weekAnalyticsAverage, currentAnalytics);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }

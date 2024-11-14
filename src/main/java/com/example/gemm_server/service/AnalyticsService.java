@@ -1,5 +1,7 @@
 package com.example.gemm_server.service;
 
+import static com.example.gemm_server.common.code.error.AnalyticsErrorCode.ANALYTICS_NOT_FOUND;
+
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.PeriodType;
 import com.example.gemm_server.common.util.DateUtil;
@@ -7,6 +9,7 @@ import com.example.gemm_server.domain.entity.Analytics;
 import com.example.gemm_server.domain.repository.AnalyticsRepository;
 import com.example.gemm_server.dto.admin.AnalyticsAverage;
 import com.example.gemm_server.dto.generator.response.LlmPptResponse;
+import com.example.gemm_server.exception.AnalyticsException;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +61,11 @@ public class AnalyticsService {
     LocalDate startDate = endDate.minusDays(daysAgo);
     return analyticsRepository.findAverageScoreByCreatedAtBetween(startDate.atStartOfDay(),
         endDate.atStartOfDay());
+  }
+
+  public Analytics findByIdOrThrow(Long analyticsId) {
+    return analyticsRepository.findById(analyticsId)
+        .orElseThrow(() -> new AnalyticsException(ANALYTICS_NOT_FOUND));
   }
 
   public Page<Analytics> getAnalyticsOrderByCreatedAt(int pageNumber, int pageSize,
