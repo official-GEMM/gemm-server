@@ -17,6 +17,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.example.gemm_server.exception.GeneratorException;
 import jakarta.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,16 @@ public class S3Util {
     staticAmazonS3 = this.amazonS3;
     staticBucketName = this.bucketName;
     staticExpirationTime = this.expirationTime;
+  }
+
+  public static String uploadFile(File file, String fileName, String saveDirectoryPath) {
+    try {
+      staticAmazonS3.putObject(staticBucketName, saveDirectoryPath + fileName, file);
+      file.delete();
+      return saveDirectoryPath + fileName;
+    } catch (SdkClientException e) {
+      throw new GeneratorException(FAILED_TO_UPLOAD_FILE);
+    }
   }
 
   public static String uploadFile(MultipartFile multipartFile, String fileName,
