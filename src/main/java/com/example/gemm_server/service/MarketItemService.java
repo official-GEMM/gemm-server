@@ -169,6 +169,15 @@ public class MarketItemService {
     return marketItemRepository.save(marketItem);
   }
 
+  public MarketItem updateMarketItemInformationAboutReview(Long marketItemId) {
+    MarketItem marketItem = findMarketItemOrThrow(marketItemId);
+    Float averageScore = reviewRepository.findAverageScoreByMarketItemId(marketItemId).floatValue();
+    int reviewCount = reviewRepository.countByMarketItemId(marketItemId);
+    marketItem.setAverageScore(averageScore);
+    marketItem.setReviewCount(reviewCount);
+    return marketItemRepository.save(marketItem);
+  }
+
   public MarketItem updateMarketItemInformationAboutScrap(Long marketItemId) {
     MarketItem marketItem = findMarketItemOrThrow(marketItemId);
     int scrapCount = scrapRepository.countByMarketItemId(marketItemId);
