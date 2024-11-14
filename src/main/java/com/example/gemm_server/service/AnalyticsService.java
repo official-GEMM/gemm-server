@@ -18,7 +18,7 @@ public class AnalyticsService {
   public Analytics saveAnalyticsInformation(LlmPptResponse pptInfo, Category category,
       String nickname) {
     Analytics analytics = analyticsRepository.save(Analytics.builder()
-        .originName(pptInfo.fileName().substring(pptInfo.fileName().lastIndexOf('/') + 1))
+        .fileName(pptInfo.fileName().substring(pptInfo.fileName().lastIndexOf('/') + 1))
         .directoryPath(pptInfo.fileName().substring(0, pptInfo.fileName().lastIndexOf('/') + 1))
         .layoutCompleteness(pptInfo.layoutCompleteness())
         .readability(pptInfo.readability())
