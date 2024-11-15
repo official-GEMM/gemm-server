@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.auth.response;
 
+import com.example.gemm_server.common.enums.Role;
 import com.example.gemm_server.domain.entity.Member;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,7 +8,8 @@ import java.time.LocalDate;
 import lombok.Getter;
 
 @Getter
-@Schema(description = "필수 정보 응답", requiredProperties = {"isCompleted", "isReferralCompensable"})
+@Schema(description = "필수 정보 응답", requiredProperties = {"isCompleted",
+    "isReferralCompensable, isAdmin"})
 public class GetNecessaryMemberDataResponse {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,6 +38,9 @@ public class GetNecessaryMemberDataResponse {
   @Schema(description = "추천인 보상 가능 여부")
   private Boolean isReferralCompensable;
 
+  @Schema(description = "관리자 여부")
+  private Boolean isAdmin;
+
   public GetNecessaryMemberDataResponse(Member member) {
     this.name = member.getName();
     this.birth = member.getBirth();
@@ -44,5 +49,6 @@ public class GetNecessaryMemberDataResponse {
     this.phoneNumber = member.getPhoneNumber();
     this.isCompleted = member.isDataCompleted();
     this.isReferralCompensable = !member.getIsRegistrationCompleted();
+    this.isAdmin = member.getRole().equals(Role.ADMIN);
   }
 }

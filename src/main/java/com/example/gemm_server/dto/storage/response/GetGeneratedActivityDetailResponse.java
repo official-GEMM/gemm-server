@@ -18,9 +18,10 @@ public class GetGeneratedActivityDetailResponse extends ActivityDetailResponse {
   @Schema(description = "마켓 업로드 여부")
   private Boolean isMarketUploaded;
 
-  public GetGeneratedActivityDetailResponse(Generation generation, List<Material> materials) {
+  public GetGeneratedActivityDetailResponse(Generation generation, List<Material> materials,
+      boolean isMarketUploaded) {
     super(generation.getActivity(), materials);
     this.generationId = generation.getId();
-    this.isMarketUploaded = false; // TODO: MARKET 구현 후 연동
+    this.isMarketUploaded = isMarketUploaded;
   }
 }

@@ -31,9 +31,9 @@ public class Analytics extends Timestamped {
   @Column(name = "id")
   private Long id;
 
-  @ColumnDescription("원본 파일 이름")
-  @Column(name = "origin_name", nullable = false) // 최대 255바이트
-  private String originName;
+  @ColumnDescription("파일 이름")
+  @Column(name = "file_name", nullable = false) // 최대 255바이트
+  private String fileName;
 
   @ColumnDescription("파일 경로")
   @Column(name = "directory_path", nullable = false) // 최대 255바이트
@@ -61,9 +61,9 @@ public class Analytics extends Timestamped {
   private Short generationTime;
 
   @Builder
-  public Analytics(String originName, String directoryPath, Category category, String nickname,
+  public Analytics(String fileName, String directoryPath, Category category, String nickname,
       Float layoutCompleteness, Float readability, Short generationTime) {
-    this.originName = originName;
+    this.fileName = fileName;
     this.directoryPath = directoryPath;
     this.category = category;
     this.nickname = nickname;

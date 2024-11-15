@@ -276,6 +276,7 @@ public class MarketController {
       @AuthenticationPrincipal CustomUser user
   ) {
     scrapService.scrap(user.getId(), marketItemId);
+    marketItemService.updateMarketItemInformationAboutScrap(marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
@@ -287,6 +288,7 @@ public class MarketController {
       @AuthenticationPrincipal CustomUser user
   ) {
     scrapService.delete(user.getId(), marketItemId);
+    marketItemService.updateMarketItemInformationAboutScrap(marketItemId);
     return ResponseEntity.ok(new EmptyDataResponse());
   }
 
@@ -320,6 +322,7 @@ public class MarketController {
     Float score = request.getScore();
     String content = request.getContent();
     Review review = reviewService.saveIfNotExists(marketItemId, user.getId(), score, content);
+    marketItemService.updateMarketItemInformationAboutReview(marketItemId);
     ReviewBundle reviewBundle = reviewService.convertToReviewBundle(review);
 
     ReviewResponse response = new ReviewResponse(reviewBundle);
