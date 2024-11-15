@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.admin;
 
+import com.example.gemm_server.common.util.NumberUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -17,8 +18,8 @@ public class ComparisonIndicator {
   private float current;
 
   public ComparisonIndicator(float month, float week, float current) {
-    this.week = week;
-    this.month = month;
-    this.current = current;
+    this.week = NumberUtil.roundToDecimalPlaces(week, 2);
+    this.month = NumberUtil.roundToDecimalPlaces(month, 2);
+    this.current = NumberUtil.roundToDecimalPlaces(current, 2);
   }
 }

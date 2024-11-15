@@ -3,6 +3,7 @@ package com.example.gemm_server.dto.my;
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.MaterialType;
 import com.example.gemm_server.common.util.MaterialUtil;
+import com.example.gemm_server.common.util.NumberUtil;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.common.response.MemberResponse;
 import com.example.gemm_server.dto.market.MarketItemBundle;
@@ -51,7 +52,7 @@ public class ScrapResponse {
     this.title = marketItem.getActivity().getTitle();
     this.thumbnailPath = marketItemBundle.getThumbnailPath();
     this.seller = new MemberResponse(marketItemBundle.getSeller());
-    this.reviewAverageScore = marketItem.getAverageScore();
+    this.reviewAverageScore = NumberUtil.roundToDecimalPlaces(marketItem.getAverageScore(), 2);
     this.reviewCount = marketItem.getReviewCount();
     this.price = marketItem.getPrice();
     this.age = marketItem.getActivity().getAge();

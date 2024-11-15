@@ -2,6 +2,7 @@ package com.example.gemm_server.dto.admin.response;
 
 import com.example.gemm_server.common.enums.ChangeType;
 import com.example.gemm_server.common.enums.IndicatorType;
+import com.example.gemm_server.common.util.NumberUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Optional;
@@ -24,13 +25,15 @@ public class IndicatorResponse {
 
   public IndicatorResponse(Double lastValue, Double nextValue, IndicatorType indicatorType) {
     if (lastValue == null || nextValue == null) {
-      this.value = Optional.ofNullable(nextValue).map(Number::floatValue).orElse(null);
+      this.value = Optional.ofNullable(nextValue)
+          .map((value) -> NumberUtil.roundToDecimalPlaces(value.floatValue(), 2))
+          .orElse(null);
     } else {
       Float last = lastValue.floatValue();
       Float next = nextValue.floatValue();
 
-      this.value = next;
-      this.change = next - last;
+      this.value = NumberUtil.roundToDecimalPlaces(next, 2);
+      this.change = NumberUtil.roundToDecimalPlaces(next - last, 2);
       this.changeType = ChangeType.getChangeType(last, next, indicatorType);
     }
   }

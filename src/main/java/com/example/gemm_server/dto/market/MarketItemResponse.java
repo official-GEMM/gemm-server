@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.market;
 
+import com.example.gemm_server.common.util.NumberUtil;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.dto.common.response.ActivityResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,7 +34,7 @@ public class MarketItemResponse extends ActivityResponse {
     super(marketItemBundle.getActivity(), marketItemBundle.getThumbnailPath());
     MarketItem marketItem = marketItemBundle.getMarketItem();
     this.marketItemId = marketItem.getId();
-    this.reviewAverageScore = marketItem.getAverageScore();
+    this.reviewAverageScore = NumberUtil.roundToDecimalPlaces(marketItem.getAverageScore(), 2);
     this.reviewCount = marketItem.getReviewCount();
     this.price = marketItem.getPrice();
     this.sellerNickname = marketItemBundle.getSeller().getNickname();
