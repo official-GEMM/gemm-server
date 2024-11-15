@@ -29,7 +29,6 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -79,9 +78,8 @@ public class MarketItemService {
     Specification<MarketItem> filterSpecification = generateSpecificationForFilter(filter);
     Specification<MarketItem> searchSpecification = generateSpecificationForSearch(search);
 
-    List<MarketItem> results = marketItemRepository.findAll(
-        filterSpecification.and(searchSpecification)); // TODO: 쿼리 최적화
-    return new PageImpl<>(results, pageable, results.size());
+    return marketItemRepository.findAll(filterSpecification.and(searchSpecification),
+        pageable); // TODO: 쿼리 최적화
   }
 
   public Specification<MarketItem> generateSpecificationForSearch(SearchRequest search) {
