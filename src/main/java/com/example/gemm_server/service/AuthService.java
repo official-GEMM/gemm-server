@@ -15,7 +15,7 @@ import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATI
 import com.example.gemm_server.common.constant.TimeZone;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.DateUtil;
-import com.example.gemm_server.common.util.RandomUtil;
+import com.example.gemm_server.common.util.NumberUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.domain.entity.redis.TokenBlackList;
@@ -148,7 +148,7 @@ public class AuthService {
     if (this.phoneVerificationRepository.existsById(memberId)) {
       throw new MemberException(VERIFICATION_RESEND_DURATION);
     }
-    return RandomUtil.getRandomNumber(4);
+    return NumberUtil.getRandomNumber(4);
   }
 
   public PhoneVerification saveVerificationCode(Long memberId, String phoneNumber,
