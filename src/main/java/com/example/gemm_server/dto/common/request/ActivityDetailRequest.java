@@ -51,4 +51,8 @@ public class ActivityDetailRequest {
   @Size(max = 5)
   @Schema(description = "업로드할 자료 리스트")
   private List<MultipartFile> materials;
+
+  public List<MultipartFile> getMaterials() {
+    return materials.stream().filter(material -> !material.isEmpty()).toList();
+  }
 }
