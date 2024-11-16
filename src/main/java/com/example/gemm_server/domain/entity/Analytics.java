@@ -44,6 +44,10 @@ public class Analytics extends Timestamped {
   @Column(name = "category", nullable = false)
   private Category category;
 
+  @ColumnDescription("타겟 연령")
+  @Column(name = "age", nullable = false)
+  private Short age;
+
   @ColumnDescription("별명")
   @Column(name = "nickname", length = 30, unique = true, nullable = false) // 최대 10자
   private String nickname;
