@@ -17,6 +17,8 @@ env:
   S3_DEPLOY_FILE_NAME: ${{secrets.S3_DEPLOY_FILE_NAME}}
   CODE_DEPLOY_APPLICATION_NAME: ${{secrets.CODE_DEPLOY_APPLICATION_NAME}}
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: ${{secrets.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME}}
+  SENTRY_AUTH_TOKEN: ${{secrets.PROD_SENTRY_AUTH_TOKEN}}
+  PROFILE: ${{secrets.PROD_PROFILE}}
 
 
 jobs:
@@ -43,6 +45,9 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build -x test
+        env:
+          SENTRY_AUTH_TOKEN: ${{env.SENTRY_AUTH_TOKEN}}
+          PROFILE: ${{env.PROFILE}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
