@@ -102,7 +102,7 @@ sentry {
     includeSourceContext = true
 
     org = "be-project"
-    projectName = "gemm-" + System.getenv("profile") + "server"
+    projectName = "gemm-" + System.getenv("profile") + "-server"
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
