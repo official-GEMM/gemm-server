@@ -18,6 +18,8 @@ env:
   SSH_HOST: ${{secrets.SSH_DEV_SERVER_HOST}}
   SSH_USERNAME: ${{secrets.SSH_DEV_SERVER_USERNAME}}
   SSH_KEY: ${{secrets.SSH_DEV_SERVER_KEY}}
+  SENTRY_AUTH_TOKEN: ${{secrets.DEV_SENTRY_AUTH_TOKEN}}
+  PROFILE: ${{secrets.DEV_PROFILE}}
 
 
 jobs:
@@ -44,6 +46,9 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build -x test
+        env:
+          SENTRY_AUTH_TOKEN: ${{env.SENTRY_AUTH_TOKEN}}
+          PROFILE: ${{env.PROFILE}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
