@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.market;
 
+import com.example.gemm_server.common.util.NumberUtil;
 import com.example.gemm_server.domain.entity.Review;
 import com.example.gemm_server.dto.common.response.MemberWithProfileImageResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,7 +31,7 @@ public class ReviewResponse {
     Review review = reviewBundle.getReview();
     this.reviewId = review.getId();
     this.writer = new MemberWithProfileImageResponse(reviewBundle.getWriter());
-    this.score = review.getScore();
+    this.score = NumberUtil.roundToDecimalPlaces(review.getScore(), 2);
     this.content = review.getContent();
     this.createdAt = review.getCreatedAt();
   }
