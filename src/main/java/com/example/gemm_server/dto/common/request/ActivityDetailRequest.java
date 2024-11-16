@@ -40,15 +40,19 @@ public class ActivityDetailRequest {
 
   @Min(2020)
   @Schema(description = "연도")
-  private short year;
+  private Short year;
 
   @Min(1)
   @Max(12)
   @Schema(description = "월")
-  private short month;
+  private Short month;
 
   @NotNull
   @Size(max = 5)
   @Schema(description = "업로드할 자료 리스트")
   private List<MultipartFile> materials;
+
+  public List<MultipartFile> getMaterials() {
+    return materials.stream().filter(material -> !material.isEmpty()).toList();
+  }
 }

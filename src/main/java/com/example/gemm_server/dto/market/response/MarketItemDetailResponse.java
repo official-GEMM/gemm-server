@@ -45,11 +45,11 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "연도")
-  private int year;
+  private Short year;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "월")
-  private short month;
+  private Short month;
 
   public MarketItemDetailResponse(MarketItem marketItem, List<Material> materialsWithThumbnail,
       boolean isScrapped, boolean isPurchased, Long currentMemberId) {
