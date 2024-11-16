@@ -27,7 +27,7 @@ public class AnalyticsService {
   private final AnalyticsRepository analyticsRepository;
 
   @Transactional
-  public Analytics saveAnalyticsInformation(LlmPptResponse pptInfo, Category category,
+  public Analytics saveAnalyticsInformation(LlmPptResponse pptInfo, Category category, Short age,
       String nickname) {
     Analytics analytics = analyticsRepository.save(Analytics.builder()
         .fileName(pptInfo.fileName().substring(pptInfo.fileName().lastIndexOf('/') + 1))
@@ -36,6 +36,7 @@ public class AnalyticsService {
         .readability(pptInfo.readability())
         .generationTime(pptInfo.generationTime())
         .category(category)
+        .age(age)
         .nickname(nickname)
         .build());
 
