@@ -13,7 +13,8 @@ import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_MATERIAL;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_THUMBNAIL;
-import static com.example.gemm_server.common.constant.FilePath.*;
+import static com.example.gemm_server.common.constant.FilePath.ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH;
+import static com.example.gemm_server.common.constant.FilePath.PPT_TEMPLATE_THUMBNAIL_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_CUTOUT_PATH;
@@ -25,7 +26,6 @@ import static com.example.gemm_server.common.constant.FilePath.TEMP_CUTOUT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_THUMBNAIL_PATH;
 
-import com.example.gemm_server.common.constant.FilePath;
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.GemUsageType;
@@ -220,7 +220,7 @@ public class ActivityService {
           llmMaterialResponse.ppt().filePath());
       amount += Policy.GENERATE_PPT;
       analyticsService.saveAnalyticsInformation(llmMaterialResponse.ppt(),
-          generateMaterialRequest.category(), member.getNickname());
+          generateMaterialRequest.category(), generateMaterialRequest.age(), member.getNickname());
     }
 
     ActivitySheetPathResponse activitySheetPathResponse = null;
@@ -305,7 +305,7 @@ public class ActivityService {
     CommentedPptResponse commentedPptResponse = new CommentedPptResponse(
         getPptThumbnailPaths(llmPptResponse), llmPptResponse.filePath());
     analyticsService.saveAnalyticsInformation(llmPptResponse, updatePptRequest.category(),
-        member.getNickname());
+        updatePptRequest.age(), member.getNickname());
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_PPT, GemUsageType.AI_USE);
 
     return new UpdatedPptResponse(commentedPptResponse, member.getGem());

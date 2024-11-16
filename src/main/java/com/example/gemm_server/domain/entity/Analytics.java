@@ -44,6 +44,10 @@ public class Analytics extends Timestamped {
   @Column(name = "category", nullable = false)
   private Category category;
 
+  @ColumnDescription("타겟 연령")
+  @Column(name = "age", nullable = false)
+  private Short age;
+
   @ColumnDescription("별명")
   @Column(name = "nickname", length = 30, unique = true, nullable = false) // 최대 10자
   private String nickname;
@@ -61,11 +65,12 @@ public class Analytics extends Timestamped {
   private Short generationTime;
 
   @Builder
-  public Analytics(String fileName, String directoryPath, Category category, String nickname,
-      Float layoutCompleteness, Float readability, Short generationTime) {
+  public Analytics(String fileName, String directoryPath, Category category, Short age,
+      String nickname, Float layoutCompleteness, Float readability, Short generationTime) {
     this.fileName = fileName;
     this.directoryPath = directoryPath;
     this.category = category;
+    this.age = age;
     this.nickname = nickname;
     this.layoutCompleteness = layoutCompleteness;
     this.readability = readability;

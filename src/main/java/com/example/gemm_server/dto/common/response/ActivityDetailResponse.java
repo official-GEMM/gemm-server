@@ -19,7 +19,7 @@ public class ActivityDetailResponse {
   private MaterialResponse[] materials;
 
   @Schema(description = "타겟 연령")
-  private int age;
+  private Short age;
 
   @Schema(description = "영역 및 활동")
   private Category category;

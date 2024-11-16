@@ -21,7 +21,7 @@ public class GetAnalyticsResponse {
 
   @Getter
   @Schema(description = "지표 정보", requiredProperties = {
-      "analyticsId, fileName, category, status, createdAt"})
+      "analyticsId, fileName, category, age, createdAt"})
   private static class AnalyticsResponse {
 
     @Schema(description = "지표 값")
@@ -33,6 +33,9 @@ public class GetAnalyticsResponse {
     @Schema(description = "카테고리")
     private Category category;
 
+    @Schema(description = "타겟 연령")
+    private short age;
+
     @Schema(description = "생성일")
     private LocalDateTime createdAt;
 
@@ -40,6 +43,7 @@ public class GetAnalyticsResponse {
       this.analyticsId = analytics.getId();
       this.fileName = analytics.getFileName();
       this.category = analytics.getCategory();
+      this.age = analytics.getAge();
       this.createdAt = analytics.getCreatedAt();
     }
   }
