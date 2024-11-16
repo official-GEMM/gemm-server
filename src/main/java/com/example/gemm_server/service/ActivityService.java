@@ -304,6 +304,8 @@ public class ActivityService {
     }
     CommentedPptResponse commentedPptResponse = new CommentedPptResponse(
         getPptThumbnailPaths(llmPptResponse), llmPptResponse.filePath());
+    analyticsService.saveAnalyticsInformation(llmPptResponse, updatePptRequest.category(),
+        member.getNickname());
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_PPT, GemUsageType.AI_USE);
 
     return new UpdatedPptResponse(commentedPptResponse, member.getGem());
@@ -323,6 +325,7 @@ public class ActivityService {
     CommentedActivitySheetResponse commentedActivitySheetResponse = new CommentedActivitySheetResponse(
         getActivitySheetThumbnailPath(llmActivitySheetResponse),
         llmActivitySheetResponse.filePath());
+
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_ACTIVITY_SHEET,
         GemUsageType.AI_USE);
 
@@ -350,14 +353,16 @@ public class ActivityService {
 
   public PptTemplatesResponse getPptTemplates() {
     List<TemplateResponse> templateResponses = IntStream.range(0, pptTemplateCount)
-        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .mapToObj(i -> new TemplateResponse((short) i,
+            S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
         .collect(Collectors.toList());
     return new PptTemplatesResponse(templateResponses);
   }
 
   public ActivitySheetTemplatesResponse getActivitySheetTemplates() {
     List<TemplateResponse> templateResponses = IntStream.range(0, activitySheetTemplateCount)
-        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .mapToObj(i -> new TemplateResponse((short) i,
+            S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
         .collect(Collectors.toList());
     return new ActivitySheetTemplatesResponse(templateResponses);
   }

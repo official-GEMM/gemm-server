@@ -1,17 +1,30 @@
 version: '3'
 services:
   gemm-server:
-    image: ${ECR_PROD_REGISTRY}/${ECR_PROD_REPOSITORY}:latest
-    container_name: gemm-prod-server
+    image: ${DOCKER_IMAGE_PATH}
+    container_name: gemm-dev-server
     restart: always
     ports:
       - "80:8080"
       - "8080:8080"
     volumes:
-      - /home/ubuntu/Pretendard-Medium.otf:/usr/share/fonts/Pretendard-Medium.otf
-      - /home/ubuntu/Pretendard-Medium.otf:/app/Pretendard-Medium.otf
+      - /home/ubuntu/BMJUA_otf.otf:/usr/share/fonts/BMJUA_otf.otf
+      - /home/ubuntu/BMJUA_otf.otf:/app/BMJUA_otf.otf
     environment:
       - PROFILE=prod
+      - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+    networks:
+      - gemm
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    expose:
+      - "6379"
+    volumes:
+      - /home/ubuntu/redis_data:/data
     networks:
       - gemm
 
