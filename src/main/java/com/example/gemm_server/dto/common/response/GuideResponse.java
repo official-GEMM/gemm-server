@@ -13,7 +13,7 @@ public class GuideResponse {
   private String title;
 
   @Schema(description = "타겟 연령")
-  private int age;
+  private short age;
 
   @Schema(description = "영역 및 활동")
   private Category category;
