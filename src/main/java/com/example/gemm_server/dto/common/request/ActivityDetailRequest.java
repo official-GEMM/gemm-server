@@ -40,12 +40,12 @@ public class ActivityDetailRequest {
 
   @Min(2020)
   @Schema(description = "연도")
-  private short year;
+  private Short year;
 
   @Min(1)
   @Max(12)
   @Schema(description = "월")
-  private short month;
+  private Short month;
 
   @NotNull
   @Size(max = 5)
