@@ -103,7 +103,8 @@ public class MarketItemService {
             .and(MarketItemSpecification.hasActivityCategory(filter.getCategories()))
             .and(MarketItemSpecification.hasActivityMaterialType(filter.getMaterialTypes()))
             .and(MarketItemSpecification.hasYear(filter.getYear()))
-            .and(MarketItemSpecification.hasMonth(filter.getMonth()));
+            .and(MarketItemSpecification.hasMonth(filter.getMonth()))
+            .and(MarketItemSpecification.isFree(filter.getIsFree()));
   }
 
   public MarketItem findMarketItemOrThrow(Long marketItemId) {
