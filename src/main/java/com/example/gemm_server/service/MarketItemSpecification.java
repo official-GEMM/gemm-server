@@ -62,7 +62,7 @@ public class MarketItemSpecification {
       // SQL: (materialType & materialTypeBitMask) = materialTypeBitMask
       return criteriaBuilder.equal(
           criteriaBuilder.function(
-              "bitwise_and", Short.class,
+              "bitand", Short.class,
               root.get("activity").get("materialType"),
               criteriaBuilder.literal(materialTypeBitMask)
           ),
