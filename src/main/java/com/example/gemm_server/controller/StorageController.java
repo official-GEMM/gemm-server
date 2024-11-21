@@ -186,13 +186,13 @@ public class StorageController {
   @AuthorizeOwner(Deal.class)
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
-  public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(
+  public ResponseEntity<CommonResponse<DownloadMaterialResponse>> downloadPurchasedActivityMaterial(
       @PathVariable("dealId") Long dealId
   ) {
     Deal deal = dealService.getDealWithActivityOrThrow(dealId);
     List<Material> materials = materialService.getMaterialsByActivityId(
         deal.getActivity().getId());
     DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }
