@@ -13,7 +13,8 @@ import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.EMPTY_PPT_RESULT;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_MATERIAL;
 import static com.example.gemm_server.common.code.error.GeneratorErrorCode.NOT_EXIST_THUMBNAIL;
-import static com.example.gemm_server.common.constant.FilePath.*;
+import static com.example.gemm_server.common.constant.FilePath.ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH;
+import static com.example.gemm_server.common.constant.FilePath.PPT_TEMPLATE_THUMBNAIL_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_ACTIVITY_SHEET_THUMBNAIL_PATH;
 import static com.example.gemm_server.common.constant.FilePath.SAVE_CUTOUT_PATH;
@@ -25,7 +26,6 @@ import static com.example.gemm_server.common.constant.FilePath.TEMP_CUTOUT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_PATH;
 import static com.example.gemm_server.common.constant.FilePath.TEMP_PPT_THUMBNAIL_PATH;
 
-import com.example.gemm_server.common.constant.FilePath;
 import com.example.gemm_server.common.constant.Policy;
 import com.example.gemm_server.common.enums.Category;
 import com.example.gemm_server.common.enums.GemUsageType;
@@ -103,6 +103,7 @@ public class ActivityService {
   private final WebClientUtil webClientUtil;
   private final GemService gemService;
   private final MemberService memberService;
+  private final AnalyticsService analyticsService;
   private final GenerationRepository generationRepository;
   private final MaterialRepository materialRepository;
   private final ThumbnailRepository thumbnailRepository;
@@ -218,6 +219,8 @@ public class ActivityService {
       pptPathResponse = new PptPathResponse(getPptThumbnailPaths(llmMaterialResponse.ppt()),
           llmMaterialResponse.ppt().filePath());
       amount += Policy.GENERATE_PPT;
+      analyticsService.saveAnalyticsInformation(llmMaterialResponse.ppt(),
+          generateMaterialRequest.category(), generateMaterialRequest.age(), member.getNickname());
     }
 
     ActivitySheetPathResponse activitySheetPathResponse = null;
@@ -301,6 +304,8 @@ public class ActivityService {
     }
     CommentedPptResponse commentedPptResponse = new CommentedPptResponse(
         getPptThumbnailPaths(llmPptResponse), llmPptResponse.filePath());
+    analyticsService.saveAnalyticsInformation(llmPptResponse, updatePptRequest.category(),
+        updatePptRequest.age(), member.getNickname());
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_PPT, GemUsageType.AI_USE);
 
     return new UpdatedPptResponse(commentedPptResponse, member.getGem());
@@ -320,6 +325,7 @@ public class ActivityService {
     CommentedActivitySheetResponse commentedActivitySheetResponse = new CommentedActivitySheetResponse(
         getActivitySheetThumbnailPath(llmActivitySheetResponse),
         llmActivitySheetResponse.filePath());
+
     gemService.saveChangesOfGemWithMember(member, Policy.UPDATE_ACTIVITY_SHEET,
         GemUsageType.AI_USE);
 
@@ -347,14 +353,16 @@ public class ActivityService {
 
   public PptTemplatesResponse getPptTemplates() {
     List<TemplateResponse> templateResponses = IntStream.range(0, pptTemplateCount)
-        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .mapToObj(i -> new TemplateResponse((short) i,
+            S3Util.getFileUrl(PPT_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
         .collect(Collectors.toList());
     return new PptTemplatesResponse(templateResponses);
   }
 
   public ActivitySheetTemplatesResponse getActivitySheetTemplates() {
     List<TemplateResponse> templateResponses = IntStream.range(0, activitySheetTemplateCount)
-        .mapToObj(i -> new TemplateResponse((short)i, S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
+        .mapToObj(i -> new TemplateResponse((short) i,
+            S3Util.getFileUrl(ACTIVITY_SHEET_TEMPLATE_THUMBNAIL_PATH + i + ".png")))
         .collect(Collectors.toList());
     return new ActivitySheetTemplatesResponse(templateResponses);
   }

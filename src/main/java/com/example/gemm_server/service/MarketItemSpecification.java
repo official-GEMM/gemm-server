@@ -10,6 +10,18 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class MarketItemSpecification {
 
+  public static Specification<MarketItem> isFree(Boolean isFree) {
+    return (root, query, criteriaBuilder) -> {
+      if (isFree == null) {
+        return criteriaBuilder.conjunction();
+      }
+      if (isFree) {
+        return criteriaBuilder.equal(root.get("price"), 0);
+      }
+      return criteriaBuilder.notEqual(root.get("price"), 0);
+    };
+  }
+
   public static Specification<MarketItem> hasActivityAge(List<Short> ages) {
     return (root, query, criteriaBuilder) -> {
       if (ages == null || ages.isEmpty()) {
@@ -50,7 +62,7 @@ public class MarketItemSpecification {
       // SQL: (materialType & materialTypeBitMask) = materialTypeBitMask
       return criteriaBuilder.equal(
           criteriaBuilder.function(
-              "bitwise_and", Short.class,
+              "bitand", Short.class,
               root.get("activity").get("materialType"),
               criteriaBuilder.literal(materialTypeBitMask)
           ),

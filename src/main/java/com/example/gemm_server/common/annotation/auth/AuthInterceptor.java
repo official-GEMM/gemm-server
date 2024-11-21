@@ -7,6 +7,7 @@ import com.example.gemm_server.security.jwt.TokenProvider;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -42,10 +43,8 @@ public class AuthInterceptor implements HandlerInterceptor {
   }
 
   private void interceptBearerAuth(HandlerMethod handlerMethod, HttpServletRequest request) {
-    BearerAuth bearerAuth = handlerMethod.getMethodAnnotation(BearerAuth.class);
-    if (bearerAuth == null) {
-      bearerAuth = handlerMethod.getBeanType().getAnnotation(BearerAuth.class);
-    }
+    BearerAuth bearerAuth = Optional.ofNullable(handlerMethod.getMethodAnnotation(BearerAuth.class))
+        .orElse(handlerMethod.getBeanType().getAnnotation(BearerAuth.class));
     if (bearerAuth == null) {
       return;
     }
@@ -57,10 +56,8 @@ public class AuthInterceptor implements HandlerInterceptor {
   }
 
   private void interceptAuthority(HandlerMethod handlerMethod) {
-    Admin admin = handlerMethod.getMethodAnnotation(Admin.class);
-    if (admin == null) {
-      admin = handlerMethod.getBeanType().getAnnotation(Admin.class);
-    }
+    Admin admin = Optional.ofNullable(handlerMethod.getMethodAnnotation(Admin.class))
+        .orElse(handlerMethod.getBeanType().getAnnotation(Admin.class));
     if (admin == null) {
       return;
     }

@@ -15,7 +15,7 @@ import static com.example.gemm_server.common.constant.Policy.REFERRAL_COMPENSATI
 import com.example.gemm_server.common.constant.TimeZone;
 import com.example.gemm_server.common.enums.GemUsageType;
 import com.example.gemm_server.common.util.DateUtil;
-import com.example.gemm_server.common.util.RandomUtil;
+import com.example.gemm_server.common.util.NumberUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.redis.PhoneVerification;
 import com.example.gemm_server.domain.entity.redis.TokenBlackList;
@@ -48,6 +48,8 @@ public class AuthService {
   private String apiSecretKey;
   @Value("${coolsms.api.fromnumber}")
   private String fromNumber;
+  @Value("${admin.phone.number}")
+  private String adminPhoneNumber;
 
   private final MemberService memberService;
   private final GemService gemService;
@@ -105,7 +107,8 @@ public class AuthService {
     if (!isPhoneNumberValidated(memberId)) {
       throw new MemberException(PHONE_NUMBER_NOT_VALIDATED);
     }
-    if (memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
+    if (!isAdminPhoneNumber(phoneNumber) &&
+        memberService.isPhoneNumberDuplicated(memberId, phoneNumber)) {
       throw new MemberException(PHONE_NUMBER_DUPLICATED);
     }
   }
@@ -145,7 +148,7 @@ public class AuthService {
     if (this.phoneVerificationRepository.existsById(memberId)) {
       throw new MemberException(VERIFICATION_RESEND_DURATION);
     }
-    return RandomUtil.getRandomNumber(4);
+    return NumberUtil.getRandomNumber(4);
   }
 
   public PhoneVerification saveVerificationCode(Long memberId, String phoneNumber,
@@ -182,5 +185,9 @@ public class AuthService {
             .orElseGet(() -> new VerificationSmsSendAttempt(memberId, today));
     smsSendAttempt.incrementAttemptCount();
     return this.verificationSmsSendAttemptRepository.save(smsSendAttempt);
+  }
+
+  public boolean isAdminPhoneNumber(String phoneNumber) {
+    return phoneNumber.equals(adminPhoneNumber);
   }
 }

@@ -24,6 +24,7 @@ import com.example.gemm_server.dto.storage.response.GetPurchasedActivityDetailRe
 import com.example.gemm_server.security.jwt.CustomUser;
 import com.example.gemm_server.service.DealService;
 import com.example.gemm_server.service.GenerationService;
+import com.example.gemm_server.service.MarketItemService;
 import com.example.gemm_server.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,6 +56,7 @@ public class StorageController {
   private final GenerationService generationService;
   private final MaterialService materialService;
   private final DealService dealService;
+  private final MarketItemService marketItemService;
 
   @Operation(summary = "생성한 활동 방법 리스트 조회", description = "사용자가 생성한 활동 방법 리스트를 조회하는 API")
   @GetMapping("/generate/guides")
@@ -110,8 +112,10 @@ public class StorageController {
     Generation generation = generationService.getGenerationWithActivityOrThrow(generationId);
     List<Material> materials = materialService.getMaterialsWithThumbnailByActivityId(
         generation.getActivity().getId());
+    boolean isMarketUploaded = marketItemService.existsByActivityId(
+        generation.getActivity().getId());
     GetGeneratedActivityDetailResponse response = new GetGeneratedActivityDetailResponse(
-        generation, materials);
+        generation, materials, isMarketUploaded);
     return ResponseEntity.ok(new CommonResponse<>(response));
   }
 
@@ -182,13 +186,13 @@ public class StorageController {
   @AuthorizeOwner(Deal.class)
   @Operation(summary = "구매 자료 다운로드", description = "사용자가 구매한 활동의 자료를 다운로드하는 API")
   @GetMapping("/generate/purchases/{dealId}/download")
-  public ResponseEntity<DownloadMaterialResponse> downloadPurchasedActivityMaterial(
+  public ResponseEntity<CommonResponse<DownloadMaterialResponse>> downloadPurchasedActivityMaterial(
       @PathVariable("dealId") Long dealId
   ) {
     Deal deal = dealService.getDealWithActivityOrThrow(dealId);
     List<Material> materials = materialService.getMaterialsByActivityId(
         deal.getActivity().getId());
     DownloadMaterialResponse response = new DownloadMaterialResponse(materials);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(new CommonResponse<>(response));
   }
 }

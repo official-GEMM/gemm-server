@@ -7,6 +7,7 @@ import static com.example.gemm_server.common.code.error.MemberErrorCode.REFERRAL
 import com.example.gemm_server.common.util.DateUtil;
 import com.example.gemm_server.domain.entity.Member;
 import com.example.gemm_server.domain.entity.ProfileImage;
+import com.example.gemm_server.domain.repository.MarketItemRepository;
 import com.example.gemm_server.domain.repository.MemberRepository;
 import com.example.gemm_server.domain.repository.ProfileImageRepository;
 import com.example.gemm_server.dto.auth.request.PostNecessaryMemberDataRequest;
@@ -24,6 +25,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final ProfileImageRepository profileImageRepository;
+  private final MarketItemRepository marketItemRepository;
 
   public Member findMemberByMemberIdOrThrow(Long memberId) {
     return memberRepository.findOneById(memberId)
@@ -74,16 +76,8 @@ public class MemberService {
     return member;
   }
 
-  @Transactional
-  public String updateNickname(Long memberId, String nickname) {
-    Member member = findMemberByMemberIdOrThrow(memberId);
-
-    member.setNickname(nickname);
-    return member.getNickname();
-  }
-
   public void withdrawMember(Long memberId) {
-    // TODO: 해당 회원의 마켓 자료 삭제
+    marketItemRepository.deleteByOwnerId(memberId);
     deleteMember(memberId);
   }
 

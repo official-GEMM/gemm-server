@@ -1,7 +1,6 @@
 package com.example.gemm_server.domain.repository;
 
 import com.example.gemm_server.domain.entity.MarketItem;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +23,11 @@ public interface MarketItemRepository extends JpaRepository<MarketItem, Long> {
   Page<MarketItem> findWithActivityAndOwnerByOwnerId(Long ownerId, Pageable pageable);
 
   @EntityGraph(attributePaths = {"activity", "owner"})
-  List<MarketItem> findAll(Specification<MarketItem> spec);
+  Page<MarketItem> findAll(Specification<MarketItem> spec, Pageable pageable);
 
   MarketItem findByActivityId(Long activityId);
+
+  Boolean existsByActivityId(Long activityId);
+
+  void deleteByOwnerId(Long memberId);
 }

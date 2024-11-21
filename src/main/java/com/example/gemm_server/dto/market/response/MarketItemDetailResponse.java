@@ -1,5 +1,6 @@
 package com.example.gemm_server.dto.market.response;
 
+import com.example.gemm_server.common.util.NumberUtil;
 import com.example.gemm_server.domain.entity.MarketItem;
 import com.example.gemm_server.domain.entity.Material;
 import com.example.gemm_server.dto.common.response.ActivityDetailResponse;
@@ -44,11 +45,11 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "연도")
-  private int year;
+  private Short year;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "월")
-  private short month;
+  private Short month;
 
   public MarketItemDetailResponse(MarketItem marketItem, List<Material> materialsWithThumbnail,
       boolean isScrapped, boolean isPurchased, Long currentMemberId) {
@@ -59,7 +60,7 @@ public class MarketItemDetailResponse extends ActivityDetailResponse {
     this.seller = new MemberResponse(marketItem.getOwner());
     this.isOwnedByCurrentMember = marketItem.getOwner().getId().equals(currentMemberId);
     this.isPurchased = isPurchased;
-    this.reviewAverageScore = marketItem.getAverageScore();
+    this.reviewAverageScore = NumberUtil.roundToDecimalPlaces(marketItem.getAverageScore(), 2);
     this.reviewCount = marketItem.getReviewCount();
     this.price = marketItem.getPrice();
     this.year = marketItem.getYear();

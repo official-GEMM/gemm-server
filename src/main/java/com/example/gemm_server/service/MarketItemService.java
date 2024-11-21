@@ -17,6 +17,7 @@ import com.example.gemm_server.domain.entity.Thumbnail;
 import com.example.gemm_server.domain.repository.DealRepository;
 import com.example.gemm_server.domain.repository.MarketItemRepository;
 import com.example.gemm_server.domain.repository.MaterialRepository;
+import com.example.gemm_server.domain.repository.ReviewRepository;
 import com.example.gemm_server.domain.repository.ScrapRepository;
 import com.example.gemm_server.dto.common.request.FilterRequest;
 import com.example.gemm_server.dto.common.request.SearchRequest;
@@ -28,7 +29,6 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,6 +44,7 @@ public class MarketItemService {
   private final ScrapRepository scrapRepository;
   private final DealRepository dealRepository;
   private final MaterialRepository materialRepository;
+  private final ReviewRepository reviewRepository;
 
   public Page<MarketItem> getMarketItemsOrderBy(int pageNumber, int pageSize, Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
@@ -77,9 +78,8 @@ public class MarketItemService {
     Specification<MarketItem> filterSpecification = generateSpecificationForFilter(filter);
     Specification<MarketItem> searchSpecification = generateSpecificationForSearch(search);
 
-    List<MarketItem> results = marketItemRepository.findAll(
-        filterSpecification.and(searchSpecification)); // TODO: 쿼리 최적화
-    return new PageImpl<>(results, pageable, results.size());
+    return marketItemRepository.findAll(filterSpecification.and(searchSpecification),
+        pageable); // TODO: 쿼리 최적화
   }
 
   public Specification<MarketItem> generateSpecificationForSearch(SearchRequest search) {
@@ -103,7 +103,8 @@ public class MarketItemService {
             .and(MarketItemSpecification.hasActivityCategory(filter.getCategories()))
             .and(MarketItemSpecification.hasActivityMaterialType(filter.getMaterialTypes()))
             .and(MarketItemSpecification.hasYear(filter.getYear()))
-            .and(MarketItemSpecification.hasMonth(filter.getMonth()));
+            .and(MarketItemSpecification.hasMonth(filter.getMonth()))
+            .and(MarketItemSpecification.isFree(filter.getIsFree()));
   }
 
   public MarketItem findMarketItemOrThrow(Long marketItemId) {
@@ -164,6 +165,26 @@ public class MarketItemService {
     marketItem.setPrice(price);
     marketItem.setYear(year);
     marketItem.setMonth(month);
+    return marketItemRepository.save(marketItem);
+  }
+
+  public boolean existsByActivityId(Long activityId) {
+    return marketItemRepository.existsByActivityId(activityId);
+  }
+
+  public MarketItem updateMarketItemInformationAboutReview(Long marketItemId) {
+    MarketItem marketItem = findMarketItemOrThrow(marketItemId);
+    Float averageScore = reviewRepository.findAverageScoreByMarketItemId(marketItemId).floatValue();
+    int reviewCount = reviewRepository.countByMarketItemId(marketItemId);
+    marketItem.setAverageScore(averageScore);
+    marketItem.setReviewCount(reviewCount);
+    return marketItemRepository.save(marketItem);
+  }
+
+  public MarketItem updateMarketItemInformationAboutScrap(Long marketItemId) {
+    MarketItem marketItem = findMarketItemOrThrow(marketItemId);
+    int scrapCount = scrapRepository.countByMarketItemId(marketItemId);
+    marketItem.setScrapCount(scrapCount);
     return marketItemRepository.save(marketItem);
   }
 }

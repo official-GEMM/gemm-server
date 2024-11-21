@@ -63,7 +63,7 @@ public class Member extends Timestamped {
   private String nickname;
 
   @ColumnDescription("전화번호")
-  @Column(name = "phone_number", length = 15, unique = true) // 최대 15자
+  @Column(name = "phone_number", length = 15) // 최대 15자
   private String phoneNumber;
 
   @ColumnDescription("관리 연령")
