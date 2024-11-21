@@ -32,11 +32,12 @@ public class ScrapService {
     return scrapRepository.existsByMemberIdAndMarketItemId(memberId, marketItemId);
   }
 
-  public Scrap delete(Long memberId, Long marketItemId) {
-    Scrap scrap = scrapRepository.findByMemberIdAndMarketItemId(memberId, marketItemId)
-        .orElseThrow(() -> new ScrapException(SCRAP_NOT_FOUND_FOR_USER));
-    scrapRepository.delete(scrap);
-    return scrap;
+  public void delete(Long memberId, Long marketItemId) {
+    List<Scrap> scraps = scrapRepository.findByMemberIdAndMarketItemId(memberId, marketItemId);
+    if (scraps.isEmpty()) {
+      throw new ScrapException(SCRAP_NOT_FOUND_FOR_USER);
+    }
+    scrapRepository.deleteAll(scraps);
   }
 
   public Scrap scrap(Long memberId, Long marketItemId) {
